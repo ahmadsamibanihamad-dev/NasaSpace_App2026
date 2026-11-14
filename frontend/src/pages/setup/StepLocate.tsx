@@ -79,8 +79,8 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
   const govName = point?.governorate ? (i18n.language === 'ar' ? point.governorate.name_ar : point.governorate.name_en) : '—'
 
   return (
-    <div className="grid grid-cols-12 gap-6 h-full">
-      <div className="col-span-4 flex flex-col gap-4 overflow-y-auto">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
+      <div className="lg:col-span-4 flex flex-col gap-4 lg:overflow-y-auto">
         <Card className="flex flex-col gap-5">
           <span className="size-14 rounded-pill border border-border flex items-center justify-center text-green-600">
             <Icon name="locate" size={28} />
@@ -162,8 +162,8 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
         </Card>
       </div>
 
-      <div className="col-span-8 rounded-card overflow-hidden relative min-h-[480px]">
-        <JordanMap>
+      <div className="lg:col-span-8 rounded-card overflow-hidden relative min-h-[360px]">
+        <JordanMap showCoords>
           <ClickToSet enabled={canClickMap} onPick={(lat, lon) => resolve(lat, lon, undefined)} />
           {fly && <FlyTo center={fly.c} zoom={fly.z} />}
           {point && state !== 'detecting' && (

@@ -5,7 +5,8 @@ import { useAuth } from '../../auth/AuthContext'
 import { Button, Field, Input } from '../../components/ui/primitives'
 import { Banner } from '../../components/ui/states'
 import { Icon } from '../../components/ui/Icon'
-import { api, ApiError } from '../../lib/api'
+import { ApiError } from '../../lib/api'
+import { forgotPassword } from '../../lib/data/repo'
 
 function AuthLayout({ title, body, children }: { title: string; body: string; children: ReactNode }) {
   const { t, i18n } = useTranslation()
@@ -172,7 +173,7 @@ export function ForgotPassword() {
     setBusy(true)
     setErr(null)
     try {
-      await api('/auth/forgot-password', { body: { email } })
+      await forgotPassword(email)
       setSent(true)
     } catch {
       setErr(t('states.errorBody'))

@@ -10,7 +10,7 @@ export interface Place {
   name_en: string
   lat: number
   lon: number
-  kind: 'governorate' | 'town'
+  kind: 'governorate' | 'town' | 'coords'
   zoom: number
 }
 

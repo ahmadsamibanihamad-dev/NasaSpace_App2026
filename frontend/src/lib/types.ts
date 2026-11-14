@@ -1,4 +1,4 @@
-import type { Polygon, MultiPolygon } from 'geojson'
+import type { Polygon } from 'geojson'
 
 export type Bi = { ar: string; en: string }
 
@@ -32,53 +32,50 @@ export interface LocateResponse {
 
 export interface Farm {
   id: string
+  user_id: string
   name: string
   governorate: Governorate | null
-  boundary: Polygon
-  area_m2: number
+  /** Located point chosen in setup; re-centred on the parcels once they exist. */
   centroid: { lat: number; lon: number }
-  plots_count: number
+  owner_name: string
+  owner_phone: string
   is_demo: boolean
   created_at: string
 }
 
+export type PlotStatus = 'planted' | 'fallow' | 'preparing' | 'unused'
+
+/** A parcel (قطعة) drawn on the map. Always belongs to one farm. */
 export interface Plot {
   id: string
   farm_id: string
+  /** Parcel number / short code shown on the map (unique inside a farm). */
   label: string
   name: string
-  polygon: Polygon | MultiPolygon
+  region: string
+  polygon: Polygon
   area_m2: number
-  excluded: boolean
-  exclusion_reason: string | null
+  perimeter_m: number
+  color: string
+  status: PlotStatus
+  notes: string
+  owner_name: string
+  owner_phone: string
   current_crop_id: string | null
   previous_crop_id: string | null
   irrigation_available: boolean
   irrigation_method: string | null
   soil_type: string | null
   soil_ph: number | null
+  created_at: string
+  updated_at: string
+  // filled from the latest analyses
   latest_score: number | null
   latest_status: string | null
   latest_top_risk: { type: string; severity: string } | null
 }
 
-export interface PlotInput {
-  label: string
-  name: string
-  polygon: Polygon | MultiPolygon
-  excluded: boolean
-  exclusion_reason?: string | null
-}
-
-export interface PlotDetailsInput {
-  id: string
-  current_crop_id: string | null
-  previous_crop_id: string | null
-  irrigation_available: boolean
-  irrigation_method: string | null
-  soil_type: string | null
-  soil_ph: number | null
-}
+export type PlotDraft = Omit<Plot, 'id' | 'farm_id' | 'area_m2' | 'perimeter_m' | 'created_at' | 'updated_at' | 'latest_score' | 'latest_status' | 'latest_top_risk'>
 
 export interface CropHistoryItem {
   id?: string
@@ -223,6 +220,9 @@ export interface RankedCrop {
   planting_window: { start: string; end: string } | null
   water_demand: 1 | 2 | 3
   main_reason: Bi
+  environmental_scores?: Record<string, number>
+  requirements?: RequirementMatch[]
+  explanation?: Bi
 }
 
 export interface CalendarRow {

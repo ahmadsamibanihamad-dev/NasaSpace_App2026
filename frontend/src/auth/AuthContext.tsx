@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { api, getToken, setToken } from '../lib/api'
-import type { AuthResponse, User } from '../lib/types'
+import * as repo from '../lib/data/repo'
+import type { User } from '../lib/types'
 
 interface AuthCtx {
   user: User | null
@@ -16,17 +16,12 @@ const Ctx = createContext<AuthCtx | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState<boolean>(!!getToken())
+  const [loading, setLoading] = useState<boolean>(!!repo.currentUserId())
   const qc = useQueryClient()
 
   const refresh = useCallback(async () => {
-    if (!getToken()) {
-      setUser(null)
-      setLoading(false)
-      return
-    }
     try {
-      setUser(await api<User>('/auth/me'))
+      setUser(await repo.me())
     } catch {
       setUser(null)
     } finally {
@@ -36,25 +31,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refresh()
-    const onLogout = () => setUser(null)
-    window.addEventListener('ardna:logout', onLogout)
-    return () => window.removeEventListener('ardna:logout', onLogout)
   }, [refresh])
 
   const login = async (email: string, password: string) => {
-    const r = await api<AuthResponse>('/auth/login', { body: { email, password } })
-    setToken(r.access_token)
-    setUser(r.user)
-    return r.user
+    const u = await repo.login(email, password)
+    qc.clear()
+    setUser(u)
+    return u
   }
   const register = async (full_name: string, email: string, password: string) => {
-    const r = await api<AuthResponse>('/auth/register', { body: { full_name, email, password } })
-    setToken(r.access_token)
-    setUser(r.user)
-    return r.user
+    const u = await repo.register(full_name, email, password)
+    qc.clear()
+    setUser(u)
+    return u
   }
   const logout = () => {
-    setToken(null)
+    repo.logout()
     setUser(null)
     qc.clear()
   }

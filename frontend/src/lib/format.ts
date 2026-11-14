@@ -1,7 +1,8 @@
 import i18n from '../i18n'
-import { DUNUM_M2, HECTARE_M2 } from '../config'
+import { HECTARE_M2 } from '../config'
+import { getSettings, type AreaUnit } from './settings'
 
-export type AreaUnit = 'dunum' | 'hectare'
+export type { AreaUnit }
 
 // Western digits in both languages.
 const nf = (digits: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 0 })
@@ -12,20 +13,23 @@ export function num(v: number | null | undefined, digits = 1): string {
 }
 
 export function getAreaUnit(): AreaUnit {
-  try {
-    return (localStorage.getItem('ardna.unit') as AreaUnit) || 'dunum'
-  } catch {
-    return 'dunum'
-  }
+  return getSettings().areaUnit
 }
 
 export function areaValue(m2: number, unit: AreaUnit = getAreaUnit()) {
-  return unit === 'hectare' ? m2 / HECTARE_M2 : m2 / DUNUM_M2
+  if (unit === 'hectare') return m2 / HECTARE_M2
+  if (unit === 'm2') return m2
+  return m2 / getSettings().dunumM2
 }
 
 export function area(m2: number | null | undefined, unit: AreaUnit = getAreaUnit(), digits = 2): string {
   if (m2 === null || m2 === undefined) return '—'
-  return `${num(areaValue(m2, unit), digits)} ${i18n.t(`units.${unit}`)}`
+  return `${num(areaValue(m2, unit), unit === 'm2' ? 0 : digits)} ${i18n.t(`units.${unit}`)}`
+}
+
+export function meters(m: number | null | undefined): string {
+  if (m === null || m === undefined) return '—'
+  return m >= 1000 ? `${num(m / 1000, 2)} ${i18n.t('units.km')}` : `${num(m, 0)} ${i18n.t('units.m')}`
 }
 
 export function date(iso: string | null | undefined, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' }): string {

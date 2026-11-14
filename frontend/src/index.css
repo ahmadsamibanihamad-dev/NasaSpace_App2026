@@ -100,6 +100,13 @@ button:disabled {
 }
 
 /* Leaflet adjustments */
+/* Leaflet positions layers with left offsets: keep its panes LTR, labels follow their own text direction */
+.leaflet-map-pane {
+  direction: ltr;
+}
+.leaflet-tooltip.plot-label {
+  unicode-bidi: plaintext;
+}
 .leaflet-container {
   font-family: var(--font-sans);
   background: var(--color-surface-muted);

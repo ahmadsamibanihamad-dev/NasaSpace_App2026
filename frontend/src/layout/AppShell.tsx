@@ -32,11 +32,11 @@ const TITLES: [RegExp, string][] = [
   [/^\/app\/?$/, 'nav.dashboard'],
 ]
 
-function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+function Sidebar({ collapsed, onToggle, mobileOpen, onNavigate }: { collapsed: boolean; onToggle: () => void; mobileOpen: boolean; onNavigate: () => void }) {
   const { t } = useTranslation()
   return (
     <aside
-      className={cx('shrink-0 h-full flex flex-col gap-2 py-6 bg-bg transition-[width] duration-200', collapsed ? 'w-[72px] px-3' : 'w-[240px] px-4')}
+      className={cx('shrink-0 h-full flex-col gap-2 py-6 bg-bg transition-[width] duration-200 overflow-y-auto', collapsed ? 'lg:w-[72px] lg:px-3' : 'lg:w-[240px] lg:px-4', mobileOpen ? 'flex fixed inset-y-0 start-0 z-[2000] w-[260px] px-4 shadow-soft' : 'hidden lg:flex')}
       aria-label="Main navigation"
     >
       <div className={cx('flex items-center gap-2 mb-6', collapsed ? 'justify-center' : 'justify-between px-2')}>
@@ -54,6 +54,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
             key={n.to}
             to={n.to}
             end={n.to === '/app'}
+            onClick={onNavigate}
             title={collapsed ? t(`nav.${n.key}`) : undefined}
             className={({ isActive }) =>
               cx(
@@ -103,7 +104,7 @@ function Menu({ trigger, children, label }: { trigger: (open: boolean, toggle: (
   )
 }
 
-function TopBar() {
+function TopBar({ onMenu }: { onMenu: () => void }) {
   const { t, i18n } = useTranslation()
   const loc = useLocation()
   const nav = useNavigate()
@@ -118,8 +119,9 @@ function TopBar() {
       : []
 
   return (
-    <header className="flex items-center gap-4 h-[88px] shrink-0">
-      <h1 className="text-h1 font-semibold me-auto truncate">{t(title)}</h1>
+    <header className="flex items-center gap-2 sm:gap-4 h-16 lg:h-[88px] shrink-0">
+      <IconButton icon="menu" label={t('nav.expand')} onClick={onMenu} className="lg:hidden" />
+      <h1 className="text-h2 lg:text-h1 font-semibold me-auto truncate">{t(title)}</h1>
 
       {farms.length > 0 && (
         <Menu
@@ -127,7 +129,7 @@ function TopBar() {
           trigger={(open, toggle) => (
             <button onClick={toggle} aria-expanded={open} aria-haspopup="menu" className="h-10 px-4 rounded-pill bg-surface border border-border flex items-center gap-2 text-label hover:bg-surface-muted">
               <Icon name="farm" size={18} className="text-green-600" />
-              <span className="max-w-40 truncate">{farm?.name}</span>
+              <span className="max-w-24 sm:max-w-40 truncate">{farm?.name}</span>
               <Icon name="chevronDown" size={16} />
             </button>
           )}
@@ -157,7 +159,7 @@ function TopBar() {
         </Menu>
       )}
 
-      <div className="relative w-64">
+      <div className="relative w-64 hidden xl:block">
         <Icon name="search" size={18} className="absolute top-1/2 -translate-y-1/2 start-4 text-text-tertiary" />
         <input
           value={q}
@@ -184,12 +186,14 @@ function TopBar() {
         aria-label="Language"
       >
         <Icon name="globe" size={18} />
-        {t('common.language')}
+        <span className="hidden sm:inline">{t('common.language')}</span>
       </button>
 
+      <span className="hidden sm:block">
       <Menu label={t('nav.notifications')} trigger={(open, toggle) => <IconButton icon="bell" label={t('nav.notifications')} onClick={toggle} aria-expanded={open} />}>
         {() => <p className="px-3 py-4 text-label text-text-secondary">{t('nav.noNotifications')}</p>}
       </Menu>
+      </span>
 
       <Menu
         label={t('nav.account')}
@@ -226,6 +230,7 @@ export function AppShell() {
       return false
     }
   })
+  const [mobileOpen, setMobileOpen] = useState(false)
   const toggle = () => {
     setCollapsed((c) => {
       try {
@@ -237,11 +242,12 @@ export function AppShell() {
     })
   }
   return (
-    <div className="h-full flex min-w-[1280px] bg-bg">
-      <Sidebar collapsed={collapsed} onToggle={toggle} />
-      <div className="flex-1 min-w-0 flex flex-col h-full px-8">
-        <TopBar />
-        <main className="flex-1 overflow-y-auto pb-8 -mx-2 px-2" id="main">
+    <div className="h-full flex bg-bg">
+      {mobileOpen && <div className="fixed inset-0 z-[1900] bg-[rgba(20,22,20,0.45)] lg:hidden" onClick={() => setMobileOpen(false)} aria-hidden />}
+      <Sidebar collapsed={collapsed && !mobileOpen} onToggle={mobileOpen ? () => setMobileOpen(false) : toggle} mobileOpen={mobileOpen} onNavigate={() => setMobileOpen(false)} />
+      <div className="flex-1 min-w-0 flex flex-col h-full px-3 sm:px-8">
+        <TopBar onMenu={() => setMobileOpen(true)} />
+        <main className="flex-1 overflow-y-auto pb-4 sm:pb-8 -mx-2 px-2" id="main">
           <OfflineBanner />
           <Outlet />
         </main>
