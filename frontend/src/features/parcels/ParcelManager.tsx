@@ -100,12 +100,11 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
   }
   const onCoordsText = (text: string) => {
     setCoordsText(text)
+    // preview the valid lines right away; lines with errors are reported and block saving
     const r = parseCoordinates(text)
-    if (r.errors.length === 0) {
-      const g = { pts: r.points, closed: r.points.length >= 3 }
-      committed.current = g
-      setGeo(g)
-    }
+    const g = { pts: r.points, closed: r.points.length >= 3 }
+    committed.current = g
+    setGeo(g)
   }
 
   // ----- flow -----

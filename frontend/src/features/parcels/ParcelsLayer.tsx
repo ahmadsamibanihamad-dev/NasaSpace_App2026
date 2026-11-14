@@ -89,7 +89,7 @@ export function ParcelsLayer({
             selected={p.id === selectedId}
             dimmed={!!dimOthers && p.id !== selectedId}
             showLabel={labels}
-            shortLabel={labelMode === 'short'}
+            shortLabel={labelMode === 'short' || Math.max(zoom, map.getZoom()) < 17}
             fill={colorOf ? colorOf(p) : p.color}
             areaText={fmtArea(p.area_m2, settings.areaUnit)}
             onSelect={onSelect}

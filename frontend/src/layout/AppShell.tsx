@@ -121,7 +121,8 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
   return (
     <header className="flex items-center gap-2 sm:gap-4 h-16 lg:h-[88px] shrink-0">
       <IconButton icon="menu" label={t('nav.expand')} onClick={onMenu} className="lg:hidden" />
-      <h1 className="text-h2 lg:text-h1 font-semibold me-auto truncate">{t(title)}</h1>
+      <h1 className="text-h2 lg:text-h1 font-semibold me-auto truncate min-w-0 hidden sm:block">{t(title)}</h1>
+      <span className="me-auto sm:hidden" />
 
       {farms.length > 0 && (
         <Menu
