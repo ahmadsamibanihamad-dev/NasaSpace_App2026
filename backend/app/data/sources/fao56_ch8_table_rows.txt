@@ -1,0 +1,361 @@
+Crop | Maximum Root Depth 1/(m) | Depletion Fraction 2 (for ET » 5 mm/day)/p
+a. Small Vegetables
+Broccoli | 0.4-0.6 | 0.45
+Brussel Sprouts | 0.4-0.6 | 0.45
+Cabbage | 0.5-0.8 | 0.45
+Carrots | 0.5-1.0 | 0.35
+Cauliflower | 0.4-0.7 | 0.45
+Celery | 0.3-0.5 | 0.20
+Garlic | 0.3-0.5 | 0.30
+Lettuce | 0.3-0.5 | 0.30
+Onions |  | 
+ | - dry | 0.3-0.6 | 0.30
+ | - green | 0.3-0.6 | 0.30
+ | - seed | 0.3-0.6 | 0.35
+Spinach | 0.3-0.5 | 0.20
+Radishes | 0.3-0.5 | 0.30
+b. Vegetables - Solarium Family (Solanaceae)
+Egg Plant | 0.7-1.2 | 0.45
+Sweet Peppers (bell) | 0.5-1.0 | 0.30
+Tomato | 0.7-1.5 | 0.40
+c. Vegetables - Cucumber Family (Cucurbitaceae)
+Cantaloupe | 0.9-1.5 | 0.45
+Cucumber |  | 
+ | - Fresh Market | 0.7-1.2 | 0.50
+ | - Machine harvest | 0.7-1.2 | 0.50
+Pumpkin, Winter Squash | 1.0-1.5 | 0.35
+Squash, Zucchini | 0.6-1.0 | 0.50
+Sweet Melons | 0.8-1.5 | 0.40
+Watermelon | 0.8-1.5 | 0.40
+d. Roots and Tubers
+Beets, table | 0.6-1.0 | 0.50
+Cassava |  | 
+ | - year 1 | 0.5-0.8 | 0.35
+ | - year 2 | 0.7-1.0 | 0.40
+Parsnip | 0.5-1.0 | 0.40
+Potato | 0.4-0.6 | 0.35
+Sweet Potato | 1.0-1.5 | 0.65
+Turnip (and Rutabaga) | 0.5-1.0 | 0.50
+Sugar Beet | 0.7-1.2 | 0.553
+e. Legumes (Leguminosae)
+Beans, green | 0.5-0.7 | 0.45
+Beans, dry and Pulses | 0.6-0.9 | 0.45
+Beans, lima, large vines | 0.8-1.2 | 0.45
+Chick pea | 0.6-1.0 | 0.50
+Fababean (broad bean) |  | 
+ | - Fresh | 0.5-0.7 | 0.45
+ | - Dry/Seed | 0.5-0.7 | 0.45
+Grabanzo | 0.6-1.0 | 0.45
+Green Gram and Cowpeas | 0.6-1.0 | 0.45
+Groundnut (Peanut) | 0.5-1.0 | 0.50
+Lentil | 0.6-0.8 | 0.50
+Peas |  | 
+ | - Fresh | 0.6-1.0 | 0.35
+ | - Dry/Seed | 0.6-1.0 | 0.40
+Soybeans | 0.6-1.3 | 0.50
+f. Perennial Vegetables (with winter dormancy and initially bare or mulched soil)
+Artichokes | 0.6-0.9 | 0.45
+Asparagus | 1.2-1.8 | 0.45
+Mint | 0.4-0.8 | 0.40
+Strawberries | 0.2-0.3 | 0.20
+g. Fibre Crops
+Cotton | 1.0-1.7 | 0.65
+Flax | 1.0-1.5 | 0.50
+Sisal | 0.5-1.0 | 0.80
+h. Oil Crops
+Castorbean (Ricinus) | 1.0-2.0 | 0.50
+Rapeseed, Canola | 1.0-1.5 | 0.60
+Safflower | 1.0-2.0 | 0.60
+Sesame | 1.0-1.5 | 0.60
+Sunflower | 0.8-1.5 | 0.45
+i. Cereals
+Barley | 1.0-1.5 | 0.55
+Oats | 1.0-1.5 | 0.55
+Spring Wheat | 1.0-1.5 | 0.55
+Winter Wheat | 1.5-1.8 | 0.55
+Maize, Field (grain) (field corn) | 1.0-1.7 | 0.55
+Maize, Sweet (sweet corn) | 0.8-1.2 | 0.50
+Millet | 1.0-2.0 | 0.55
+Sorghum |  | 
+ | - grain | 1.0-2.0 | 0.55
+ | - sweet | 1.0-2.0 | 0.50
+Rice | 0.5-1.0 | 0.204
+j. Forages
+Alfalfa |  | 
+ | - for hay | 1.0-2.0 | 0.55
+ | - for seed | 1.0-3.0 | 0.60
+Bermuda |  | 
+ | - for hay | 1.0-1.5 | 0.55
+ | - Spring crop for seed | 1.0-1.5 | 0.60
+Clover hay, Berseem | 0.6-0.9 | 0.50
+Rye Grass hay | 0.6-1.0 | 0.60
+Sudan Grass hay (annual) | 1.0-1.5 | 0.55
+Grazing Pasture |  | 
+ | - Rotated Grazing | 0.5-1.5 | 0.60
+ | - Extensive Grazing | 0.5-1.5 | 0.60
+Turf grass |  | 
+ | - cool season 5 | 0.5-1.0 | 0.40
+ | - warm season 5 | 0.5-1.0 | 0.50
+k. Sugar Cane | 1.2-2.0 | 0.65
+l. Tropical Fruits and Trees
+Banana |  | 
+ | - 1st year | 0.5-0.9 | 0.35
+ | - 2nd year | 0.5-0.9 | 0.35
+Cacao | 0.7-1.0 | 0.30
+Coffee | 0.9-1.5 | 0.40
+Date Palms | 1.5-2.5 | 0.50
+Palm Trees | 0.7-1.1 | 0.65
+Pineapple | 0.3-0.6 | 0.50
+Rubber Trees | 1.0-1.5 | 0.40
+Tea |  | 
+ | - non-shaded | 0.9-1.5 | 0.40
+ | - shaded | 0.9-1.5 | 0.45
+m. Grapes and Berries
+Berries (bushes) | 0.6-1.2 | 0.50
+Grapes |  | 
+ | - Table or Raisin | 1.0-2.0 | 0.35
+ | - Wine | 1.0-2.0 | 0.45
+Hops | 1.0-1.2 | 0.50
+n. Fruit Trees
+Almonds | 1.0-2.0 | 0.40
+Apples, Cherries, Pears | 1.0-2.0 | 0.50
+Apricots, Peaches, Stone Fruit | 1.0-2.0 | 0.50
+Avocado | 0.5-1.0 | 0.70
+Citrus |  | 
+ | - 70% canopy | 1.2-1.5 | 0.50
+ | - 50% canopy | 1.1-1.5 | 0.50
+ | - 20% canopy | 0.8-1.1 | 0.50
+Conifer Trees | 1.0-1.5 | 0.70
+Kiwi | 0.7-1.3 | 0.35
+Olives (40 to 60% ground coverage by canopy) | 1.2-1.7 | 0.65
+Pistachios | 1.0-1.5 | 0.40
+Walnut Orchard | 1.7-2.4 | 0.50
+Estimate RAW for a full-grown onion, tomato and maize crop. Assume that the crops are cultivated on loamy sand, silt and silty clay soils.
+From Table 22 | Onion | Zr » 0.4 m | p = 0.30
+Tomato | Zr » 0.8 m | p = 0.40
+Maize | Zr » 1.2 m | p = 0.55
+From Table 19 | Loamy sand | q FC » 0.15 m3 m-3 | q WP » 0.06 m3 m-3
+1000 (q FC - q WP) = 90 mm(water)/m(soil depth)
+Silt | q FC » 0.32 m3 m-3 | q WP » 0.15 m3 m-3
+1000 (q FC - q WP) = 170 mm(water)/m(soil depth)
+Silty clay | q FC » 0.35 m3 m-3 | q WP » 0.23 m3 m-3
+1000 (q FC - q WP) = 120 mm(water)/m(soil depth)
+ | Loamy sand | Silt | Silty clay
+ | TAW/ (Eq. 82)/ mm | RAW/ (Eq. 83)/ mm | TAW/ (Eq. 82)/ mm | RAW/ (Eq. 83)/ mm | TAW/ (Eq. 82)/ mm | RAW/ (Eq. 83)/ mm
+Onion | 36 | 11 | 68 | 20 | 48 | 14
+Tomato | 72 | 29 | 136 | 54 | 96 | 38
+Maize | 108 | 59 | 204 | 112 | 144 | 79
+Estimate the effect of water stress on the evapotranspiration of a full grown tomato crop (Zr = 0.8 m and p = 0.40) cultivated on a silty soil (q FC = 0.32 and q WP = 0.12 m3 m-3) for the coming 10 days when the initial root zone depletion is 55 mm and neither rain nor irrigations are either forecasted or planned. The expected ETo for the coming decade is 5 mm/day and Kc = 1.2.
+From Eq. 82 | TAW = 1000 (0.32-0.12) 0.8 = 160 mm
+From Eq. 83 | RAW = 0.40 (160) = 64 mm
+(1) | (2) | (3) | (4) | (5) | (6) | (7) | (8)
+Day | ETo | Kc | ETc | Dr, i start | Ks | ETc adj | Dr, i end
+ | mm/day |  | mm/day | mm |  | mm/day | mm
+start | - | - | - | - | - | - | 55.0
+1 | 5.0 | 1.2 | 6.0 | 55.0 | 1.00 | 6.0 | 61.0
+2 | 5.0 | 1.2 | 6.0 | 61.0 | 1.00 | 6.0 | 67.0
+3 | 5.0 | 1.2 | 6.0 | 67.0 | 0.97 | 5.8 | 72.8
+4 | 5.0 | 1.2 | 6.0 | 72.8 | 0.91 | 5.4 | 78.3
+5 | 5.0 | 1.2 | 6.0 | 78.3 | 0.85 | 5.1 | 83.4
+6 | 5.0 | 1.2 | 6.0 | 83.4 | 0.80 | 4.8 | 88.2
+7 | 5.0 | 1.2 | 6.0 | 88.2 | 0.75 | 4.5 | 92.6
+8 | 5.0 | 1.2 | 6.0 | 92.6 | 0.70 | 4.2 | 96.9
+9 | 5.0 | 1.2 | 6.0 | 96.9 | 0.66 | 3.9 | 100.8
+10 | 5.0 | 1.2 | 6.0 | 100.8 | 0.62 | 3.7 | 104.5
+(1) | Day number.
+(2) | Reference crop evapotranspiration.
+(3) | Crop coefficient.
+(4) | Eq. 58, crop ET if no water stress.
+(5) | Root zone depletion at the beginning of the day (column 8 of previous day),
+(6) | Eq. 84 where Ks = 1 if Dr, i < RAW.
+(7) | Eq. 81, crop ET under soil water stress conditions.
+(8) | Depletion at end of day.
+The example demonstrates that the estimate of Ks requires a daily water balance calculation. This is developed further in the next section.
+Plan the irrigation applications for Example 35. It is assumed that: - irrigations are to be applied when RAW is depleted, - the depletion factor (p) is 0.6, - all irrigations and precipitations occur early in the day, - the depth of the root zone (Zr) on day 1 is 0.3 m and increases to 0.35 m by day 10, - the root zone depletion at the beginning of day 1 (Dr, i-1) is RAW.
+From Eq. 82 | TAW = 1000 (0.23 - 0.10) Zr, i = 130 Zr, i [mm]
+From Eq. 83 | RAW = 0.6 TAW = 78 Zr, i [mm]
+On day 1, | when Zr = 0.3 m: Dr, i-1 = RAW = 78 (0.3) = 23 mm
+
+(1) | (2) | (3) | (4) | (5) | (6) | (7) | (8) | (9) | (10) | (11) | (12) | (13) | (14)
+Day | ETo | Zr | RAW | Dr, i start | P-RO | I | Ks | Kcb | Ke | Kc | ETc | DP | Dr, i end
+ | mm/d | m | mm | mm | mm | mm |  |  |  |  | mm | mm | mm
+start | - | - | - | - | - | - | - | - | - | - | - | - | 23
+1 | 4.5 | 0.30 | 23 | 0 | 0 | 40 | 1 | 0.30 | 0.91 | 1.21 | 5.5 | 17 | 5
+2 | 5.0 | 0.31 | 24 | 5 | 0 | 0 | 1 | 0.31 | 0.90 | 1.21 | 6.1 | 0 | 12
+3 | 3.9 | 0.31 | 24 | 12 | 0 | 0 | 1 | 0.32 | 0.72 | 1.04 | 4.0 | 0 | 16
+4 | 4.2 | 0.32 | 25 | 16 | 0 | 0 | 1 | 0.33 | 0.37 | 0.70 | 2.9 | 0 | 18
+5 | 4.8 | 0.32 | 25 | 18 | 0 | 0 | 1 | 0.34 | 0.18 | 0.52 | 2.5 | 0 | 21
+6 | 2.7 | 0.33 | 26 | 15 | 6 | 0 | 1 | 0.36 | 0.64 | 1.00 | 2.7 | 0 | 18
+7 | 5.8 | 0.33 | 26 | 18 | 0 | 0 | 1 | 0.37 | 0.45 | 0.82 | 4.7 | 0 | 22
+8 | 5.1 | 0.34 | 26 | 22 | 0 | 0 | 1 | 0.38 | 0.17 | 0.55 | 2.8 | 0 | 25
+9 | 4.7 | 0.34 | 27 | 25 | 0 | 0 | 1 | 0.39 | 0.08 | 0.47 | 2.2 | 0 | 27
+10 | 5.2 | 0.35 | 27 | 0 | 0 | 27 | 1 | 0.40 | 0.81 | 1.21 | 6.3 | 0 | 6
+(1) | Day number.
+(2) | From Example 35.
+(3) | Zr is given (interpolated between 0.3 m on day 1 and 0.35 m on day 10).
+(4) | Eq. 83.
+(5) | Dr, i start (root zone depletion at the beginning of the day) If precipitation and irrigation occur early in the day then Dr, i start = Max(Dr, i-1 end - I - (P-RO), or 0) If precipitation and irrigation occur late in the day, then Dr, i start = Dr, i-1 end where Dr, i-1 end is taken from column 14 of previous day Since the depth of the root zone increases each day, the water content of the subsoil (q sub) has to be considered to update Dr, i Dr, i = Dr, i-1 + 1000 (q FC - q sub, i-1) D Zr, l In the example it is assumed that q sub is at field capacity (due to prior overirrigation and excessive rainfall on previous days). Therefore, a combination of the equations for Dr, i can be utilized.
+(6) | From Example 35.
+(7) | Irrigation is required when Dr, i ³ RAW. On day 1, the irrigation depth (infiltrating the soil) is given (from Example 35:1 = 40 mm) On day 10, another irrigation is required. An irrigation with a net depth of 27 mm refills the root zone and avoids water loss by deep percolation (DP = 0 mm).
+(8) | Eq. 84, where Ks = 1 for Dr, i £ RAW.
+(9) | From Example 35.
+(10) | Day 1 to 9: From Example 35. Day 10: Following the extra irrigation early in the day, the topsoil will be wet and Kr is 1 or from Eq. 71: Ke = (1.21 - 0.40) = 0.81.
+(11) | Kc =Ks Kcb + Ke.
+(12) | Eq. 80.
+(13) | Eq. 88, where Dr, i-1 is taken from column 14 of previous day.
+(14) | Dr, i (root zone depletion at end of one day) = the starting Dr, i at the beginning of the next day (see footnote 5). From Eq. 85, where Dr, i-1 is taken from column 14 of previous day.
+Crop 1 | ECe treshold 2(dS m-1)3 | b 4 (%/dS m-1) | Rating 5
+a. Small vegetables
+Broccoli | 2.8 | 9.2 | MS
+Brussels sprouts | 1.8 | 9.7 | MS
+Cabbage | 1.0-1.8 | 9.8-14.0 | MS
+Carrots | 1.0 | 14.0 | S
+Cauliflower | 1.8 | 6.2 | MS
+Celery | 1.8-2.5 | 6.2-13.0 | MS
+Lettuce | 1.3-1.7 | 12.0 | MS
+Onions | 1.2 | 16.0 | S
+Spinach | 2.0-3.2 | 7.7-16.0 | MS
+Radishes | 1.2-2.0 | 7.6-13.0 | MS
+b. Vegetables - Solanum Family (Solanaceae)
+Egg Plant | - | - | MS
+Peppers | 1.5-1.7 | 12.0-14.0 | MS
+Tomato | 0.9-2.5 | 9.0 | MS
+c. Vegetables Cucumber Family (Cucurbitaceae)
+Cucumber | 1.1-2.5 | 7.0-13.0 | MS
+Melons |  | - | MS
+Pumpkin, winter squash | 1:2 | 13.0 | MS
+Squash, Zucchini | 4.7 | 10.0 | MT
+Squash (scallop) | 3.2 | 16.0 | MS
+Watermelon | - | - | MS
+d. Roots and Tubers
+Beets, red | 4.0 | 9.0 | MT
+Parsnip | - | - | S
+Potato | 1.7 | 12.0 | MS
+Sweet potato | 1.5-2.5 | 10.0 | MS
+Turnip | 0.9 | 9.0 | MS
+Sugar beet | 7.0 | 5.9 | T
+e. Legumes (Leguminosae)
+Beans | 1.0 | 19.0 | S
+Broadbean (faba bean) | 1.5-1.6 | 9.6 | MS
+Cowpea | 4.9 | 12.0 | MT
+Groundnut (Peanut) | 3.2 | 29.0 | MS
+Peas | 1.5 | 14.0 | S
+Soybeans | 5.0 | 20.0 | MT
+f. Perennial Vegetables (with winter dormancy and initially bare or mulched soil)
+Artichokes | - | - | MT
+Asparagus | 4.1 | 2.0 | T
+Mint | - | - | -
+Strawberries | 1.0-1.5 | 11.0-33.0 | S
+g. Fibre crops
+Cotton | 7.7 | 5.2 | T
+Flax | 1.7 | 12.0 | MS
+h. Oil crops
+Casterbean | - | - | MS
+Safflower | - | - | MT
+Sunflower | - | - | MS
+i. Cereals
+Barley | 8.0 | 5.0 | T
+Oats | - | - | MT
+Maize | 1.7 | 12.0 | MS
+Maize, sweet (sweet corn) | 1.7 | 12.0 | MS
+Millet | - | - | MS
+Sorghum | 6.8 | 16.0 | MT
+Rice 6 | 3.0 | 12.0 | S
+Wheat (Triticum aestivum) | 6.0 | 7.1 | MT
+Wheat, semidwarf (T. aestivum) | 8.6 | 3.0 | T
+Wheat, durum (Triticum turgidum) | 5.7-5.9 | 3.8-5.5 | T
+j. Forages
+Alfalfa | 2.0 | 7.3 | MS
+Barley (forage) | 6.0 | 7.1 | MT
+Bermuda | 6.9 | 6.4 | T
+Clover, Berseem | 1.5 | 5.7 | MS
+Clover (alsike, ladino, red, strawberry) | 1.5 | 12.0 | MS
+Cowpea (forage) | 2.5 | 11.0 | MS
+Fescue | 3.9 | 5.3-6.2 | MT
+Foxtail | 1.5 | 9.6 | MS
+Hardinggrass | 4.6 | 7.6 | MT
+Lovegrass | 2.0 | 8.4 | MS
+Maize (forage) | 1.8 | 7.4 | MS
+Orchardgrass | 1.5 | 6.2 | MS
+Rye-grass (perennial) | 5.6 | 7.6 | MT
+Sesbania | 2.3 | 7.0 | MS
+Sphaerophysa | 2.2 | 7.0 | MS
+Sudangrass | 2.8 | 4.3 | MT
+Trefoil, narrowleaf birdsfoot | 5.0 | 10.0 | MT
+Trefoil, big | 2.3 | 19.0 | MS
+Vetch, common | 3.0 | 11.0 | MS
+Wheatgrass, tall | 7.5 | 4.2 | T
+Wheatgrass, fairway crested | 7.5 | 6.9 | T
+Wheatgrass, standard crested | 3.5 | 4.0 | MT
+Wildrye, beardless | 2.7 | 6.0 | MT
+k. Sugar cane | 1.7 | 5.9 | MS
+l. Tropical Fruits and Trees
+Banana | - | - | MS
+Coffee | - | - | -
+Date Palms | 4.0 | 3.6 | T
+Palm trees | - | - | T
+Pineapple (multi-year crop) | - | - | MT
+Tea | - | - | -
+m. Grapes and berries
+Blackberry | 1.5 | 22.0 | S
+Boysenberry | 1.5 | 22.0 | S
+Grapes | 1.5 | 9.6 | MS
+Hops | - | - | -
+n. Fruit trees
+Almonds | 1.5 | 19.0 | S
+Avocado | - | - | S
+Citrus (Grapefruit) | 1.8 | 16.0 | S
+Citrus (Orange) | 1.7 | 16.0 | S
+Citrus (Lemon) | - | - | S
+Citrus (Lime) | - | - | S
+Citrus (Pummelo) | - | - | S
+Citrus (Tangerine) | - | ' | S
+Conifer trees | - | - | MS/MT
+Deciduous orchard |  |  | 
+ | - Apples | - | - | S
+ | - Peaches | 1.7 | 21.0 | S
+ | - Cherries | - | - | S
+ | - Pear | - | . - | S
+ | - Apricot | 1.6 | 24.0 | S
+ | - Plum, prune | 1.5 | 18.0 | S
+ | - Pomegranate | - | - | MT
+Olives | - | - | MT
+Crop | Ky
+Alfalfa | 1.1
+Banana | 1.2-1.35
+Beans | 1.15
+Cabbage | 0.95
+Citrus | 1.1-1.3
+Cotton | 0.85
+Grape | 0.85
+Groundnet | 0.70
+Maize | 1.25
+Onion | 1.1
+Peas | 1,15
+Pepper | 1.1
+Potato | 1.1
+Safflower | 0.8
+Sorghum | 0.9
+Soybean | 0.85
+Spring Wheat | 1.15
+Sugarbeet | 1.0
+Sugarcane | 1.2
+Sunflower | 0.95
+Tomato | 1.05
+Watermelon | 1.1
+Winter wheat | 1.05
+A field of beans is cultivated on a silt loam soil and is irrigated during the midseason period using water having salinity ECiw = 1 dS m-1. A 15 percent leaching fraction is employed. The ECe, threshold and slope from Table 23 are 1.0 dS m-1 and 19 %/(dS m-1) respectively. The seasonal Ky from FAO Irrigation and Drainage Paper No 33 and Table 24 for beans is Ky = 1.15. Compare the effect on crop evapotranspiration for various levels of soil water depletion in the root zone under saline and nonsaline conditions. The TAW and RAW for the bean crop are 110 and 44 mm (for p = 0.4).
+Since the leaching fraction is 0.15, ECe is estimated from Equation 93 as ECe = 1.5 ECw = 1.5 (1) = 1.5 dS m-1. The Ks in the presence of salinity stress and absence of moisture stress is: The Ks in the presence of moisture stress, but in the absence of salinity stress is: The Ks in the presence of both moisture stress and salinity stress is:
+The effect on crop evapotranspiration for various soil water depletions in the root zone (Dr) are:
+Dr/(mm) | Ks/no soil salinity | Ks/with soil salinity (ECe = 1.5 dS m-1) (Eq. 92) | Additional reduction in potential ETc due to salinity
+0 | 1.00 | no reduction in ETc | 0.92 | 8% reduction in ETc | 8%
+35 | 1.00 | no reduction in ETc | 0.92 | 8% reduction in ETc | 8%
+40 | 1.00 | no reduction in ETc | 0.92 | 8% reduction | 8%
+44 | 1.00 | no reduction in ETc | 0.92 | 8% reduction | 8%
+50 | 0.91 | 9% reduction | 0.83 | 17% reduction | 8%
+60 | 0.76 | 24% reduction | 0.69 | 31 % reduction | 7%
+70 | 0.61 | 39% reduction | 0.56 | 44% reduction | 5%
+80 | 0.45 | 55% reduction | 0.42 | 58% reduction | 3%
+90 | 0.30 | 70% reduction | 0.28 | 72% reduction | 2%
+100 | 0.15 | 85% reduction | 0.14 | 86% reduction | 1%
+110 | 0.00 | ETc = 0 | 0.00 | ETc = 0 | --

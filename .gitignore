@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+backend/.env
+backend/*.db
+backend/data_store/
+backend/app/ml/models/*
+!backend/app/ml/models/.gitkeep
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env
+
+# Secrets / misc
+.env
+*.h5
+*.nc4
+.netrc
+.DS_Store
+.claude/settings.local.json

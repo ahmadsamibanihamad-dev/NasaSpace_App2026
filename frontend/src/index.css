@@ -1,0 +1,173 @@
+@import "tailwindcss";
+@import "@fontsource/ibm-plex-sans-arabic/300.css";
+@import "@fontsource/ibm-plex-sans-arabic/400.css";
+@import "@fontsource/ibm-plex-sans-arabic/600.css";
+@import "leaflet/dist/leaflet.css";
+
+/* ---------- Design tokens (single source of truth) ---------- */
+@theme {
+  --font-sans: "IBM Plex Sans Arabic", system-ui, sans-serif;
+
+  --color-*: initial;
+  --color-white: #FFFFFF;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-green-50: #EEF7F0;
+  --color-green-100: #D7ECDC;
+  --color-green-200: #B0D9BB;
+  --color-green-300: #7FC190;
+  --color-green-400: #4FA867;
+  --color-green-500: #2F8F4E;
+  --color-green-600: #24753F;
+  --color-green-700: #1B5C31;
+  --color-green-800: #134324;
+  --color-green-900: #0C2D18;
+
+  --color-bg: #EFEFED;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F6F6F4;
+  --color-border: #E2E2DE;
+
+  --color-text-primary: #141614;
+  --color-text-secondary: #6B706B;
+  --color-text-tertiary: #9A9F9A;
+
+  --color-water: #2F7FD1;
+  --color-warning: #E8892B;
+  --color-critical: #D64533;
+
+  --radius-card: 24px;
+  --radius-tile: 16px;
+  --radius-input: 12px;
+  --radius-pill: 9999px;
+
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  --text-display: 40px;
+  --text-display--line-height: 48px;
+  --text-metric: 48px;
+  --text-metric--line-height: 52px;
+  --text-h1: 28px;
+  --text-h1--line-height: 36px;
+  --text-h2: 20px;
+  --text-h2--line-height: 28px;
+  --text-body: 16px;
+  --text-body--line-height: 24px;
+  --text-label: 14px;
+  --text-label--line-height: 20px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: lining-nums;
+}
+
+/* Visible focus ring everywhere (green) */
+:focus-visible {
+  outline: 2px solid var(--color-green-600);
+  outline-offset: 2px;
+}
+
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Leaflet adjustments */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--color-surface-muted);
+}
+.leaflet-container .leaflet-control-attribution {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.85);
+}
+.leaflet-tooltip.plot-label {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  box-shadow: none;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 2px 8px;
+  color: var(--color-text-primary);
+}
+.leaflet-tooltip.plot-label::before {
+  display: none;
+}
+
+/* Pulsing location marker */
+@keyframes pulse-ring {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.pulse-marker {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+.pulse-marker::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--color-green-500);
+  animation: pulse-ring 1.6s ease-out infinite;
+}
+.pulse-marker::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 9999px;
+  background: var(--color-green-600);
+  border: 2px solid #fff;
+}
+
+/* Skeleton shimmer (no extra hue: uses surface-muted/border) */
+@keyframes shimmer {
+  0% { opacity: 1; }
+  50% { opacity: 0.55; }
+  100% { opacity: 1; }
+}
+.skeleton {
+  background: var(--color-surface-muted);
+  border-radius: 12px;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+@media print {
+  aside, header, .no-print { display: none !important; }
+  body { background: #fff; }
+}
