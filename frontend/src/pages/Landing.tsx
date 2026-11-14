@@ -20,8 +20,8 @@ export default function Landing() {
   ]
   return (
     <div className="min-h-full bg-bg">
-      <div className="max-w-[1376px] mx-auto px-8">
-        <header className="flex items-center justify-between h-20">
+      <div className="max-w-[1376px] mx-auto px-4 sm:px-8">
+        <header className="flex items-center justify-between gap-2 h-16 sm:h-20">
           <span className="flex items-center gap-2 text-h2 font-semibold text-green-700">
             <img src="/favicon.svg" alt="" className="size-8" /> {t('app.name')}
           </span>
@@ -36,11 +36,11 @@ export default function Landing() {
         </header>
 
         {/* Hero */}
-        <section className="grid grid-cols-12 gap-6 items-stretch mt-4">
-          <div className="col-span-5 flex flex-col justify-center py-12">
-            <h1 className="text-[56px] leading-[64px] font-light tracking-tight">{t('landing.heroTitle')}</h1>
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mt-2 sm:mt-4">
+          <div className="lg:col-span-5 flex flex-col justify-center py-6 lg:py-12">
+            <h1 className="text-[34px] leading-[44px] sm:text-[44px] sm:leading-[54px] xl:text-[56px] xl:leading-[64px] font-light tracking-tight">{t('landing.heroTitle')}</h1>
             <p className="text-body text-text-secondary mt-6 max-w-lg">{t('landing.heroBody')}</p>
-            <div className="mt-10">
+            <div className="mt-6 sm:mt-10">
               <Link to="/register" className="inline-flex items-center gap-2 h-12 px-8 rounded-pill bg-green-600 text-white text-body hover:bg-green-700">
                 {t('landing.start')}
                 <Icon name="arrowRight" size={18} className="rtl:-scale-x-100" />
@@ -50,15 +50,15 @@ export default function Landing() {
               <Icon name="satellite" size={16} /> {t('landing.builtWith')}
             </p>
           </div>
-          <div className="col-span-7">
-            <img src="/images/hero-farm.webp" alt="" className="w-full h-[560px] object-cover rounded-card" />
+          <div className="lg:col-span-7">
+            <img src="/images/hero-farm.webp" alt="" className="w-full h-[240px] sm:h-[380px] lg:h-[560px] object-cover rounded-card" />
           </div>
         </section>
 
         {/* How it works */}
-        <section className="mt-24" aria-labelledby="how">
-          <h2 id="how" className="text-display font-light mb-8">{t('landing.howTitle')}</h2>
-          <div className="grid grid-cols-3 gap-6">
+        <section className="mt-14 sm:mt-24" aria-labelledby="how">
+          <h2 id="how" className="text-display font-light mb-6 sm:mb-8">{t('landing.howTitle')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {steps.map((s, i) => (
               <Card key={i} className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -75,9 +75,9 @@ export default function Landing() {
         </section>
 
         {/* NASA sources */}
-        <section className="mt-24" aria-labelledby="sources">
-          <h2 id="sources" className="text-display font-light mb-8">{t('landing.sourcesTitle')}</h2>
-          <div className="grid grid-cols-3 gap-6">
+        <section className="mt-14 sm:mt-24" aria-labelledby="sources">
+          <h2 id="sources" className="text-display font-light mb-6 sm:mb-8">{t('landing.sourcesTitle')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {sources.map((s) => (
               <Card key={s.title} className="flex flex-col gap-3">
                 <span className="size-12 rounded-pill bg-green-50 text-green-700 flex items-center justify-center">
@@ -91,13 +91,13 @@ export default function Landing() {
         </section>
 
         {/* Jordan */}
-        <section className="mt-24" aria-labelledby="jordan">
-          <Card className="grid grid-cols-12 gap-6 p-10">
-            <div className="col-span-5">
+        <section className="mt-14 sm:mt-24" aria-labelledby="jordan">
+          <Card className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:!p-10">
+            <div className="lg:col-span-5">
               <h2 id="jordan" className="text-display font-light">{t('landing.jordanTitle')}</h2>
               <p className="text-body text-text-secondary mt-4">{t('landing.jordanBody')}</p>
             </div>
-            <div className="col-span-7 flex flex-wrap gap-3 content-center">
+            <div className="lg:col-span-7 flex flex-wrap gap-2 sm:gap-3 content-center">
               {CROPS.map((c) => (
                 <span key={c} className="inline-flex items-center gap-2 h-12 ps-1 pe-4 rounded-pill border border-border">
                   <CropIcon crop={c} size={40} />
@@ -108,7 +108,7 @@ export default function Landing() {
           </Card>
         </section>
 
-        <footer className="mt-24 py-10 border-t border-border flex items-center justify-between text-caption text-text-secondary">
+        <footer className="mt-14 sm:mt-24 py-8 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-caption text-text-secondary">
           <span>{t('landing.footer')}</span>
           <span>© {new Date().getFullYear()} {t('app.name')}</span>
         </footer>

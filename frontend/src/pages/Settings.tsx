@@ -52,11 +52,11 @@ export default function Settings() {
         <CardTitle action={<Button size="sm" variant="secondary" icon="plus" onClick={() => nav('/setup?new=1')}>{t('farm.addFarm')}</Button>}>{t('settings.farms')}</CardTitle>
         <ul className="flex flex-col gap-2">
           {farms.map((f) => (
-            <li key={f.id} className="flex items-center gap-2 rounded-tile border border-border p-3">
+            <li key={f.id} className="flex flex-wrap items-center gap-2 rounded-tile border border-border p-3">
               <Icon name="farm" size={18} className="text-green-600 shrink-0" />
               <Input
                 aria-label={t('parcels.farmName')}
-                className="!h-9 !text-label flex-1"
+                className="!h-9 !text-label flex-1 min-w-[55%] sm:min-w-0"
                 value={renaming[f.id] ?? f.name}
                 onChange={(e) => setRenaming({ ...renaming, [f.id]: e.target.value })}
                 onBlur={async () => {
@@ -100,11 +100,11 @@ export default function Settings() {
       <Card>
         <CardTitle>{t('settings.language')} · {t('settings.units')}</CardTitle>
         <div className="flex flex-col gap-5">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-label">{t('settings.language')}</span>
             <Tabs value={i18n.language as 'ar' | 'en'} onChange={(l) => i18n.changeLanguage(l)} options={[{ value: 'ar', label: 'العربية' }, { value: 'en', label: 'English' }]} />
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-label">{t('settings.units')}</span>
             <Tabs
               value={s.areaUnit}
@@ -113,8 +113,8 @@ export default function Settings() {
             />
           </div>
           <Field label={t('settings.dunumSize')} htmlFor="s-dunum" hint={t('settings.dunumHint')} error={dunumOk ? null : t('settings.dunumInvalid')}>
-            <div className="flex gap-2">
-              <Input id="s-dunum" type="number" dir="ltr" min={100} max={10000} step={1} value={dunum} onChange={(e) => setDunum(e.target.value)} aria-invalid={!dunumOk} />
+            <div className="flex flex-wrap gap-2">
+              <Input id="s-dunum" className="!w-auto flex-1 min-w-32" type="number" dir="ltr" min={100} max={10000} step={1} value={dunum} onChange={(e) => setDunum(e.target.value)} aria-invalid={!dunumOk} />
               <Button
                 variant="secondary"
                 disabled={!dunumOk}

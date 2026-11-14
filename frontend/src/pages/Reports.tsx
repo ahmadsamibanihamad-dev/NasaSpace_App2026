@@ -65,7 +65,7 @@ function Compare({ ids }: { ids: [string, string] }) {
             {rowsOf(x).map(([k, v], i) => (
               <div key={i} className="flex justify-between gap-4 px-4 py-2 text-label">
                 <dt className="text-text-secondary">{k}</dt>
-                <dd className="font-semibold text-end">{v}</dd>
+                <dd className="font-semibold text-end min-w-0 break-words">{v}</dd>
               </div>
             ))}
           </dl>
@@ -97,8 +97,40 @@ export default function Reports() {
         {rows.length === 0 ? (
           <EmptyState icon="file" title={t('reports.empty')} action={<Button icon="plus" onClick={() => nav('/app/analysis/new')}>{t('nav.newAnalysis')}</Button>} />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-label">
+          <>
+          <ul className="md:hidden flex flex-col gap-3">
+            {rows.map((a) => (
+              <li key={a.id} className={`rounded-tile border p-4 flex flex-col gap-3 ${picked.includes(a.id) ? 'border-green-600 bg-green-50' : 'border-border'}`}>
+                <div className="flex items-start gap-3">
+                  <input type="checkbox" className="size-5 mt-0.5 accent-[#24753F] shrink-0" aria-label={t('common.compare')} disabled={a.status !== 'completed'} checked={picked.includes(a.id)} onChange={() => toggle(a.id)} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-label font-semibold">{t(`analysis.objectives.${a.analysis_type}`)}</p>
+                    <p className="text-caption text-text-secondary">{date(a.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-caption text-text-secondary break-words">
+                      {t('reports.plots')}: {a.summary?.plots.join('، ')}
+                      {a.summary?.crop && ` · ${cropName(a.summary.crop)}`}
+                    </p>
+                  </div>
+                  {a.status === 'completed' && a.summary?.headline_score != null ? (
+                    <ScoreBadge score={a.summary.headline_score} />
+                  ) : (
+                    <Pill tone={a.status === 'completed' ? 'green' : a.status === 'failed' ? 'critical' : 'neutral'} icon={a.status === 'completed' ? 'check' : a.status === 'failed' ? 'alert' : 'rotate'}>
+                      {t(`reports.statuses.${a.status}`)}
+                    </Pill>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="secondary" className="flex-1" onClick={() => nav(`/app/analysis/${a.id}`)}>
+                    {t('common.view')}
+                  </Button>
+                  <IconButton icon="download" size={32} label={t('results.exportPdf')} disabled={a.status !== 'completed'} onClick={() => nav(`/app/analysis/${a.id}?print=1`)} />
+                  <IconButton icon="trash" size={32} label={t('common.delete')} onClick={() => setToDelete(a)} />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full min-w-[720px] text-label">
               <thead>
                 <tr className="text-caption text-text-secondary">
                   <th className="w-10 py-2" />
@@ -143,6 +175,7 @@ export default function Reports() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </Card>
 

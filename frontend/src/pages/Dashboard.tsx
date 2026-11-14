@@ -195,7 +195,7 @@ export default function Dashboard() {
             <p className="text-label text-text-secondary py-6 text-center">{t('parcels.emptyBody')}</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-label">
+              <table className="w-full min-w-[560px] text-label">
                 <thead>
                   <tr className="text-caption text-text-secondary">
                     <th className="text-start font-normal py-2">{t('common.plot')}</th>

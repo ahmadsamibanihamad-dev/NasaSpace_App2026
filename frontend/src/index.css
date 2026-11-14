@@ -69,6 +69,21 @@
   color-scheme: light;
 }
 
+/* Smaller type scale and tighter cards on phones */
+@media (max-width: 640px) {
+  :root {
+    --text-display: 28px;
+    --text-display--line-height: 38px;
+    --text-metric: 36px;
+    --text-metric--line-height: 42px;
+    --text-h1: 22px;
+    --text-h1--line-height: 32px;
+    --text-h2: 18px;
+    --text-h2--line-height: 26px;
+    --radius-card: 20px;
+  }
+}
+
 html,
 body,
 #root {

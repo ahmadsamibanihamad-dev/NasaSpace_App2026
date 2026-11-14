@@ -57,7 +57,7 @@ export function IconButton({
 
 export function Card({ children, className, as: As = 'section', ...rest }: { children: ReactNode; className?: string; as?: 'section' | 'div' | 'article' } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <As className={cx('bg-surface rounded-card p-6 shadow-soft', className)} {...rest}>
+    <As className={cx('bg-surface rounded-card p-4 sm:p-6 shadow-soft', className)} {...rest}>
       {children}
     </As>
   )
@@ -115,7 +115,7 @@ export function Chip({ selected, children, className, ...rest }: ButtonHTMLAttri
 
 export function Tabs<T extends string>({ value, onChange, options, className }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; className?: string }) {
   return (
-    <div role="tablist" className={cx('inline-flex p-1 rounded-pill bg-surface-muted gap-1', className)}>
+    <div role="tablist" className={cx('inline-flex max-w-full overflow-x-auto p-1 rounded-pill bg-surface-muted gap-1', className)}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -123,7 +123,7 @@ export function Tabs<T extends string>({ value, onChange, options, className }: 
           aria-selected={value === o.value}
           onClick={() => onChange(o.value)}
           className={cx(
-            'h-8 px-4 rounded-pill text-label transition-colors',
+            'h-8 px-3 sm:px-4 rounded-pill text-label transition-colors whitespace-nowrap shrink-0',
             value === o.value ? 'bg-surface text-text-primary shadow-soft font-semibold' : 'text-text-secondary hover:text-text-primary',
           )}
         >
@@ -203,7 +203,7 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <div className="flex flex-wrap items-end justify-between gap-3 mb-4 sm:mb-6">
       <div>
         <h1 className="text-display font-light">{title}</h1>
         {subtitle && <p className="text-body text-text-secondary mt-1">{subtitle}</p>}

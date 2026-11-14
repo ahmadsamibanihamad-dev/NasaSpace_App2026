@@ -137,7 +137,7 @@ export function RequirementsTable({ rows }: { rows: RequirementMatch[] }) {
   const icon = { match: 'check', partial: 'info', mismatch: 'x', unknown: 'info' } as const
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-label">
+      <table className="w-full min-w-[640px] text-label">
         <thead>
           <tr className="text-caption text-text-secondary">
             <th className="text-start font-normal py-2">{t('results.requirements')}</th>
@@ -354,7 +354,7 @@ export function CalendarView({ result }: { result: AnalysisResult }) {
   const maxRain = Math.max(...cal.monthly_rainfall_mm.map((m) => m.value), 1)
   const dekadOfIso = (iso: string) => (new Date(iso).getUTCMonth()) * 3 + (new Date(iso).getUTCDate() >= 21 ? 2 : new Date(iso).getUTCDate() >= 11 ? 1 : 0)
   const Row = ({ label, sub, children }: { label: ReactNode; sub?: ReactNode; children: ReactNode }) => (
-    <div className="grid grid-cols-[150px_1fr] gap-4 items-center py-2 border-t border-border">
+    <div className="grid grid-cols-[110px_1fr] sm:grid-cols-[150px_1fr] gap-3 sm:gap-4 items-center py-2 border-t border-border">
       <div className="min-w-0">
         <div className="text-label font-semibold truncate flex items-center gap-2">{label}</div>
         {sub && <div className="text-caption text-text-secondary truncate">{sub}</div>}
@@ -375,7 +375,7 @@ export function CalendarView({ result }: { result: AnalysisResult }) {
         <CardTitle>{t('results.calendar')}</CardTitle>
         <div className="overflow-x-auto">
           <div className="min-w-[760px]">
-            <div className="grid grid-cols-[150px_1fr] gap-4 pb-2">
+            <div className="grid grid-cols-[110px_1fr] sm:grid-cols-[150px_1fr] gap-3 sm:gap-4 pb-2">
               <span />
               <div className="grid grid-cols-12 text-caption text-text-secondary" style={{ direction: 'ltr' }}>
                 {months.map((m) => (
