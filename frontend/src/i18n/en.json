@@ -141,8 +141,8 @@
    "asking": "Waiting for browser permission…",
    "detecting": "Detecting your location",
    "detected": "We found your location",
-   "denied": "We couldn't access your location",
-   "deniedBody": "Search for your governorate or area, or click the map to set your land's location.",
+   "denied": "We couldn't detect your location automatically",
+   "deniedBody": "Search for your governorate or area, type your land's coordinates, or click the map.",
    "outside": "This location is outside Jordan",
    "outsideBody": "Ardna currently supports farms inside Jordan only. Search for your land or click the map.",
    "notMine": "This isn't my land",
@@ -152,7 +152,18 @@
    "coordinates": "Coordinates",
    "useThis": "Yes, this is my area",
    "unsupportedGeo": "Your browser doesn't support geolocation.",
-   "moveHint": "Drag the pin or click the map to change the location."
+   "moveHint": "Drag the pin or click the map to change the location.",
+   "approx": "Approximate location",
+   "approxBody": "This is a city-level estimate from your internet connection and may be kilometres from your land. Drag the pin, click the map or search to set the exact place.",
+   "approxToast": "Exact location unavailable; moved to an approximate location from your internet connection.",
+   "deniedToast": "Couldn't detect your location. Allow location access for this site in the browser settings, or search manually.",
+   "chooseManually": "I'd rather set the location myself",
+   "reasons": {
+    "denied": "Reason: location permission is blocked for this site in the browser. Click the padlock next to the address, allow \"Location\", then try again.",
+    "insecure": "Reason: browsers only allow location on a secure connection (https) or on localhost.",
+    "unsupported": "Reason: this browser doesn't support location detection.",
+    "unavailable": "Reason: the device returned no position. Check that Location services are on in the system settings (Windows: Settings → Privacy & security → Location)."
+   }
   },
   "details": {
    "title": "Tell us about each plot",

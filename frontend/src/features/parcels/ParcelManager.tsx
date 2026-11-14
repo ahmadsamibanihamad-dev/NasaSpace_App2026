@@ -688,8 +688,13 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
           )}
           <MapControls
             onFit={() => setFit((n) => n + 1)}
-            onLocated={(lat, lon) => (insideJordan(lat, lon) ? setFly({ c: [lat, lon], z: 17, pin: true }) : toast(t('states.unsupportedLocationBody'), 'error'))}
-            onLocateError={() => toast(t('setup.locate.denied'), 'error')}
+            onLocated={(lat, lon, found) => {
+              if (!insideJordan(lat, lon)) return toast(t('states.unsupportedLocationBody'), 'error')
+              const exact = found.source === 'device'
+              setFly({ c: [lat, lon], z: exact ? 17 : 12, pin: exact })
+              if (!exact) toast(t('setup.locate.approxToast'), 'info')
+            }}
+            onLocateError={() => toast(t('setup.locate.deniedToast'), 'error')}
           />
         </JordanMap>
 

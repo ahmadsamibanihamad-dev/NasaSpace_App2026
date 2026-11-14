@@ -10,6 +10,7 @@ import { Icon } from '../../components/ui/Icon'
 import { useLocate } from '../../hooks/queries'
 import type { Governorate } from '../../lib/types'
 import { num } from '../../lib/format'
+import { detectLocation, LocateError, type LocateFailure } from '../../lib/locate'
 
 type State = 'idle' | 'asking' | 'detecting' | 'detected' | 'denied' | 'outside' | 'manual'
 
@@ -34,10 +35,14 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
   const [point, setPoint] = useState<LocatedPoint | null>(initial)
   const [fly, setFly] = useState<{ c: LatLngExpression; z: number } | null>(initial ? { c: [initial.lat, initial.lon], z: 15 } : null)
   const [error, setError] = useState<string | null>(null)
+  // why the device position failed (shown to the user), and whether the pin is only a network estimate
+  const [failure, setFailure] = useState<LocateFailure | null>(null)
+  const [approximate, setApproximate] = useState(false)
   const locate = useLocate()
 
   const resolve = async (lat: number, lon: number, zoom = 15, fromGps = false) => {
     setError(null)
+    if (zoom !== 11) setApproximate(false)
     try {
       const r = await locate.mutateAsync({ lat, lon })
       setPoint({ lat, lon, governorate: r.governorate })
@@ -50,29 +55,28 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
   }
 
   const ask = async () => {
-    if (!('geolocation' in navigator)) {
-      setError(t('setup.locate.unsupportedGeo'))
-      setState('denied')
-      return
-    }
+    setError(null)
+    setFailure(null)
+    setApproximate(false)
+    setState('asking')
     try {
-      const perm = await navigator.permissions?.query({ name: 'geolocation' as PermissionName })
-      setState(perm?.state === 'granted' ? 'detecting' : 'asking')
-    } catch {
-      setState('asking')
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lon } = pos.coords
-        setState('detecting')
-        setPoint({ lat, lon, governorate: null })
-        setFly({ c: [lat, lon], z: 16 })
+      const found = await detectLocation((stage) => setState(stage))
+      setState('detecting')
+      if (found.source === 'device') {
+        setPoint({ lat: found.lat, lon: found.lon, governorate: null })
+        setFly({ c: [found.lat, found.lon], z: 16 })
         // brief pause so the pulsing "detecting" marker is visible while we resolve the governorate
-        setTimeout(() => resolve(lat, lon, 16, true), 600)
-      },
-      () => setState('denied'),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
-    )
+        setTimeout(() => resolve(found.lat, found.lon, 16, true), 600)
+      } else {
+        // only a city-level estimate from the internet connection: show it, and ask the user to refine
+        setFailure(found.deviceFailure ?? null)
+        setApproximate(true)
+        await resolve(found.lat, found.lon, 11)
+      }
+    } catch (e) {
+      setFailure(e instanceof LocateError ? e.reason : 'unavailable')
+      setState('denied')
+    }
   }
 
   const canClickMap = state === 'denied' || state === 'outside' || state === 'manual'
@@ -103,6 +107,13 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
             </div>
           )}
 
+          {approximate && state === 'manual' && (
+            <Banner icon="info" tone="warning">
+              <b className="font-semibold block">{t('setup.locate.approx')}</b>
+              {t('setup.locate.approxBody')}
+              {failure && <span className="block text-caption text-text-secondary mt-1">{t(`setup.locate.reasons.${failure}`)}</span>}
+            </Banner>
+          )}
           {(state === 'detected' || state === 'manual') && point && (
             <div className="flex flex-col gap-4" aria-live="polite">
               {state === 'detected' && (
@@ -135,10 +146,16 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
           )}
 
           {state === 'denied' && (
-            <Banner icon="info" tone="warning">
-              <b className="font-semibold block">{t('setup.locate.denied')}</b>
-              {t('setup.locate.deniedBody')}
-            </Banner>
+            <>
+              <Banner icon="info" tone="warning">
+                <b className="font-semibold block">{t('setup.locate.denied')}</b>
+                {failure && <span className="block">{t(`setup.locate.reasons.${failure}`)}</span>}
+                {t('setup.locate.deniedBody')}
+              </Banner>
+              <Button variant="secondary" icon="rotate" onClick={ask}>
+                {t('common.retry')}
+              </Button>
+            </>
           )}
           {state === 'outside' && (
             <Banner icon="pin" tone="warning">
@@ -155,8 +172,8 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
             </div>
           )}
           {state === 'idle' && (
-            <button className="text-label text-green-600 hover:underline self-start" onClick={() => setState('denied')}>
-              {t('setup.locate.notMine')}
+            <button className="text-label text-green-600 hover:underline self-start" onClick={() => setState('manual')}>
+              {t('setup.locate.chooseManually')}
             </button>
           )}
         </Card>

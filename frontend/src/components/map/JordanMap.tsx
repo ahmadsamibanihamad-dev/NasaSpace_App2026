@@ -7,6 +7,7 @@ import jordan from '../../data/geo/jordan.json'
 import { JORDAN_BOUNDS, JORDAN_CENTER } from '../../config'
 import { activeTileSource, useSettings } from '../../lib/settings'
 import { Icon, type IconName } from '../ui/Icon'
+import { detectLocation, type Located } from '../../lib/locate'
 
 const jordanGeom = (jordan as unknown as { features: Feature<Polygon>[] }).features[0]
 const jordanRing: [number, number][] = jordanGeom.geometry.coordinates[0].map(([x, y]) => [y, x])
@@ -90,7 +91,7 @@ function CtlButton({ icon, label, onClick }: { icon: IconName; label: string; on
 }
 
 /** Zoom in/out, go to my location, fit to farm. */
-export function MapControls({ onFit, onLocated, onLocateError }: { onFit?: () => void; onLocated?: (lat: number, lon: number) => void; onLocateError?: () => void }) {
+export function MapControls({ onFit, onLocated, onLocateError }: { onFit?: () => void; onLocated?: (lat: number, lon: number, found: Located) => void; onLocateError?: () => void }) {
   const map = useMap()
   const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
@@ -101,17 +102,19 @@ export function MapControls({ onFit, onLocated, onLocateError }: { onFit?: () =>
       L.DomEvent.disableScrollPropagation(ref.current)
     }
   }, [])
-  const locate = () => {
-    if (!('geolocation' in navigator)) return onLocateError?.()
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lon } = pos.coords
-        if (onLocated) onLocated(lat, lon)
-        else map.flyTo([lat, lon], 17)
-      },
-      () => onLocateError?.(),
-      { enableHighAccuracy: true, timeout: 12000 },
-    )
+  const [busy, setBusy] = useState(false)
+  const locate = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      const found = await detectLocation()
+      if (onLocated) onLocated(found.lat, found.lon, found)
+      else map.flyTo([found.lat, found.lon], found.source === 'device' ? 17 : 12)
+    } catch {
+      onLocateError?.()
+    } finally {
+      setBusy(false)
+    }
   }
   return (
     <div ref={ref} className="absolute top-3 end-3 z-[1000] flex flex-col gap-2">
