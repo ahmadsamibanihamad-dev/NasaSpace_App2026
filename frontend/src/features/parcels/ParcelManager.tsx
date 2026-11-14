@@ -24,10 +24,18 @@ import { CROP_IDS } from '../../lib/places'
 import { useSettings } from '../../lib/settings'
 import type { Farm, Plot, PlotDraft } from '../../lib/types'
 import { DraftLayer } from './DraftLayer'
+import { DragShapeLayer } from './DragShapeLayer'
 import { ParcelsLayer } from './ParcelsLayer'
 import { ParcelForm, ParcelMetrics, STATUSES, type FormErrors } from './ParcelForm'
 import { download, emptyDraft, parseGeoJSON, toCSV, toGeoJSON } from './io'
 
+type Tool = 'rect' | 'square' | 'points' | 'pan'
+const TOOLS: { id: Tool; icon: 'rect' | 'square' | 'polygon' | 'move' }[] = [
+  { id: 'rect', icon: 'rect' },
+  { id: 'square', icon: 'square' },
+  { id: 'points', icon: 'polygon' },
+  { id: 'pan', icon: 'move' },
+]
 type Mode = 'browse' | 'choose' | 'draw' | 'coords' | 'form' | 'review' | 'reshape' | 'editData'
 interface Geo {
   pts: LatLon[]
@@ -53,6 +61,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
   const committed = useRef<Geo>({ pts: [], closed: false })
   const [undoStack, setUndoStack] = useState<Geo[]>([])
   const [coordsText, setCoordsText] = useState('')
+  const [tool, setTool] = useState<Tool>('rect')
   const [draft, setDraft] = useState<PlotDraft | null>(null)
   const [errors, setErrors] = useState<FormErrors>({})
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -118,6 +127,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
     setSelectedId(null)
     setDraft(null)
     resetGeo()
+    setTool('rect')
     setMode(m)
     setPanelOpen(true)
   }
@@ -333,7 +343,25 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
         ) : (
           stepTitle(2, mode === 'draw' ? t('parcels.drawOnMap') : t('parcels.enterCoords'))
         )}
-        <p className="text-label text-text-secondary">{mode === 'coords' ? t('parcels.coordsHelp') : geo.closed ? t('parcels.reshapeHelp') : t('parcels.drawHelp')}</p>
+        {mode === 'draw' && !geo.closed && (
+          <div role="radiogroup" aria-label={t('parcels.toolsLabel')} className="grid grid-cols-2 gap-2">
+            {TOOLS.map((x) => (
+              <button
+                key={x.id}
+                role="radio"
+                aria-checked={tool === x.id}
+                onClick={() => {
+                  if (geo.pts.length && x.id !== tool) commitGeo([], false)
+                  setTool(x.id)
+                }}
+                className={cx('h-11 rounded-tile border flex items-center gap-2 px-3 text-label transition-colors', tool === x.id ? 'border-green-600 bg-green-50 text-green-700 font-semibold' : 'border-border hover:bg-surface-muted')}
+              >
+                <Icon name={x.icon} size={18} /> {t(`parcels.tools.${x.id}`)}
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="text-label text-text-secondary">{mode === 'coords' ? t('parcels.coordsHelp') : geo.closed ? t('parcels.reshapeHelp') : t(`parcels.toolHelp.${tool}`)}</p>
         {mode !== 'coords' && geometryTools}
         {(mode === 'coords' || mode === 'reshape') && (
           <div className="flex flex-col gap-1">
@@ -624,7 +652,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
       )}
 
       {/* Map */}
-      <div className={cx('relative flex-1 min-h-[280px] rounded-card overflow-hidden', geometryMode && !geo.closed && '[&_.leaflet-container]:cursor-crosshair')}>
+      <div className={cx('relative flex-1 min-h-[280px] rounded-card overflow-hidden', mode === 'draw' && !geo.closed && tool !== 'pan' && '[&_.leaflet-container]:cursor-crosshair')}>
         <JordanMap center={[farm.centroid.lat, farm.centroid.lon]} zoom={16} showCoords>
           <FitBounds bounds={bounds} token={fit} />
           {mode === 'browse' && selBounds && <FitBounds bounds={selBounds} token={selectedId} maxZoom={18} />}
@@ -633,6 +661,9 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
           <ParcelsLayer plots={plots} selectedId={selectedId} hiddenId={mode === 'reshape' ? selectedId : null} dimOthers={geometryMode} onSelect={mode === 'browse' ? select : undefined} />
           {(geometryMode || mode === 'form' || mode === 'review') && (
             <DraftLayer
+              clickToAdd={mode === 'draw' && tool === 'points'}
+              moveLabel={t('parcels.moveShape')}
+              rotateLabel={t('parcels.rotateShape')}
               points={mode === 'form' || mode === 'review' ? fromPolygon(draft!.polygon) : geo.pts}
               closed={mode === 'form' || mode === 'review' ? true : geo.closed}
               color={draft?.color ?? selected?.color ?? '#4FA867'}
@@ -651,6 +682,9 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
                     }
               }
             />
+          )}
+          {mode === 'draw' && !geo.closed && (tool === 'rect' || tool === 'square') && (
+            <DragShapeLayer square={tool === 'square'} color={draft?.color ?? '#4FA867'} onDone={(pts) => commitGeo(pts, true)} onTooSmall={() => toast(t('parcels.dragTooSmall'), 'info')} />
           )}
           <MapControls
             onFit={() => setFit((n) => n + 1)}
@@ -677,7 +711,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
         {geometryMode && (
           <div className="absolute bottom-12 inset-x-0 z-[1000] flex justify-center pointer-events-none px-3">
             <span className="bg-surface/95 rounded-pill px-4 py-2 text-label shadow-soft text-center">
-              {mode === 'coords' ? t('parcels.coordsHint') : geo.closed ? t('parcels.reshapeHint') : geo.pts.length >= 3 ? t('parcels.closeHint') : t('parcels.drawHint')} · {t('parcels.vertices', { n: geo.pts.length })}
+              {mode === 'coords' ? t('parcels.coordsHint') : geo.closed ? t('parcels.reshapeHint') : tool !== 'points' ? t(`parcels.toolHint.${tool}`) : geo.pts.length >= 3 ? t('parcels.closeHint') : t('parcels.drawHint')} · {t('parcels.vertices', { n: geo.pts.length })}
               {draftPolygon && <> · {fmtArea(areaM2(draftPolygon))}</>}
             </span>
           </div>

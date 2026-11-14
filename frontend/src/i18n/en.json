@@ -85,7 +85,7 @@
   "step1": "Locate your land",
   "step1Body": "We find you on a satellite map, or you search for your area or type its coordinates.",
   "step2": "Draw your parcels",
-  "step2Body": "Draw each parcel by clicking its corners or enter its coordinates; area and perimeter are calculated automatically.",
+  "step2Body": "Drag on the map to draw a rectangle over each parcel and adjust its corners, or enter coordinates. Area and perimeter are calculated automatically.",
   "step3": "Get recommendations",
   "step3Body": "We assess crop suitability, planting time, rotation, and risks.",
   "sourcesTitle": "NASA data we rely on",
@@ -582,20 +582,20 @@
   "addNew": "Add new parcel",
   "drawOnMap": "Draw parcel on map",
   "drawOnMapShort": "Draw on map",
-  "drawOnMapBody": "Click the parcel corners one by one, then click the first point to close the shape.",
+  "drawOnMapBody": "Press and drag on the map to draw a rectangle or square over your land, then adjust the corners to match its shape.",
   "enterCoords": "Enter coordinates",
   "enterCoordsShort": "Enter coordinates",
   "enterCoordsBody": "Type the boundary points manually: latitude then longitude for each point.",
   "chooseMethod": "How do you want to set the boundary?",
   "step": "Step {{n}} of {{total}}",
   "drawHelp": "Click the map to add polygon vertices. Click the first point (or double-click) to close the shape.",
-  "reshapeHelp": "Drag a vertex to move it, click the small point between two vertices to add one, right-click a vertex to remove it. Area and perimeter update automatically.",
+  "reshapeHelp": "Drag any corner to change the shape. Click the small point on an edge to add a corner; right-click a corner to remove it. The centre handle moves the whole parcel and the top handle rotates it. Area and perimeter update automatically.",
   "coordsHelp": "One point per line as: latitude, longitude (decimal degrees). Example: 32.5568, 35.8469. The boundary appears on the map as you type.",
   "coordsLabel": "Coordinates (latitude, longitude)",
   "coordsHint": "The boundary appears here as you type; you can drag vertices",
   "drawHint": "Click to add parcel vertices",
   "closeHint": "Click the first point to close the shape",
-  "reshapeHint": "Drag vertices to adjust the boundary",
+  "reshapeHint": "Drag corners to reshape, the centre to move, the top handle to rotate",
   "closeShape": "Close shape",
   "vertices": "{{n}} vertices",
   "area": "Area",
@@ -657,6 +657,27 @@
    "format": "Line {{line}}: type two numbers as \"lat, lon\"",
    "range": "Line {{line}}: coordinates out of range"
   },
-  "localNote": "Data is stored on this device only (frontend-only mode)."
+  "localNote": "Data is stored on this device only (frontend-only mode).",
+  "toolsLabel": "Drawing tool",
+  "tools": {
+   "rect": "Rectangle",
+   "square": "Square",
+   "points": "Free shape (points)",
+   "pan": "Move the map"
+  },
+  "toolHelp": {
+   "rect": "Press on the map, drag over your land and release: a rectangle covers the marked area. Handles then appear so you can reshape it.",
+   "square": "Press, drag and release to draw a square with equal sides (in metres). Handles then appear so you can reshape it.",
+   "points": "For irregular land: click to add corners one by one, then click the first point or double-click to close.",
+   "pan": "Move and zoom the map until you reach your land, then pick a drawing tool."
+  },
+  "toolHint": {
+   "rect": "Press and drag to mark the parcel area",
+   "square": "Press and drag to draw a square",
+   "pan": "Move the map, then pick a drawing tool"
+  },
+  "dragTooSmall": "Press and drag a longer distance to mark the area.",
+  "moveShape": "Drag to move the whole parcel",
+  "rotateShape": "Drag to rotate the parcel"
  }
 }

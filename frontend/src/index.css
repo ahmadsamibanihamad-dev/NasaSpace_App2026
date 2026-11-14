@@ -130,6 +130,12 @@ button:disabled {
   display: none;
 }
 
+.leaflet-container.drawing-shape {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* Pulsing location marker */
 @keyframes pulse-ring {
   0% { transform: scale(0.6); opacity: 0.8; }
