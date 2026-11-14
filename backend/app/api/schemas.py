@@ -75,6 +75,7 @@ class FarmOut(BaseModel):
     centroid: dict
     plots_count: int
     is_demo: bool
+    plot_layout: Optional[dict] = None
     created_at: datetime
 
 
@@ -88,6 +89,7 @@ class PlotIn(BaseModel):
 
 class PlotsReplaceIn(BaseModel):
     plots: list[PlotIn] = Field(min_length=1, max_length=400)
+    layout: Optional[dict] = None
 
     @field_validator("plots")
     @classmethod

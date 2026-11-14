@@ -45,6 +45,7 @@ def farm_out(session: Session, f: Farm) -> FarmOut:
         centroid={"lat": f.centroid_lat, "lon": f.centroid_lon},
         plots_count=n,
         is_demo=f.is_demo,
+        plot_layout=f.plot_layout,
         created_at=f.created_at,
     )
 
@@ -147,6 +148,7 @@ def update_farm(farm_id: str, body: FarmUpdateIn, user: User = Depends(current_u
         f.name = body.name.strip()
     if body.boundary is not None:
         _apply_boundary(f, body.boundary)
+        f.plot_layout = None
     session.add(f)
     session.commit()
     session.refresh(f)
@@ -203,6 +205,8 @@ def replace_plots(farm_id: str, body: PlotsReplaceIn, user: User = Depends(curre
     if union_area > boundary.area * 1.03:
         raise AppError(422, "PLOTS_OVERLAP", "Plots overlap each other")
 
+    f.plot_layout = body.layout
+    session.add(f)
     existing = {p.label: p for p in session.exec(select(Plot).where(Plot.farm_id == f.id)).all()}
     keep = set()
     for item, g, area in parsed:

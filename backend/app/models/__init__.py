@@ -36,6 +36,8 @@ class Farm(SQLModel, table=True):
     centroid_lat: float
     centroid_lon: float
     is_demo: bool = False
+    # Plot-editor state (divider fractions, splits, merges) so the grid can be re-edited.
+    plot_layout: Optional[dict] = Field(default=None, sa_column=Column(JSON, nullable=True))
     created_at: datetime = Field(default_factory=utcnow)
 
 
