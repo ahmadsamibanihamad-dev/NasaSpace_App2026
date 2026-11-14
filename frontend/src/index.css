@@ -1,12 +1,12 @@
 @import "tailwindcss";
-@import "@fontsource/ibm-plex-sans-arabic/300.css";
-@import "@fontsource/ibm-plex-sans-arabic/400.css";
-@import "@fontsource/ibm-plex-sans-arabic/600.css";
+@import "@fontsource/almarai/300.css";
+@import "@fontsource/almarai/400.css";
+@import "@fontsource/almarai/700.css";
 @import "leaflet/dist/leaflet.css";
 
 /* ---------- Design tokens (single source of truth) ---------- */
 @theme {
-  --font-sans: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-sans: "Almarai", system-ui, sans-serif;
 
   --color-*: initial;
   --color-white: #FFFFFF;
@@ -61,7 +61,8 @@
 
   --font-weight-light: 300;
   --font-weight-normal: 400;
-  --font-weight-semibold: 600;
+  /* Almarai ships 300 / 400 / 700 / 800 (no 600), so "semibold" maps to 700 */
+  --font-weight-semibold: 700;
 }
 
 :root {

@@ -137,7 +137,7 @@ frontend/src/
 - **المناخ**: [NASA POWER](https://power.larc.nasa.gov) Daily API، مجتمع AG.
 - **المحاصيل**: FAO ECOCROP (عبر ملف `ecocrop.rds` في حزمة Recocrop)، و FAO Irrigation and Drainage Paper 56. المقتطفات محفوظة في `backend/app/data/sources/`.
 - **الخريطة الافتراضية**: Esri World Imagery (يظهر الإسناد على الخريطة).
-- **الخط**: IBM Plex Sans Arabic.
+- **الخط**: Almarai (المراعي)، بالأوزان 300 و400 و700.
 
 ## غير منجز
 
