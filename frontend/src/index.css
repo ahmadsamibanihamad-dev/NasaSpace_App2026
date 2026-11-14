@@ -175,6 +175,29 @@ button:disabled {
 }
 
 @media print {
-  aside, header, .no-print { display: none !important; }
-  body { background: #fff; }
+  aside,
+  header,
+  .no-print,
+  .leaflet-control-container {
+    display: none !important;
+  }
+  html,
+  body,
+  #root,
+  #root > div,
+  main {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  section,
+  article {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid var(--color-border);
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

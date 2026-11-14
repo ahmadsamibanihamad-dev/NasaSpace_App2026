@@ -23,7 +23,7 @@ const NAV: { to: string; key: string; icon: IconName; primary?: boolean }[] = [
 const TITLES: [RegExp, string][] = [
   [/^\/app\/farm/, 'nav.myFarm'],
   [/^\/app\/analysis\/new/, 'nav.newAnalysis'],
-  [/^\/app\/analysis\//, 'results.suitability'],
+  [/^\/app\/analysis\//, 'analysis.resultTitle'],
   [/^\/app\/rotation/, 'nav.rotation'],
   [/^\/app\/analytics/, 'nav.analytics'],
   [/^\/app\/risks/, 'nav.risks'],

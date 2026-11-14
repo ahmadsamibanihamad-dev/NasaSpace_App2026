@@ -7,8 +7,8 @@
  * without touching any screen. Results carry model_version "rules-web-v0".
  */
 import type { Bi, Evidence, RequirementMatch, Risk, Severity } from '../types'
-import { DEKADS, dekadOf, dekadProbabilities, dekadStart, fractionOfYearsMeeting, seasonStats, type Climate, type SeasonStats } from '../climate/features'
-import { IRRIGATED_SOIL_FLOOR, IRRIGATION_FLOOR, PENALTY, RISK, SOIL_WETNESS_LIMITS, SOLAR_LIMITS, WATER_DEMAND_BINS, WEIGHTS, statusOf, trapezoid } from './config'
+import { DEKADS, dekadOf, dekadProbabilities, dekadStart, fractionOfYearsMeeting, monthlyClimatology, monthlySeries, seasonStats, type Climate, type SeasonStats } from '../climate/features'
+import { ESTABLISHMENT_WEIGHT, IRRIGATED_SOIL_FLOOR, IRRIGATION_FLOOR, LIMITING_MARGIN, PENALTY, RISK, SOIL_WETNESS_LIMITS, SOLAR_LIMITS, WATER_DEMAND_BINS, WEIGHTS, statusOf, trapezoid } from './config'
 import type { CropKB } from './crops'
 
 export interface PlotCtx {
@@ -35,7 +35,19 @@ const r0 = (x: number) => Math.round(x)
 const r1 = (x: number) => Math.round(x * 10) / 10
 const SRC = 'NASA POWER'
 
+const coldestCache = new WeakMap<Climate, number>()
+/** Long-term mean temperature of the coldest calendar month. */
+function coldestMonthMean(c: Climate): number {
+  if (!coldestCache.has(c)) {
+    const clim = monthlyClimatology(monthlySeries(c), (r) => r.t).filter((x): x is number => x !== null)
+    coldestCache.set(c, clim.length ? Math.min(...clim) : NaN)
+  }
+  return coldestCache.get(c)!
+}
+
 export function evaluate(c: Climate, crop: CropKB, dekad: number, plot: PlotCtx): Evaluation {
+  const T = crop.temp
+  const R = crop.rain
   const start = crop.perennial ? { month: 1, day: 1 } : dekadStart(dekad)
   const stats = seasonStats(c, {
     startMonth: start.month,
@@ -45,15 +57,25 @@ export function evaluate(c: Climate, crop: CropKB, dekad: number, plot: PlotCtx)
     heatThreshold: crop.heat_threshold.value,
     kc: { ini: crop.kc.ini.value, mid: crop.kc.mid.value, end: crop.kc.end.value },
     stages: crop.stages.value,
+    tempSuitability: (t) => trapezoid(t, T.abs_min.value, T.opt_min.value, T.opt_max.value, T.abs_max.value),
   })
-  const T = crop.temp
-  const R = crop.rain
-  const temperature = trapezoid(stats.tmean, T.abs_min.value, T.opt_min.value, T.opt_max.value, T.abs_max.value)
-  const rainScore = trapezoid(stats.rain, R.abs_min.value, R.opt_min.value, R.opt_max.value, R.abs_max.value)
+  // Temperature: the crop's ECOCROP trapezoid applied to every day's mean temperature, averaged over the season.
+  // Perennial trees use the annual mean temperature against the same limits.
+  // (a tree must suit the average year AND get through the coldest month: mean of the two scores).
+  const tz = (t: number) => trapezoid(t, T.abs_min.value, T.opt_min.value, T.opt_max.value, T.abs_max.value)
+  const temperature = crop.perennial ? (tz(stats.tmean) + tz(coldestMonthMean(c))) / 2 : Number.isFinite(stats.tempScore) ? stats.tempScore : 0
+  // Water: share of crop water demand (ETc, FAO-56) met by effective rainfall (a simplified
+  // water-requirement-satisfaction index), weighted by how often the ECOCROP minimum rainfall is reached.
+  // Perennial trees are scored on annual rainfall against the (annual) ECOCROP rainfall range instead.
+  const rainScore = crop.perennial ? trapezoid(stats.rain, R.abs_min.value, R.opt_min.value, R.opt_max.value, R.abs_max.value) : stats.waterSatisfaction * 100
   const rainReliability = fractionOfYearsMeeting(stats, R.abs_min.value)
   const irrigated = plot.irrigation_available
-  const deficit = stats.rain < R.opt_min.value
+  const deficit = crop.perennial ? stats.rain < R.opt_min.value : stats.waterSatisfaction < 0.95
   let precipitation = rainScore * (0.7 + 0.3 * rainReliability)
+  // Rainfed annual crops need rain at sowing: scale by how much of the initial-stage demand is met by rain.
+  if (!irrigated && !crop.perennial) precipitation *= 1 - ESTABLISHMENT_WEIGHT + ESTABLISHMENT_WEIGHT * stats.establishment
+  // Too much rain is limiting as well (upper side of the ECOCROP rainfall trapezoid).
+  if (stats.rain > R.opt_max.value) precipitation = Math.min(precipitation, trapezoid(stats.rain, R.abs_min.value, R.opt_min.value, R.opt_max.value, R.abs_max.value))
   // Irrigation covers a rainfall deficit (not an excess).
   if (irrigated && deficit) precipitation = Math.max(precipitation, IRRIGATION_FLOOR[plot.irrigation_method ?? 'surface'] ?? 85)
   let soil = stats.soilWetness === null ? 50 : trapezoid(stats.soilWetness, ...SOIL_WETNESS_LIMITS)
@@ -69,8 +91,8 @@ export function evaluate(c: Climate, crop: CropKB, dekad: number, plot: PlotCtx)
       ? 0
       : Math.min(PENALTY.drySpellCap, Math.max(0, stats.longestDrySpell - PENALTY.drySpellFreeDays) * PENALTY.drySpellPerDay * PENALTY.drySpellTolerance[crop.drought_tolerance.value])
   const total = Math.min(PENALTY.totalCap, frost + heat + dry)
-  // A crop outside its absolute temperature limits cannot be rescued by the other factors.
-  const limited = temperature === 0 ? Math.min(base, 35) : base
+  // Limiting-factor rule (Liebig): good soil moisture or radiation cannot compensate for unsuitable temperature or water.
+  const limited = Math.min(base, Math.min(temperature, precipitation) + LIMITING_MARGIN)
   const score = stats.n === 0 ? 0 : Math.max(0, Math.min(100, limited - total))
   return { crop, dekad, stats, factors, rainScore, rainReliability, penalties: { frost, heat, dry_spell: dry, total }, score }
 }
@@ -172,8 +194,8 @@ export function buildRisks(c: Climate, e: Evaluation, plot: PlotCtx, soilAnomaly
       severity: sev(stats.heatDays, RISK.heatDays),
       period,
       explanation: {
-        ar: `في المتوسط ${r1(stats.heatDays)} يوماً تتجاوز فيها العظمى ${crop.heat_threshold.value}°م (الحد الأعلى لـ${crop.name.ar}) خلال الموسم.`,
-        en: `On average ${r1(stats.heatDays)} days exceed ${crop.heat_threshold.value} °C (the upper limit for ${crop.name.en}) during the season.`,
+        ar: `في المتوسط ${r1(stats.heatDays)} يوماً يتجاوز فيها متوسط الحرارة اليومي ${crop.heat_threshold.value}°م (الحد الأعلى لـ${crop.name.ar}) خلال الموسم.`,
+        en: `On average ${r1(stats.heatDays)} days have a daily mean temperature above ${crop.heat_threshold.value} °C (the upper limit for ${crop.name.en}) during the season.`,
       },
       action: {
         ar: 'بكّر موعد الزراعة لتجنب الحر في مرحلة الإزهار، واروِ في الصباح الباكر، واستخدم التغطية (الملش) أو التظليل للخضار.',
@@ -181,15 +203,15 @@ export function buildRisks(c: Climate, e: Evaluation, plot: PlotCtx, soilAnomaly
       },
     })
   }
-  if (!plot.irrigation_available && e.rainReliability < 1 && stats.rain < crop.rain.opt_min.value) {
-    const s: Severity = e.rainReliability < RISK.rainReliability.high ? 'high' : e.rainReliability < RISK.rainReliability.moderate ? 'moderate' : 'low'
+  if (!plot.irrigation_available && (e.rainReliability < 1 || stats.waterSatisfaction < 0.6)) {
+    const s: Severity = e.rainReliability < RISK.rainReliability.high || stats.waterSatisfaction < 0.4 ? 'high' : e.rainReliability < RISK.rainReliability.moderate || stats.waterSatisfaction < 0.6 ? 'moderate' : 'low'
     risks.push({
       type: 'drought',
       severity: s,
       period,
       explanation: {
-        ar: `متوسط أمطار الموسم ${r0(stats.rain)} ملم، والحد الأدنى لـ${crop.name.ar} ${crop.rain.abs_min.value} ملم. تحقق هذا الحد في ${r0(e.rainReliability * 100)}٪ فقط من المواسم (${years} موسماً)، والقطعة بعلية.`,
-        en: `Mean seasonal rainfall is ${r0(stats.rain)} mm against a minimum of ${crop.rain.abs_min.value} mm for ${crop.name.en}. That minimum was met in only ${r0(e.rainReliability * 100)}% of ${years} seasons, and the plot is rainfed.`,
+        ar: `متوسط أمطار الموسم ${r0(stats.rain)} ملم يغطي ${r0(stats.waterSatisfaction * 100)}٪ من الاحتياج المائي لـ${crop.name.ar} (${r0(stats.etc)} ملم). الحد الأدنى للمطر (${crop.rain.abs_min.value} ملم) تحقق في ${r0(e.rainReliability * 100)}٪ من ${years} موسماً، والقطعة بعلية.`,
+        en: `Mean seasonal rainfall of ${r0(stats.rain)} mm covers ${r0(stats.waterSatisfaction * 100)}% of the water demand of ${crop.name.en} (${r0(stats.etc)} mm). The minimum rainfall (${crop.rain.abs_min.value} mm) was met in ${r0(e.rainReliability * 100)}% of ${years} seasons, and the plot is rainfed.`,
       },
       action: {
         ar: 'وفّر رياً تكميلياً إن أمكن، أو اختر محصولاً أكثر تحملاً للجفاف، واعتمد الحصاد المائي وتقليل الحراثة لحفظ رطوبة التربة.',
@@ -254,6 +276,8 @@ export function buildEvidence(c: Climate, e: Evaluation): Evidence[] {
     ev('seasonal_mean_temperature_c', 'متوسط حرارة الموسم', 'Seasonal mean temperature', s.tmean, '°C'),
     ev('seasonal_rainfall_mm', 'أمطار الموسم', 'Seasonal rainfall', s.rain, 'mm'),
     ev('rainfall_variability_cv', 'تذبذب الأمطار بين السنوات', 'Rainfall year-to-year variability (CV)', s.rainCV * 100, '%'),
+    ev('water_demand_met_by_rain_pct', 'نسبة تلبية الاحتياج المائي بالمطر', 'Water demand met by rainfall', s.waterSatisfaction * 100, '%'),
+    ev('sowing_rain_adequacy_pct', 'كفاية أمطار فترة الإنبات', 'Sowing-period rain adequacy', s.establishment * 100, '%'),
     ev('years_meeting_min_rainfall_pct', 'مواسم حققت الحد الأدنى للمطر', 'Seasons meeting the minimum rainfall', e.rainReliability * 100, '%'),
     ev('root_zone_wetness_pct', 'رطوبة منطقة الجذور', 'Root-zone soil wetness', s.soilWetness === null ? null : s.soilWetness * 100, '%'),
     ev('solar_radiation_mj_m2_day', 'الإشعاع الشمسي', 'Solar radiation', s.rs, 'MJ/m²/day'),
@@ -275,10 +299,10 @@ export function buildExplanation(e: Evaluation, plot: PlotCtx): Bi {
   const T = crop.temp
   const waterAr = plot.irrigation_available
     ? `القطعة مروية، لذلك لا يُحتسب نقص المطر (${r0(s.rain)} ملم) عائقاً؛ احتياج الري المقدّر ${r0(s.irrigation)} ملم للموسم.`
-    : `القطعة بعلية: أمطار الموسم ${r0(s.rain)} ملم مقابل نطاق مثالي ${crop.rain.opt_min.value}–${crop.rain.opt_max.value} ملم، وتحقق الحد الأدنى (${crop.rain.abs_min.value} ملم) في ${r0(e.rainReliability * 100)}٪ من المواسم.`
+    : `القطعة بعلية: أمطار الموسم ${r0(s.rain)} ملم تغطي ${r0(s.waterSatisfaction * 100)}٪ من احتياج المحصول المائي (${r0(s.etc)} ملم)، وتحقق الحد الأدنى للمطر (${crop.rain.abs_min.value} ملم) في ${r0(e.rainReliability * 100)}٪ من المواسم.`
   const waterEn = plot.irrigation_available
     ? `The plot is irrigated, so the rainfall shortfall (${r0(s.rain)} mm) is not treated as limiting; estimated irrigation need is ${r0(s.irrigation)} mm for the season.`
-    : `The plot is rainfed: seasonal rainfall is ${r0(s.rain)} mm against an optimal ${crop.rain.opt_min.value}–${crop.rain.opt_max.value} mm, and the minimum (${crop.rain.abs_min.value} mm) was met in ${r0(e.rainReliability * 100)}% of seasons.`
+    : `The plot is rainfed: seasonal rainfall of ${r0(s.rain)} mm covers ${r0(s.waterSatisfaction * 100)}% of the crop's water demand (${r0(s.etc)} mm), and the minimum rainfall (${crop.rain.abs_min.value} mm) was met in ${r0(e.rainReliability * 100)}% of seasons.`
   const penAr = e.penalties.total > 0 ? ` خُصم ${r0(e.penalties.total)} نقطة بسبب المخاطر (صقيع ${r0(e.penalties.frost)}، حرارة ${r0(e.penalties.heat)}، فترات جفاف ${r0(e.penalties.dry_spell)}).` : ''
   const penEn = e.penalties.total > 0 ? ` ${r0(e.penalties.total)} points were deducted for risks (frost ${r0(e.penalties.frost)}, heat ${r0(e.penalties.heat)}, dry spells ${r0(e.penalties.dry_spell)}).` : ''
   return {
@@ -300,11 +324,11 @@ export function mainReason(e: Evaluation, plot: PlotCtx): Bi {
   if (e.score >= 60) {
     return plot.irrigation_available
       ? { ar: `الحرارة مناسبة (${r1(s.tmean)}°م) والري متاح؛ احتياج الري نحو ${r0(s.irrigation)} ملم.`, en: `Temperature fits (${r1(s.tmean)} °C) and irrigation is available; irrigation need is about ${r0(s.irrigation)} mm.` }
-      : { ar: `الحرارة مناسبة (${r1(s.tmean)}°م) وأمطار الموسم ${r0(s.rain)} ملم تكفي في ${r0(e.rainReliability * 100)}٪ من السنوات.`, en: `Temperature fits (${r1(s.tmean)} °C) and seasonal rainfall of ${r0(s.rain)} mm is enough in ${r0(e.rainReliability * 100)}% of years.` }
+      : { ar: `الحرارة مناسبة (${r1(s.tmean)}°م) وأمطار الموسم ${r0(s.rain)} ملم تغطي ${r0(s.waterSatisfaction * 100)}٪ من احتياج المحصول.`, en: `Temperature fits (${r1(s.tmean)} °C) and seasonal rainfall of ${r0(s.rain)} mm covers ${r0(s.waterSatisfaction * 100)}% of the crop's demand.` }
   }
   const names: Record<string, Bi> = {
     temperature: { ar: `الحرارة (${r1(s.tmean)}°م) خارج النطاق المثالي ${e.crop.temp.opt_min.value}–${e.crop.temp.opt_max.value}°م`, en: `temperature (${r1(s.tmean)} °C) is outside the optimal ${e.crop.temp.opt_min.value}–${e.crop.temp.opt_max.value} °C` },
-    precipitation: { ar: `أمطار الموسم (${r0(s.rain)} ملم) أقل من حاجة المحصول (${e.crop.rain.opt_min.value} ملم) ولا يوجد ري`, en: `seasonal rainfall (${r0(s.rain)} mm) is below the crop's need (${e.crop.rain.opt_min.value} mm) with no irrigation` },
+    precipitation: { ar: `أمطار الموسم (${r0(s.rain)} ملم) تغطي ${r0(s.waterSatisfaction * 100)}٪ فقط من احتياج المحصول (${r0(s.etc)} ملم) ولا يوجد ري`, en: `seasonal rainfall (${r0(s.rain)} mm) covers only ${r0(s.waterSatisfaction * 100)}% of the crop's demand (${r0(s.etc)} mm) with no irrigation` },
     soil_moisture: { ar: `رطوبة التربة منخفضة (${s.soilWetness === null ? '—' : r0(s.soilWetness * 100)}٪)`, en: `soil moisture is low (${s.soilWetness === null ? '—' : r0(s.soilWetness * 100)}%)` },
     solar_radiation: { ar: `الإشعاع الشمسي (${r1(s.rs)} ميجاجول/م²/يوم) غير مثالي`, en: `solar radiation (${r1(s.rs)} MJ/m²/day) is not ideal` },
   }

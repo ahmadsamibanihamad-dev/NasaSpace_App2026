@@ -13,6 +13,11 @@ export const WEIGHTS = { temperature: 0.35, precipitation: 0.3, soil_moisture: 0
 export const SOIL_WETNESS_LIMITS: [number, number, number, number] = [0.15, 0.35, 0.75, 0.95] // POWER GWETROOT fraction (0–1)
 export const SOLAR_LIMITS: [number, number, number, number] = [6, 12, 28, 34] // MJ/m²/day
 
+/** Rainfed annual crops: weight of "sowing rains" (rain in the initial stage vs that stage's water demand). */
+export const ESTABLISHMENT_WEIGHT = 0.5
+/** Limiting-factor rule: the score cannot exceed the weaker of temperature / water by more than this margin. */
+export const LIMITING_MARGIN = 10
+
 export const IRRIGATION_FLOOR: Record<string, number> = { drip: 95, sprinkler: 90, surface: 85 }
 export const IRRIGATED_SOIL_FLOOR = 85
 

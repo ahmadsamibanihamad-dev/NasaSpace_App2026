@@ -60,7 +60,7 @@ export function buildRotation(input: RotationInput): { strategies: RotationStrat
     return s
   }
 
-  const plan = (objective: 'soil' | 'water' | 'income'): (string | null)[] => {
+  const plan = (objective: 'soil' | 'water' | 'income', avoidFirst?: string | null): (string | null)[] => {
     const seq: (string | null)[] = []
     for (let i = 0; i < SEASONS_AHEAD; i++) {
       const prev = [...past, ...seq]
@@ -68,6 +68,7 @@ export function buildRotation(input: RotationInput): { strategies: RotationStrat
       for (const c of ANNUAL_CROPS) {
         const e = best.get(c.id)!
         if (e.score < MIN_SUITABILITY) continue
+        if (i === 0 && avoidFirst === c.id) continue
         let v = transitionScore(prev, c)
         if (objective === 'soil') v = v * 1.3 + e.score * 0.3
         else if (objective === 'water') v = v * 0.7 + e.score * 0.35 - (plot.irrigation_available ? e.stats.irrigation : e.stats.etc) * 0.06
@@ -83,9 +84,14 @@ export function buildRotation(input: RotationInput): { strategies: RotationStrat
   const pattern = past.slice(-Math.min(3, past.length))
   const current = Array.from({ length: SEASONS_AHEAD }, (_, i) => pattern[i % pattern.length])
   const bObjective: 'water' | 'income' = priority === 'increase_income' ? 'income' : 'water'
-  const seqs: Record<RotationStrategy['key'], (string | null)[]> = perennial
-    ? { current, option_a: current, option_b: current }
-    : { current, option_a: plan('soil'), option_b: plan(bObjective) }
+  const optionA = plan('soil')
+  let optionB = plan(bObjective)
+  // The two options must be real alternatives: if both objectives pick the same sequence, start B with a different crop.
+  if (optionB.join() === optionA.join()) {
+    const alt = plan(bObjective, optionA[0])
+    if (alt[0] !== null) optionB = alt
+  }
+  const seqs: Record<RotationStrategy['key'], (string | null)[]> = perennial ? { current, option_a: current, option_b: current } : { current, option_a: optionA, option_b: optionB }
 
   const score = (seq: (string | null)[]) => {
     const full = [...past.slice(-1), ...seq]

@@ -83,9 +83,9 @@
   "signIn": "Sign in",
   "howTitle": "How it works",
   "step1": "Locate your land",
-  "step1Body": "We find you on the map and you draw your land's boundary.",
-  "step2": "Divide it into plots",
-  "step2Body": "Split the land into plots and tell us each plot's crop and irrigation.",
+  "step1Body": "We find you on a satellite map, or you search for your area or type its coordinates.",
+  "step2": "Draw your parcels",
+  "step2Body": "Draw each parcel by clicking its corners or enter its coordinates; area and perimeter are calculated automatically.",
   "step3": "Get recommendations",
   "step3Body": "We assess crop suitability, planting time, rotation, and risks.",
   "sourcesTitle": "NASA data we rely on",
@@ -290,7 +290,14 @@
    "processing_satellite_information": "Processing satellite information",
    "evaluating_crop_requirements": "Evaluating crop requirements",
    "generating_recommendations": "Generating recommendations"
-  }
+  },
+  "cropOptional": "Optional: leave it on \"Current crops\" to analyse each parcel's own crop.",
+  "currentCrops": "Current crops",
+  "reviewNote": "We will fetch the daily record from NASA POWER for the farm location, then compute the results. This needs an internet connection the first time.",
+  "bestDate": "Best date (suggested automatically)",
+  "failedOffline": "NASA POWER could not be reached and there is no saved copy for this location. Check your connection and try again.",
+  "failedInterrupted": "The analysis stopped because the page was closed or reloaded before it finished. Run it again.",
+  "resultTitle": "Analysis results"
  },
  "results": {
   "suitability": "Suitability result",
@@ -372,7 +379,10 @@
   "newAnalysis": "New analysis",
   "exportPdf": "Export PDF",
   "notFound": "This analysis was not found.",
-  "noWindow": "No suitable window during the year."
+  "noWindow": "No suitable window during the year.",
+  "needsReview": "needs review",
+  "yearRound": "Perennial crop",
+  "probability": "Probability"
  },
  "rotation": {
   "title": "Crop Rotation",
@@ -397,7 +407,19 @@
   "run": "Compare strategies",
   "saveHistory": "Save history",
   "empty": "Pick a plot and a priority, then press \"Compare strategies\".",
-  "fallow": "Fallow"
+  "fallow": "Fallow",
+  "focus": {
+   "soil_health": "Soil health",
+   "water": "Water saving",
+   "income": "Higher income",
+   "current": "Current"
+  },
+  "keys": {
+   "current": "Current rotation",
+   "option_a": "Option A",
+   "option_b": "Option B"
+  },
+  "now": "Current crop"
  },
  "analytics": {
   "title": "Environmental Analytics",
@@ -416,7 +438,14 @@
   },
   "thisYear": "This period",
   "historical": "Historical average",
-  "noData": "No data for this variable."
+  "noData": "No data for this variable.",
+  "seasons": {
+   "winter": "Winter",
+   "spring": "Spring",
+   "summer": "Summer",
+   "autumn": "Autumn"
+  },
+  "soilNote": "This is the NASA POWER root-zone wetness index (GWETROOT): a fraction of saturation, not volumetric water content and not from SMAP."
  },
  "risks": {
   "title": "Risk Center",
@@ -449,7 +478,9 @@
    "completed": "Completed",
    "failed": "Failed"
   },
-  "comparison": "Comparison"
+  "comparison": "Comparison",
+  "deleteBody": "This analysis will be permanently deleted.",
+  "deleted": "Analysis deleted."
  },
  "settings": {
   "title": "Settings",
@@ -461,7 +492,21 @@
   "notifRisks": "Risk alerts",
   "notifAnalyses": "Analysis completed",
   "notifUiOnly": "Notification settings are display-only for now.",
-  "saved": "Saved"
+  "saved": "Saved",
+  "current": "Current",
+  "switch": "Switch",
+  "dunumSize": "Dunum size in square metres",
+  "dunumHint": "The metric dunum used in Jordan is 1000 m². Change it if your region uses a different dunum.",
+  "dunumInvalid": "Enter a value between 100 and 10000 m².",
+  "basemap": "Basemap source",
+  "tileSource": "Map layer",
+  "customSource": "Custom source (XYZ URL)",
+  "tileUrl": "Tile URL",
+  "tileUrlInvalid": "The URL must start with https and contain {z}, {x} and {y}.",
+  "tileAttribution": "Attribution text",
+  "tileNote": "No API keys are stored in the frontend. Use only sources that need no secret key, and follow the provider's terms of use.",
+  "deleteFarmBody": "Farm \"{{name}}\" and all its parcels, history and analyses will be permanently deleted. This cannot be undone.",
+  "farmDeleted": "Farm deleted."
  },
  "states": {
   "emptyTitle": "Nothing here yet",

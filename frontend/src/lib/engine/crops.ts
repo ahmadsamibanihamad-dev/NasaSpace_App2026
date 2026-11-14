@@ -71,7 +71,7 @@ interface Def {
 }
 
 const DEFS: Def[] = [
-  { id: 'wheat', name: { ar: 'قمح', en: 'Wheat' }, sci: 'Triticum aestivum', family: 'Poaceae', category: 'cereal', eco: [5, 15, 23, 27, 0, 300, 750, 900, 1600, 90, 250, 5.5, 6.0, 7.0, 8.5], kc: [0.7, 1.15, 0.3], kcNote: 'Winter wheat, non-frozen soils; Kc end printed as 0.25–0.4', stages: [30, 140, 40, 30], stagesSource: 'Winter wheat, November, Mediterranean', root: [1.5, 1.8], months: [11, 12], income: 1 },
+  { id: 'wheat', name: { ar: 'قمح', en: 'Wheat' }, sci: 'Triticum aestivum', family: 'Poaceae', category: 'cereal', eco: [5, 15, 23, 27, 0, 300, 750, 900, 1600, 90, 250, 5.5, 6.0, 7.0, 8.5], kc: [0.7, 1.15, 0.3], kcNote: 'Winter wheat, non-frozen soils; Kc end printed as 0.25–0.4', stages: [40, 60, 60, 40], stagesSource: 'Barley/Oats/Wheat, November (region not printed); the Winter Wheat Mediterranean row is 30/140/40/30 = 240 d', root: [1.5, 1.8], months: [11, 12], income: 1 },
   { id: 'barley', name: { ar: 'شعير', en: 'Barley' }, sci: 'Hordeum vulgare', family: 'Poaceae', category: 'cereal', eco: [2, 15, 20, 40, -4, 200, 500, 1000, 2000, 90, 240, 6.0, 6.5, 7.5, 8.0], kc: [0.3, 1.15, 0.25], stages: [40, 60, 60, 40], stagesSource: 'Barley/Oats/Wheat, November (region not printed)', root: [1.0, 1.5], months: [11, 12], income: 1 },
   { id: 'lentil', name: { ar: 'عدس', en: 'Lentil' }, sci: 'Lens culinaris', family: 'Fabaceae', category: 'legume', nfix: true, eco: [5, 15, 29, 32, 0, 250, 600, 1000, 2500, 70, 240, 4.5, 5.5, 7.5, 8.2], kc: [0.4, 1.1, 0.3], stages: [25, 35, 70, 40], stagesSource: 'Lentil, Oct/Nov, Arid Region', root: [0.6, 0.8], months: [11, 12, 1], income: 2 },
   { id: 'chickpea', name: { ar: 'حمص', en: 'Chickpea' }, sci: 'Cicer arietinum', family: 'Fabaceae', category: 'legume', nfix: true, eco: [7, 15, 29, 35, -9, 300, 600, 1000, 1800, 90, 180, 4.7, 6.0, 8.5, 9.5], kc: [0.4, 1.0, 0.35], stages: [25, 35, 70, 40], root: [0.6, 1.0], months: [12, 1, 2, 3], income: 2 },
@@ -120,7 +120,7 @@ function build(d: Def): CropKB {
     kc: { ini: kcSrc(d.kc[0]), mid: kcSrc(d.kc[1]), end: kcSrc(d.kc[2]) },
     root_depth: d.rootReview ? review(d.root, 'FAO-56 Table 22 (lentil)', 'Vetch is not in Table 22; lentil values used as a placeholder') : { value: d.root, source: 'FAO-56 Table 22' },
     base_temp: review(tmin, ECO, 'Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base'),
-    heat_threshold: review(tmax, ECO, 'Proxy: ECOCROP absolute maximum temperature applied to daily Tmax'),
+    heat_threshold: review(tmax, ECO, 'ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it'),
     planting_months: review(d.months, 'Not verified', d.perennial ? 'Perennial tree crop' : 'Typical planting months in Jordan; confirm with the local extension service'),
     frost_tolerance: review(frostTolerance(ktmp, tmin), ECO, 'Derived from ECOCROP killing / minimum temperatures'),
     drought_tolerance: review(droughtTolerance(rmin), ECO, 'Derived from ECOCROP minimum rainfall'),

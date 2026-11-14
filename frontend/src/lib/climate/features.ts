@@ -167,6 +167,8 @@ export interface SeasonParams {
   heatThreshold: number
   kc?: { ini: number; mid: number; end: number }
   stages?: [number, number, number, number]
+  /** 0–100 suitability of one day's mean temperature (crop trapezoid); averaged over the season */
+  tempSuitability?: (t: number) => number
 }
 
 export interface SeasonYear {
@@ -187,6 +189,12 @@ export interface SeasonYear {
   etc: number
   effRain: number
   irrigation: number
+  /** mean daily temperature suitability over the season (0–100) */
+  tempScore: number
+  /** water satisfaction: seasonal effective rainfall as a share of seasonal crop water demand ETc (0–1) */
+  waterSatisfaction: number
+  /** share of the initial-stage water demand met by rain falling in that stage (0–1): are there sowing rains? */
+  establishment: number
 }
 
 export interface SeasonStats {
@@ -210,6 +218,9 @@ export interface SeasonStats {
   etc: number
   effRain: number
   irrigation: number
+  tempScore: number
+  waterSatisfaction: number
+  establishment: number
 }
 
 /** Statistics of one candidate season across every year of the record that fully contains it. */
@@ -234,19 +245,30 @@ export function seasonStats(c: Climate, p: SeasonParams): SeasonStats {
     let et0 = 0
     let etc = 0
     let absMin = Infinity
+    let tsSum = 0
+    let tsN = 0
+    const iniDays = stages ? stages[0] : Math.min(30, p.lengthDays)
+    let iniRain = 0
+    let iniEtc = 0
     // monthly buckets for effective rainfall and irrigation requirement
     const pm = new Map<number, { p: number; etc: number }>()
     for (let k = a; k < b; k++) {
       const tm = d.t[k]
       const tn = d.tmin[k]
-      const tx = d.tmax[k]
       const pr = d.pr[k] ?? 0
-      if (tm !== null) gdd += Math.max(0, tm - p.tBase)
+      if (tm !== null) {
+        gdd += Math.max(0, tm - p.tBase)
+        // heat-stress day: daily MEAN temperature above the crop's absolute maximum (ECOCROP limits are for mean temperature)
+        if (tm > p.heatThreshold) heat++
+        if (p.tempSuitability) {
+          tsSum += p.tempSuitability(tm)
+          tsN++
+        }
+      }
       if (tn !== null) {
         if (tn < 0) frost++
         if (tn < absMin) absMin = tn
       }
-      if (tx !== null && tx > p.heatThreshold) heat++
       rain += pr
       if (pr < 1) {
         dry++
@@ -257,6 +279,10 @@ export function seasonStats(c: Climate, p: SeasonParams): SeasonStats {
       const kc = stages && p.kc ? kcAt(k - a, stages, p.kc) : 1
       et0 += e0
       etc += e0 * kc
+      if (k - a < iniDays) {
+        iniRain += pr
+        iniEtc += e0 * kc
+      }
       const mk = c.ym[k]
       const m = pm.get(mk) ?? { p: 0, etc: 0 }
       m.p += pr
@@ -265,8 +291,11 @@ export function seasonStats(c: Climate, p: SeasonParams): SeasonStats {
     }
     let eff = 0
     let irr = 0
+    let effSeason = 0 // effective rain of the whole season: winter surplus is assumed stored in the soil for later months
     for (const m of pm.values()) {
-      const e = Math.min(effectiveRainMonthly(m.p), m.etc)
+      const em = effectiveRainMonthly(m.p)
+      const e = Math.min(em, m.etc)
+      effSeason += em
       eff += e
       irr += Math.max(0, m.etc - e)
     }
@@ -289,6 +318,9 @@ export function seasonStats(c: Climate, p: SeasonParams): SeasonStats {
       etc,
       effRain: eff,
       irrigation: irr,
+      tempScore: tsN ? tsSum / tsN : NaN,
+      waterSatisfaction: etc > 0 ? Math.min(1, effSeason / etc) : 1,
+      establishment: iniEtc > 0 ? Math.min(1, iniRain / iniEtc) : 1,
     })
   }
   const col = (f: (y: SeasonYear) => number) => mean(years.map(f))
@@ -315,6 +347,9 @@ export function seasonStats(c: Climate, p: SeasonParams): SeasonStats {
     etc: col((y) => y.etc),
     effRain: col((y) => y.effRain),
     irrigation: col((y) => y.irrigation),
+    tempScore: col((y) => y.tempScore),
+    waterSatisfaction: col((y) => y.waterSatisfaction),
+    establishment: col((y) => y.establishment),
   }
 }
 
@@ -340,11 +375,11 @@ export function dekadProbabilities(c: Climate, heatThreshold: number): { frost: 
     const y = +iso.slice(0, 4)
     const dk = dekadOf(+iso.slice(5, 7), +iso.slice(8, 10))
     const tn = d.tmin[k]
-    const tx = d.tmax[k]
-    if (tn === null && tx === null) continue
+    const tm = d.t[k]
+    if (tn === null && tm === null) continue
     seen[dk].add(y)
     if (tn !== null && tn < 0) frostY[dk].add(y)
-    if (tx !== null && tx > heatThreshold) heatY[dk].add(y)
+    if (tm !== null && tm > heatThreshold) heatY[dk].add(y)
   }
   return {
     frost: frostY.map((s, i) => (seen[i].size ? s.size / seen[i].size : 0)),

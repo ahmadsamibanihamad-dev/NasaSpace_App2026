@@ -12,6 +12,7 @@ const ParcelShape = memo(function ParcelShape({
   selected,
   dimmed,
   showLabel,
+  shortLabel,
   fill,
   areaText,
   onSelect,
@@ -20,6 +21,7 @@ const ParcelShape = memo(function ParcelShape({
   selected: boolean
   dimmed: boolean
   showLabel: boolean
+  shortLabel: boolean
   fill: string
   areaText: string
   onSelect?: (id: string) => void
@@ -41,7 +43,12 @@ const ParcelShape = memo(function ParcelShape({
     >
       {showLabel && (
         <Tooltip permanent direction="center" className="plot-label" interactive={false}>
-          <b>{plot.label}</b> · {plot.name} · <span dir="ltr">{areaText}</span>
+          <b>{plot.label}</b>
+          {!shortLabel && (
+            <>
+              {' '}· {plot.name} · <span dir="ltr">{areaText}</span>
+            </>
+          )}
         </Tooltip>
       )}
     </LPolygon>
@@ -55,7 +62,9 @@ export function ParcelsLayer({
   dimOthers,
   colorOf,
   onSelect,
+  labelMode = 'full',
 }: {
+  labelMode?: 'full' | 'short' | 'none'
   plots: Plot[]
   selectedId?: string | null
   /** parcel currently being reshaped (drawn by the draft layer instead) */
@@ -68,7 +77,7 @@ export function ParcelsLayer({
   const settings = useSettings() // re-render labels when units change
   const [zoom, setZoom] = useState(15)
   const map = useMapEvents({ zoomend: () => setZoom(map.getZoom()) })
-  const labels = Math.max(zoom, map.getZoom()) >= LABEL_MIN_ZOOM || plots.length <= 12
+  const labels = labelMode !== 'none' && (Math.max(zoom, map.getZoom()) >= LABEL_MIN_ZOOM || plots.length <= 12)
   return (
     <>
       {plots
@@ -80,6 +89,7 @@ export function ParcelsLayer({
             selected={p.id === selectedId}
             dimmed={!!dimOthers && p.id !== selectedId}
             showLabel={labels}
+            shortLabel={labelMode === 'short'}
             fill={colorOf ? colorOf(p) : p.color}
             areaText={fmtArea(p.area_m2, settings.areaUnit)}
             onSelect={onSelect}
