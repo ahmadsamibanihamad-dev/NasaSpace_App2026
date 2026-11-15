@@ -10,7 +10,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[2]
 APP_DIR = BACKEND_DIR / "app"
 DATA_DIR = APP_DIR / "data"
 
-APP_NAME = {"en": "Ardna", "ar": "أرضنا"}
+APP_NAME = {"en": "AgriVision", "ar": "AgriVision"}
 
 
 def _local_secret() -> str:

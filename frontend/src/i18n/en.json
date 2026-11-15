@@ -1,6 +1,6 @@
 {
  "app": {
-  "name": "Ardna",
+  "name": "AgriVision",
   "tagline": "Smarter farm decisions for Jordan, built on NASA data"
  },
  "common": {
@@ -80,7 +80,7 @@
  },
  "landing": {
   "heroTitle": "Know what to grow, where, and when",
-  "heroBody": "Ardna turns NASA satellite data into clear planting guidance for your farm in Jordan, and explains the reason behind every recommendation.",
+  "heroBody": "AgriVision turns NASA satellite data into clear planting guidance for your farm in Jordan, and explains the reason behind every recommendation.",
   "start": "Get started free",
   "signIn": "Sign in",
   "howTitle": "How it works",
@@ -146,7 +146,7 @@
    "denied": "We couldn't detect your location automatically",
    "deniedBody": "Search for your governorate or area, type your land's coordinates, or click the map.",
    "outside": "This location is outside Jordan",
-   "outsideBody": "Ardna currently supports farms inside Jordan only. Search for your land or click the map.",
+   "outsideBody": "AgriVision currently supports farms inside Jordan only. Search for your land or click the map.",
    "notMine": "This isn't my land",
    "searchPlaceholder": "Search a governorate or area…",
    "clickMap": "or click the map to set the location",
@@ -529,7 +529,7 @@
   "offline": "You're offline. Showing the last saved data.",
   "missingData": "Some data is unavailable for this location or period.",
   "unsupportedLocation": "Unsupported location",
-  "unsupportedLocationBody": "This location is outside Jordan. Ardna supports farms in Jordan only.",
+  "unsupportedLocationBody": "This location is outside Jordan. AgriVision supports farms in Jordan only.",
   "unsupportedCrop": "Unsupported crop",
   "unsupportedCropBody": "This crop is not among the 13 supported crops.",
   "validation": "Please check the data you entered.",

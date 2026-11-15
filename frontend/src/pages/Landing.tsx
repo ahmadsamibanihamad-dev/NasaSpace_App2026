@@ -23,7 +23,7 @@ export default function Landing() {
       <div className="max-w-[1376px] mx-auto px-4 sm:px-8">
         <header className="flex items-center justify-between gap-2 h-16 sm:h-20">
           <span className="flex items-center gap-2 text-h2 font-semibold text-green-700">
-            <img src="/favicon.svg" alt="" className="size-8" /> {t('app.name')}
+            <img src="/logo.png" alt="" className="size-9" /> {t('app.name')}
           </span>
           <div className="flex items-center gap-2">
             <button onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')} className="h-10 px-4 rounded-pill border border-border bg-surface text-label flex items-center gap-2 hover:bg-surface-muted">

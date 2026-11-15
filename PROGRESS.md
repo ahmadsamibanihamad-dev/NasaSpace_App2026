@@ -2,6 +2,14 @@
 
 Last updated 2026-11-15.
 
+## Renamed to AgriVision (2026-11-15, user decision)
+
+The app is now called AgriVision in both languages, with the logo the user supplied.
+
+- `frontend/public/logo.png` (emblem, 256 px, transparent), `logo-full.png` (emblem with wordmark), `favicon.png`. The light background of the supplied image was removed. The old `favicon.svg` is gone.
+- Name changed in `i18n` (`app.name` and three sentences), `config.ts`, `index.html`, backend `APP_NAME`, both READMEs and the two `.bat` files.
+- Internal identifiers were left as `ardna` on purpose: browser storage keys (`ardna.token`, `ardna.lang`, ...), the database file `ardna.db` and logger names. Renaming them would sign users out and orphan the existing database.
+
 ## Cultivation type in the rules, and laboratory soil input on the site (2026-11-15)
 
 The two items left open after mvp-2. Rule version stays mvp-2, six crops.

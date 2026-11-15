@@ -15,7 +15,7 @@ function AuthLayout({ title, body, children }: { title: string; body: string; ch
       <div className="lg:col-span-5 flex flex-col min-h-0">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-h2 font-semibold text-green-700">
-            <img src="/favicon.svg" alt="" className="size-8" /> {t('app.name')}
+            <img src="/logo.png" alt="" className="size-9" /> {t('app.name')}
           </Link>
           <button onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')} className="h-10 px-4 rounded-pill border border-border bg-surface text-label flex items-center gap-2 hover:bg-surface-muted">
             <Icon name="globe" size={18} /> {t('common.language')}

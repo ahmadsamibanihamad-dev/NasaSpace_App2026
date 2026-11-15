@@ -66,7 +66,7 @@ export default function SetupWizard() {
     <div className="h-full flex flex-col bg-bg p-4 sm:p-8 gap-4 sm:gap-6">
       <header className="flex flex-wrap items-center gap-4">
         <span className="flex items-center gap-2 text-h2 font-semibold text-green-700">
-          <img src="/favicon.svg" alt="" className="size-8" /> {t('app.name')}
+          <img src="/logo.png" alt="" className="size-9" /> {t('app.name')}
         </span>
         <ol className="flex items-center gap-2 mx-auto" aria-label={t('setup.title')}>
           {steps.map((s, i) => {

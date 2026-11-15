@@ -39,7 +39,7 @@ export default function Guest() {
     <div className="h-full flex flex-col bg-bg p-4 sm:p-8 gap-4 sm:gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <Link to="/" className="flex items-center gap-2 text-h2 font-semibold text-green-700 me-auto">
-          <img src="/favicon.svg" alt="" className="size-8" /> {t('app.name')}
+          <img src="/logo.png" alt="" className="size-9" /> {t('app.name')}
         </Link>
         <button onClick={() => i18n.changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')} className="h-10 px-4 rounded-pill border border-border bg-surface text-label flex items-center gap-2 hover:bg-surface-muted">
           <Icon name="globe" size={18} /> <span className="hidden sm:inline">{t('common.language')}</span>

@@ -1,5 +1,5 @@
 // Single place for the product name and app-wide constants.
-export const APP_NAME = { en: 'Ardna', ar: 'أرضنا' } as const
+export const APP_NAME = { en: 'AgriVision', ar: 'AgriVision' } as const
 
 export const HECTARE_M2 = 10000
 

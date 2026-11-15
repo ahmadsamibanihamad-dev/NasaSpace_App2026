@@ -1,4 +1,4 @@
-# أرضنا (Ardna)
+# AgriVision
 
 منصة دعم قرار زراعي لمزارع **الأردن فقط**، ضمن تحدي NASA Space Apps «Field Shift».
 

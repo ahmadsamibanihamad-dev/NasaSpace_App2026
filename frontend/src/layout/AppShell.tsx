@@ -46,7 +46,7 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onNavigate }: { collapsed: b
       <div className={cx('flex items-center gap-2 mb-6', collapsed ? 'justify-center' : 'justify-between px-2')}>
         {!collapsed && (
           <span className="flex items-center gap-2 text-h2 font-semibold text-green-700">
-            <img src="/favicon.svg" alt="" className="size-8" />
+            <img src="/logo.png" alt="" className="size-9" />
             {t('app.name')}
           </span>
         )}

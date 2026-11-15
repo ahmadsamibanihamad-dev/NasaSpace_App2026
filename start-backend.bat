@@ -1,7 +1,7 @@
 @echo off
-rem Ardna - double-click to start the backend API (FastAPI + SQLite) on http://localhost:8765
+rem AgriVision - double-click to start the backend API (FastAPI + SQLite) on http://localhost:8765
 rem API documentation: http://localhost:8765/api/v1/docs
-title Ardna - backend
+title AgriVision - backend
 cd /d "%~dp0backend"
 
 if not exist .venv (
@@ -27,7 +27,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo Starting the Ardna API on http://localhost:8765
+echo Starting the AgriVision API on http://localhost:8765
 echo Keep this window open. Close it to stop the server.
 echo.
 call .venv\Scripts\python.exe -m uvicorn app.main:app --port 8765
