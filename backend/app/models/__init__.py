@@ -65,6 +65,8 @@ class Plot(SQLModel, table=True):
     cultivation_type: str = "open_field"
     soil_type: Optional[str] = None
     soil_ph: Optional[float] = None
+    # Laboratory soil test of the parcel, as entered by the user ({"ph": 7.1, "sand": 40, ...}); None = no test.
+    soil_lab: Optional[dict] = Field(default=None, sa_column=Column(JSON, nullable=True))
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)
 

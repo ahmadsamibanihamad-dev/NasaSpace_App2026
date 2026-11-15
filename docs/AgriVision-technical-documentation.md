@@ -423,7 +423,9 @@ Example: after radish (Brassicaceae), arugula loses 45 rotation points; spinach 
 
 ### 13.10 Laboratory soil results
 
-The user may enter pH, sand, silt, clay, organic carbon, total nitrogen, CEC and coarse fragments. An entered value replaces the SoilGrids estimate for that request and keeps its source ("laboratory result"). Sand, silt and clay must be entered together. Laboratory values affect the forecast recommendations and the rotation planner; the historical analyses do not use them.
+The user may enter pH, sand, silt, clay, organic carbon, total nitrogen, CEC and coarse fragments. An entered value replaces the SoilGrids estimate and keeps its source ("laboratory result"). Sand, silt and clay must be entered together.
+
+A laboratory test can be **saved with a parcel** in the parcel form. It is then applied automatically whenever that parcel is chosen in the forecast page or the rotation planner, and can still be changed there for a single request. The historical analyses read the parcel's test too (Section 15.5).
 
 ### 13.11 Results
 
@@ -553,6 +555,8 @@ Perennial trees are evaluated over the full year, using the annual mean and the 
 | **Water requirements** | a crop, optional planting date | Crop need (ETc), effective rain, net irrigation in mm, and seasonal irrigation in m³ for the parcel's area; a monthly bar chart of the three; an explanation. Figures are net of irrigation-system losses |
 | **Risk assessment** | farm or parcels | Risk cards sorted by severity, each with period, affected parcels, a numeric explanation and an action; a table of risks per parcel |
 
+**Laboratory soil test in the analyses**: when the parcel has a stored test, its pH is compared with the crop's FAO ECOCROP pH limits in the requirements table and marked "laboratory test"; the advice to run a soil test and the "no soil test" information gap in the rotation analysis disappear. Without a test the pH row stays unknown. The suitability score has no soil-chemistry factor, so the test changes the requirements match, not the score.
+
 **Best planting window**: the run of consecutive ten-day periods around the best one whose score is within 5 points of it and at least 40.
 
 **Rotation logic**: a transition score penalises repeating a family (−40 after the same family, −15 two seasons back) and rewards a legume after a non-legume (+30) and a change of rooting depth (+12). Each strategy picks, season by season, the annual crop that maximises its objective among crops scoring at least 40.
@@ -622,7 +626,7 @@ Each risk is low, moderate or high.
 
 ### 16.3 Validation (frontend and backend)
 
-A boundary is rejected if it has fewer than three distinct points, repeated points, crosses itself, covers less than 10 m², or has any corner outside Jordan. The backend repeats every check and is the authority. Parcel numbers must be unique within a farm.
+A boundary is rejected if it has fewer than three distinct points, repeated points, crosses itself, covers less than 10 m², has any corner outside Jordan, or **overlaps another parcel of the same farm**. Parcels may share a border, and a sliver of up to 2 % of the smaller parcel is tolerated; beyond that the message names the overlapped parcel and saving is blocked. The backend repeats every check and is the authority. Parcel numbers must be unique within a farm.
 
 ### 16.4 Measurements
 
@@ -633,7 +637,7 @@ A boundary is rejected if it has fewer than three distinct points, repeated poin
 
 ### 16.5 Parcel details
 
-Name, number, area or locality, status (planted, fallow, being prepared, unused), previous crop, irrigation method (rainfed, drip, sprinkler, surface), colour (eight-colour palette), notes (up to 500 characters), owner or manager name and phone. **Soil information** for the parcel's centre is fetched automatically and shown read-only; the user never types estimated soil values.
+Name, number, area or locality, status (planted, fallow, being prepared, unused), previous crop, irrigation method (rainfed, drip, sprinkler, surface), colour (eight-colour palette), notes (up to 500 characters), owner or manager name and phone. **Soil information** for the parcel's centre is fetched automatically and shown read-only; the user never types estimated soil values. An optional **laboratory soil test** (eight values) can be entered and is saved with the parcel.
 
 ### 16.6 Working with the list and the map
 
@@ -681,14 +685,14 @@ Register (name, email, password of at least 8 characters), sign in, edit the pro
 |---|---|
 | `user` | email, name, password hash, language, area unit |
 | `farm` | owner, name, centre, governorate, demo flag |
-| `plot` | farm, number, name, polygon (GeoJSON), area, perimeter, colour, status, crops, irrigation, notes |
+| `plot` | farm, number, name, polygon (GeoJSON), area, perimeter, colour, status, crops, irrigation, notes, laboratory soil test |
 | `crophistory` | parcel, season, crop |
 | `analysis` | farm, type, scope, inputs, status, stage, result, error, summary |
 | `rotationplan` | farm, parcel, request, full plan, summary |
 | `envcache` | NASA POWER payload per 0.5° cell, with fetch time |
 | `forecast` | reserved for the optional prediction-service endpoint |
 
-Foreign keys are enforced and write-ahead logging is on. The research dataset and the models are files, not database rows.
+Foreign keys are enforced and write-ahead logging is on. Columns added after the first release are added in place at start-up, so an existing database keeps its data. The research dataset and the models are files, not database rows.
 
 ### 18.4 Jordan boundary check
 
@@ -725,7 +729,8 @@ Every error has the same shape: `{"error": {"code", "message", "details"}}`. Cod
 ### 19.2 Application shell
 
 - Collapsible sidebar; on phones it becomes a drawer.
-- Header with the farm switcher, a search box over the current farm's parcels (name, number, crop), the language toggle and the account menu.
+- Header with the farm switcher, a search box over the current farm's parcels (name, number, crop), the language toggle, notifications and the account menu.
+- **Notifications**: the bell lists the farm's latest events, newest first: analyses that finished or failed, and parcels whose top risk is moderate or high. A badge counts what is new since the list was last opened; an item opens the analysis or the risk page. The two switches in Settings (risk alerts, analysis completed) decide which kinds appear.
 - A banner appears when the device is offline; the last loaded data stays visible.
 
 ### 19.3 Maps
@@ -772,7 +777,7 @@ Pages are loaded on demand; server data is cached with TanStack Query and the pr
 | Forecast outlook | `GET /outlook/status`, `GET /outlook/soil`, `POST /outlook` | public, rate-limited |
 | Rotation planner | `POST /crop-rotation/plan` | public, rate-limited |
 | Saved plans | `POST /crop-rotation/plans`, `GET /crop-rotation/plans`, `GET/DELETE /crop-rotation/plans/{id}` | signed in |
-| Status | `GET /health`, `GET /models/status`, `GET /data/status` | public |
+| Status | `GET /health`, `GET /models/status`, `GET /data/status` (cached NASA POWER cells and the forecast dataset's sources and date range) | public |
 
 Interactive API documentation is generated at `/api/v1/docs`.
 
@@ -806,10 +811,10 @@ Environment variables (documented in `backend/.env.example`): `JWT_SECRET`, `DAT
 
 | Suite | Size | Covers |
 |---|---|---|
-| Backend (pytest) | 98 test cases in 7 files | authentication, farms and parcels, the six analyses and guest flow, numerical parity of the analytics engine against fixtures, Jordan geometry, the forecast outlook with the real models, the rotation planner, and the recommendation rules |
-| Frontend (Vitest) | 8 test cases | area and perimeter, boundary validation, coordinate parsing including Arabic digits, shape drawing and rotation |
+| Backend (pytest) | 103 test cases in 7 files | authentication, farms and parcels, the six analyses and guest flow, numerical parity of the analytics engine against fixtures, Jordan geometry, the forecast outlook with the real models, the rotation planner, and the recommendation rules |
+| Frontend (Vitest) | 13 test cases | area and perimeter, boundary validation, parcel overlap, coordinate parsing including Arabic digits, shape drawing and rotation, notifications |
 
-Rules verified by tests include: the same temperature with different soil texture gives a different ranking; a different previous crop gives a different ranking; repeating a botanical family lowers rotation compatibility; missing soil data produces unknown factors, never values; a perfect rotation score cannot rescue an environmentally unsuitable crop; a greenhouse leaves outdoor weather out and requires irrigation; historical data is labelled and a date outside the dataset is refused; inconsistent forecasts produce a partial plan.
+Rules verified by tests include: the same temperature with different soil texture gives a different ranking; a different previous crop gives a different ranking; repeating a botanical family lowers rotation compatibility; missing soil data produces unknown factors, never values; a perfect rotation score cannot rescue an environmentally unsuitable crop; a greenhouse leaves outdoor weather out and requires irrigation; historical data is labelled and a date outside the dataset is refused; inconsistent forecasts produce a partial plan; overlapping parcels are refused while neighbours and slivers are accepted; a parcel's laboratory test reaches the analyses.
 
 ---
 
@@ -940,9 +945,9 @@ Register → locate the farm → name it → draw or enter parcels → measureme
 **Application**
 
 16. Password reset does not send an email yet.
-17. Notification preferences are stored but no notifications are generated.
-18. Parcels can be imported from GeoJSON only; overlap between parcels is not checked.
-19. Laboratory soil values apply to the forecast engine and planner, not to the six analyses.
+17. Notifications are in-app only (no email or push), and what counts as new is remembered per browser.
+18. Parcels can be imported from GeoJSON only.
+19. In the six analyses a laboratory test supplies the pH comparison only; it does not change the score, and its texture and nutrient values are used only by the forecast engine and planner.
 20. SQLite and in-memory rate limiting suit a single-server deployment.
 21. It is a responsive web application, not a native mobile app.
 22. Results are guidance and do not replace a local agricultural engineer.
@@ -960,12 +965,13 @@ Implemented and tested:
 - 90-day crop rotation planner with partial-plan handling, alternatives and saved plans.
 - Historical analytics engine (`rules-v1`): six analyses on thirteen crops from twelve years of NASA POWER data.
 - Environmental analytics charts and a risk page.
-- Farm and parcel management: drawing, editing, coordinate entry, validation, measurement in three units, colours, search and filters, CSV and GeoJSON export, GeoJSON import.
+- Farm and parcel management: drawing, editing, coordinate entry, validation including overlap between parcels, measurement in three units, colours, search and filters, a laboratory soil test per parcel, CSV and GeoJSON export, GeoJSON import.
+- In-app notifications for finished analyses and parcel risks.
 - Precise location detection with accuracy handling.
 - Accounts, multiple farms, demo farm, guest mode.
 - Reports with comparison and PDF export.
 - Arabic and English, responsive layout, accessibility support.
-- 106 automated test cases (98 backend, 8 frontend).
+- 116 automated test cases (103 backend, 13 frontend).
 
 ---
 
@@ -979,8 +985,8 @@ Implemented and tested:
 - Greenhouse-specific crop requirements.
 - Review of crop requirements and weights by Jordanian agronomists; field validation.
 - Irrigation scheduling, yield estimation, multi-year rotation.
-- Email delivery (password reset, alerts) and in-app notifications.
-- Laboratory soil values in the six analyses; parcel-overlap checks; CSV import.
+- Email delivery (password reset, alerts) and push notifications.
+- Soil chemistry and texture as scored factors in the six analyses; CSV import.
 - A production database and distributed rate limiting.
 - A dedicated mobile application if needed.
 

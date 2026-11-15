@@ -97,8 +97,23 @@ def models_status():
 @router.get("/data/status", tags=["system"])
 def data_status(session: Session = Depends(get_session)):
     """Freshness of the cached climate record per source and cell."""
+    from app.api.outlook import outlook_status
+
     rows = session.exec(select(EnvCache)).all()
+    st = outlook_status()
     return {
+        # NASA POWER record fetched live for the six analyses, per 0.5-degree cell
         "sources": [{"source": r.source, "cell": r.cell, "latest_observation_date": r.last_date, "fetched_at": r.fetched_at} for r in rows],
-        "not_integrated": ["NASA SMAP", "NASA IMERG", "ISRIC SoilGrids", "Copernicus DEM"],
+        # The AI team's integrated dataset behind the forecasts and the crop ranking (a prepared file, not a live feed)
+        "forecast_dataset": {
+            "available": st["available"],
+            "kind": "prepared historical dataset",
+            "sources": ["NASA POWER", "NASA SMAP", "NASA GPM IMERG", "ISRIC SoilGrids", "Copernicus DEM GLO-30"],
+            "default_forecast_origin": st["forecast_origin"],
+            "planting_date_min": st["planting_date_min"],
+            "planting_date_max": st["planting_date_max"],
+            "full_history_installed": st["available"] and st["planting_date_min"] != st["planting_date_max"],
+            "rule_version": st["rule_version"],
+        },
+        "not_integrated": [],
     }

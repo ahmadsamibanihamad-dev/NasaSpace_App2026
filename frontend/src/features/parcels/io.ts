@@ -24,6 +24,7 @@ export function emptyDraft(polygon: Polygon, label: string, index = 0): PlotDraf
     irrigation_method: 'none',
     soil_type: null,
     soil_ph: null,
+    soil_lab: null,
   }
 }
 

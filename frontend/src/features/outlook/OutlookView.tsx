@@ -12,7 +12,7 @@ import { getOutlook, type HistoricalIndicators, type OutlookCrop, type OutlookFo
 import { date, num } from '../../lib/format'
 import { loc } from '../../i18n'
 import { Explanations, GroupScores } from './CropScore'
-import { emptyHistory, FarmHistory, historyKey, historyPayload, type FarmHistoryValue } from './FarmHistory'
+import { emptyHistory, FarmHistory, historyKey, historyPayload, type FarmHistoryValue, type LabValues } from './FarmHistory'
 import { SoilTiles } from './SoilInfo'
 
 const VAR_ICON: Record<OutlookForecast['key'], IconName> = {
@@ -92,12 +92,12 @@ function HistoryTiles({ h }: { h: HistoricalIndicators }) {
   )
 }
 
-export function OutlookView({ lat, lon, irrigation, defaultPrevious }: { lat: number; lon: number; irrigation: boolean | null; defaultPrevious?: string | null }) {
+export function OutlookView({ lat, lon, irrigation, defaultPrevious, defaultLab }: { lat: number; lon: number; irrigation: boolean | null; defaultPrevious?: string | null; defaultLab?: LabValues | null }) {
   const { t } = useTranslation()
   const [horizon, setHorizon] = useState<'30' | '90'>('30')
   // '' = the default planting date chosen by the backend
   const [planting, setPlanting] = useState('')
-  const [history, setHistory] = useState<FarmHistoryValue>(() => emptyHistory(irrigation, defaultPrevious))
+  const [history, setHistory] = useState<FarmHistoryValue>(() => emptyHistory(irrigation, defaultPrevious, defaultLab))
   const q = useQuery({
     queryKey: ['outlook', lat.toFixed(4), lon.toFixed(4), planting, historyKey(history)],
     queryFn: () => getOutlook({ lat, lon, planting_date: planting || null, ...historyPayload(history) }),

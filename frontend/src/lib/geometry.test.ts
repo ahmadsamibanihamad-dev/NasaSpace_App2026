@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { areaM2, governorateFor, insideJordan, parseCoordinates, parseLatLonQuery, perimeterM, toPolygon, validateRing } from './geometry'
+import { areaM2, governorateFor, insideJordan, overlappingParcel, parseCoordinates, parseLatLonQuery, perimeterM, toPolygon, validateRing } from './geometry'
 
 describe('parcel geometry', () => {
   const sq = [[32.5568, 35.8469], [32.5568, 35.8479], [32.5578, 35.8479], [32.5578, 35.8469]] as [number, number][]
@@ -31,5 +31,22 @@ describe('parcel geometry', () => {
     expect(governorateFor(31.95, 35.93)?.id).toBe('am')
     expect(insideJordan(33.51, 36.29)).toBe(false)
     expect(governorateFor(24.71, 46.67)).toBeNull()
+  })
+})
+
+describe('parcel overlap', () => {
+  const sq = (lon: number, d = 0.0005) => toPolygon([[32.5563, lon - d], [32.5563, lon + d], [32.5573, lon + d], [32.5573, lon - d]])!
+  const others = [{ id: 'a', label: '7', polygon: sq(35.85) }]
+
+  it('names the parcel a boundary overlaps and tolerates borders and slivers', () => {
+    expect(overlappingParcel(sq(35.8505), others)).toBe('7') // half of it
+    expect(overlappingParcel(sq(35.851), others)).toBeNull() // shared border
+    expect(overlappingParcel(sq(35.85099), others)).toBeNull() // 1 % sliver, under the tolerance
+    expect(overlappingParcel(sq(35.86), others)).toBeNull() // apart
+    expect(overlappingParcel(sq(35.85, 0.0001), others)).toBe('7') // a small parcel inside a larger one
+  })
+
+  it('does not compare a parcel with itself', () => {
+    expect(overlappingParcel(sq(35.85), others, 'a')).toBeNull()
   })
 })

@@ -47,6 +47,9 @@ export interface Farm {
 
 export type PlotStatus = 'planted' | 'fallow' | 'preparing' | 'unused'
 
+/** Laboratory soil test results of a parcel. Only the values the user entered are present. */
+export type SoilLab = Partial<Record<'ph' | 'sand' | 'silt' | 'clay' | 'organic_carbon' | 'nitrogen' | 'cec' | 'coarse_fragments', number>>
+
 /** A parcel (قطعة) drawn on the map. Always belongs to one farm. */
 export interface Plot {
   id: string
@@ -70,6 +73,8 @@ export interface Plot {
   cultivation_type?: 'open_field' | 'greenhouse'
   soil_type: string | null
   soil_ph: number | null
+  /** Laboratory soil test stored with the parcel; null = none. */
+  soil_lab?: SoilLab | null
   created_at: string
   updated_at: string
   // filled from the latest analyses
@@ -193,6 +198,8 @@ export interface RequirementMatch {
   label: Bi
   required: string
   observed: string
+  /** Where the observed value comes from, when it is not from the climate record (e.g. a laboratory test). */
+  observed_source?: Bi | null
   status: 'match' | 'partial' | 'mismatch' | 'unknown'
   source: string
   needs_review: boolean

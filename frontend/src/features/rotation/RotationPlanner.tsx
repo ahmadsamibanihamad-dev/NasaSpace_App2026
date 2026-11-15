@@ -16,7 +16,7 @@ import { date, dayMonth, num } from '../../lib/format'
 import { loc } from '../../i18n'
 import { SoilTiles } from '../outlook/SoilInfo'
 import { GroupScores } from '../outlook/CropScore'
-import { emptyHistory, FarmHistory, historyKey, historyPayload, type FarmHistoryValue } from '../outlook/FarmHistory'
+import { emptyHistory, FarmHistory, historyKey, historyPayload, type FarmHistoryValue, type LabValues } from '../outlook/FarmHistory'
 
 export const PLAN_CROPS = ['radish', 'arugula', 'spinach', 'carrot', 'beet', 'bush_bean'] as const
 const VARS: { key: ForecastKey; icon: IconName }[] = [
@@ -316,6 +316,7 @@ export function RotationPlanner({
   place,
   defaultIrrigation,
   defaultPrevious,
+  defaultLab,
   farmId,
   plotId,
   onSaved,
@@ -327,6 +328,8 @@ export function RotationPlanner({
   defaultIrrigation: boolean | null
   /** The parcel's current crop, offered as the previous crop. */
   defaultPrevious?: string | null
+  /** The parcel's stored laboratory soil test. */
+  defaultLab?: LabValues | null
   /** When set (signed-in user with a farm) the plan can be saved. */
   farmId?: string
   plotId?: string | null
@@ -336,7 +339,7 @@ export function RotationPlanner({
   const toast = useToast()
   const [horizon, setHorizon] = useState<'90' | '30'>('90')
   const [planting, setPlanting] = useState('') // '' = default date from the backend
-  const [history, setHistory] = useState<FarmHistoryValue>(() => emptyHistory(defaultIrrigation, defaultPrevious))
+  const [history, setHistory] = useState<FarmHistoryValue>(() => emptyHistory(defaultIrrigation, defaultPrevious, defaultLab))
 
   const input = {
     latitude: lat,

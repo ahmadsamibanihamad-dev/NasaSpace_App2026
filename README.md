@@ -87,8 +87,8 @@ npm run dev
 
 | الأمر | من داخل | العدد |
 |---|---|---|
-| `.venv\\Scripts\\python.exe -m pytest -q` | `backend/` | 98 اختباراً |
-| `npm test` | `frontend/` | 8 اختبارات |
+| `.venv\\Scripts\\python.exe -m pytest -q` | `backend/` | 103 اختبارات |
+| `npm test` | `frontend/` | 13 اختباراً |
 | `npx tsc -b` و `npm run build` | `frontend/` | فحص الأنواع والبناء |
 
 ## المصادر والتراخيص

@@ -76,7 +76,16 @@
   "searchPlaceholder": "Search plots or crops…",
   "noNotifications": "No new notifications",
   "outlook": "Forecast",
-  "plans": "Saved plans"
+  "plans": "Saved plans",
+  "notif": {
+   "done": "Analysis finished: {{type}}",
+   "failed": "Analysis could not be completed: {{type}}",
+   "risk": "Parcel {{plot}}: {{risk}} ({{severity}})",
+   "new": "New",
+   "off": "Notifications are off. Turn them on in Settings.",
+   "unread_one": "Notifications: 1 new",
+   "unread_other": "Notifications: {{count}} new"
+  }
  },
  "landing": {
   "heroTitle": "Know what to grow, where, and when",
@@ -675,7 +684,8 @@
    "duplicate_points": "There is a repeated point. Remove the duplicate vertex.",
    "self_intersecting": "The boundary crosses itself. Move the vertices so the edges do not cross.",
    "too_small": "The area is too small (under 10 m²). Check the vertex positions.",
-   "outside_jordan": "Part of the parcel is outside Jordan. Only land inside Jordan is supported."
+   "outside_jordan": "Part of the parcel is outside Jordan. Only land inside Jordan is supported.",
+   "overlaps_parcel": "The boundary overlaps parcel {{label}}. Move it so the two parcels do not overlap (a shared border is fine)."
   },
   "lineError": {
    "format": "Line {{line}}: type two numbers as \"lat, lon\"",
@@ -701,7 +711,8 @@
   },
   "dragTooSmall": "Press and drag a longer distance to mark the area.",
   "moveShape": "Drag to move the whole parcel",
-  "rotateShape": "Drag to rotate the parcel"
+  "rotateShape": "Drag to rotate the parcel",
+  "labNote": "If you have a laboratory test of this parcel's soil, enter what you know from it. It is saved with the parcel and used by the forecast, the rotation planner and the analyses instead of the automatic estimate."
  },
  "guest": {
   "title": "What should I grow on my land?",

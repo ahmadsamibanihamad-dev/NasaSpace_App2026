@@ -149,6 +149,17 @@ def perimeter_m(g: BaseGeometry | dict) -> float:
 
 
 MIN_PARCEL_M2 = 10.0
+# Two parcels may share a border, and hand-drawn neighbours overlap by slivers. A boundary is refused
+# when the shared area exceeds this share of the smaller parcel. Same value as the frontend (geometry.ts).
+MAX_OVERLAP_SHARE = 0.02
+
+
+def overlap_share(a: BaseGeometry, b: BaseGeometry) -> float:
+    """Shared area of two parcels as a share of the smaller one (0 = apart or only touching)."""
+    if not a.intersects(b):
+        return 0.0
+    smaller = min(a.area, b.area)
+    return a.intersection(b).area / smaller if smaller > 0 else 0.0
 
 
 def validate_parcel(gj: dict) -> BaseGeometry:

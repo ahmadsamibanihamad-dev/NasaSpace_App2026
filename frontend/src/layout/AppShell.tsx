@@ -7,6 +7,7 @@ import { OfflineBanner } from '../components/ui/states'
 import { useAuth } from '../auth/AuthContext'
 import { useFarmCtx } from './FarmContext'
 import { usePlots } from '../hooks/queries'
+import { NotificationList, useNotifications } from '../features/notifications/Notifications'
 import { cropName } from '../lib/format'
 
 const NAV: { to: string; key: string; icon: IconName; primary?: boolean }[] = [
@@ -115,6 +116,7 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
   const { user, logout } = useAuth()
   const { farms, farm, setFarmId } = useFarmCtx()
   const plots = usePlots(farm?.id)
+  const notices = useNotifications(farm?.id)
   const [q, setQ] = useState('')
   const title = TITLES.find(([re]) => re.test(loc.pathname))?.[1] ?? 'nav.dashboard'
   const matches =
@@ -132,9 +134,9 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
         <Menu
           label={t('nav.farmSwitcher')}
           trigger={(open, toggle) => (
-            <button onClick={toggle} aria-expanded={open} aria-haspopup="menu" className="h-10 px-4 rounded-pill bg-surface border border-border flex items-center gap-2 text-label hover:bg-surface-muted">
-              <Icon name="farm" size={18} className="text-green-600" />
-              <span className="max-w-24 sm:max-w-40 truncate">{farm?.name}</span>
+            <button onClick={toggle} aria-expanded={open} aria-haspopup="menu" className="h-10 px-3 sm:px-4 rounded-pill bg-surface border border-border flex items-center gap-2 text-label hover:bg-surface-muted min-w-0">
+              <Icon name="farm" size={18} className="text-green-600 shrink-0" />
+              <span className="max-w-16 sm:max-w-40 truncate">{farm?.name}</span>
               <Icon name="chevronDown" size={16} />
             </button>
           )}
@@ -194,11 +196,21 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
         <span className="hidden sm:inline">{t('common.language')}</span>
       </button>
 
-      <span className="hidden sm:block">
-      <Menu label={t('nav.notifications')} trigger={(open, toggle) => <IconButton icon="bell" label={t('nav.notifications')} onClick={toggle} aria-expanded={open} />}>
-        {() => <p className="px-3 py-4 text-label text-text-secondary">{t('nav.noNotifications')}</p>}
+      <Menu
+        label={t('nav.notifications')}
+        trigger={(open, toggle) => (
+          <span className="relative">
+            <IconButton icon="bell" label={notices.unread ? t('nav.notif.unread', { count: notices.unread }) : t('nav.notifications')} onClick={toggle} aria-expanded={open} />
+            {notices.unread > 0 && !open && (
+              <span className="absolute -top-1 -end-1 min-w-5 h-5 px-1 rounded-pill bg-critical text-white text-caption font-semibold flex items-center justify-center pointer-events-none" aria-hidden="true">
+                {notices.unread}
+              </span>
+            )}
+          </span>
+        )}
+      >
+        {(close) => <NotificationList items={notices.items} last={notices.last} off={notices.off} onOpen={notices.markSeen} close={close} />}
       </Menu>
-      </span>
 
       <Menu
         label={t('nav.account')}

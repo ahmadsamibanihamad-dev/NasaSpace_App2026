@@ -25,6 +25,7 @@ from typing import Literal, Optional
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
+from app.api.schemas import SoilLab as SoilLabIn  # the same laboratory-results schema a parcel stores
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.ratelimit import limit
@@ -73,18 +74,6 @@ class HistoryIn(BaseModel):
     year: int = Field(ge=1990, le=2100)
     crop_id: str
 
-
-class SoilLabIn(BaseModel):
-    """Optional laboratory results. A given value replaces the estimate for this request; its source is kept."""
-
-    ph: Optional[float] = Field(default=None, ge=0, le=14)
-    sand: Optional[float] = Field(default=None, ge=0, le=100)
-    silt: Optional[float] = Field(default=None, ge=0, le=100)
-    clay: Optional[float] = Field(default=None, ge=0, le=100)
-    organic_carbon: Optional[float] = Field(default=None, ge=0)
-    nitrogen: Optional[float] = Field(default=None, ge=0)
-    cec: Optional[float] = Field(default=None, ge=0)
-    coarse_fragments: Optional[float] = Field(default=None, ge=0, le=100)
 
 
 class FarmHistoryIn(BaseModel):

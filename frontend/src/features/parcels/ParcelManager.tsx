@@ -18,7 +18,7 @@ import { CropIcon } from '../../components/crops/CropIcon'
 import { useCreatePlot, useDeletePlot, usePlots, useUpdateFarm, useUpdatePlot } from '../../hooks/queries'
 import { ApiError } from '../../lib/api'
 import { nextLabel } from '../../lib/data/repo'
-import { areaM2, boundsOf, formatCoordinates, fromPolygon, insideJordan, parseCoordinates, toPolygon, validateRing, type GeometryIssue, type LatLon } from '../../lib/geometry'
+import { areaM2, boundsOf, formatCoordinates, fromPolygon, insideJordan, overlappingParcel, parseCoordinates, toPolygon, validateRing, type GeometryIssue, type LatLon } from '../../lib/geometry'
 import { area as fmtArea, cropName, meters } from '../../lib/format'
 import { CROP_IDS } from '../../lib/places'
 import { useSettings } from '../../lib/settings'
@@ -81,7 +81,14 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
   const selected = plots.find((p) => p.id === selectedId) ?? null
   const geometryMode = mode === 'draw' || mode === 'coords' || mode === 'reshape'
   const draftPolygon: Polygon | null = geo.closed ? toPolygon(geo.pts) : null
-  const issues: GeometryIssue[] = geo.pts.length ? (geo.closed ? validateRing(geo.pts) : geo.pts.some(([la, lo]) => !insideJordan(la, lo)) ? ['outside_jordan'] : []) : []
+  const ringIssues: GeometryIssue[] = geo.pts.length ? (geo.closed ? validateRing(geo.pts) : geo.pts.some(([la, lo]) => !insideJordan(la, lo)) ? ['outside_jordan'] : []) : []
+  // A sound boundary must also stay clear of the farm's other parcels (the parcel being reshaped is not compared with itself).
+  const overlapLabel = useMemo(
+    () => (draftPolygon && ringIssues.length === 0 ? overlappingParcel(draftPolygon, plots, mode === 'reshape' ? selectedId : null) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [geo, plots, mode, selectedId],
+  )
+  const issues: GeometryIssue[] = overlapLabel ? [...ringIssues, 'overlaps_parcel'] : ringIssues
   const geometryOk = geo.closed && issues.length === 0
   const parsed = useMemo(() => parseCoordinates(coordsText), [coordsText])
 
@@ -146,7 +153,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
   const fail = (e: unknown) => {
     const a = e as ApiError
     const msg =
-      a.code === 'UNSUPPORTED_LOCATION' ? t('parcels.issues.outside_jordan') : a.code === 'DUPLICATE_LABEL' ? t('parcels.duplicateNumber') : a.code === 'NETWORK_ERROR' ? t('states.serverDownBody') : a.code === 'INVALID_GEOMETRY' && Array.isArray(a.details) && a.details[0] ? t(`parcels.issues.${a.details[0]}`, { defaultValue: t('parcels.saveFailed') }) : t('parcels.saveFailed')
+      a.code === 'UNSUPPORTED_LOCATION' ? t('parcels.issues.outside_jordan') : a.code === 'DUPLICATE_LABEL' ? t('parcels.duplicateNumber') : a.code === 'NETWORK_ERROR' ? t('states.serverDownBody') : a.code === 'INVALID_GEOMETRY' && Array.isArray(a.details) && a.details[0] ? t(`parcels.issues.${a.details[0]}`, { defaultValue: t('parcels.saveFailed'), label: a.details[1] ?? '' }) : t('parcels.saveFailed')
     toast(msg, 'error')
   }
   const saveNew = async () => {
@@ -269,7 +276,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
       <Banner icon="alert" tone="warning">
         <ul className="list-disc ps-4">
           {issues.map((i) => (
-            <li key={i}>{t(`parcels.issues.${i}`)}</li>
+            <li key={i}>{t(`parcels.issues.${i}`, { label: overlapLabel ?? '' })}</li>
           ))}
         </ul>
       </Banner>

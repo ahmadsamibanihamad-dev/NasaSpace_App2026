@@ -160,3 +160,65 @@ def test_deleting_a_farm_removes_its_parcels_history_and_analyses(client):
     assert client.get(f"{API}/farms", headers=h).json() == []
     assert client.get(f"{API}/analyses/{a['analysis_id']}", headers=h).status_code == 404
     assert client.get(f"{API}/plots/{plots[1]['id']}", headers=h).status_code == 404
+
+
+def test_overlapping_parcels_are_refused_but_neighbours_are_not(client):
+    h = auth_headers(client)
+    farm = make_farm(client, h)
+    first = make_plot(client, h, farm["id"], "1")  # square around lon 35.8489, half-width 0.0005
+    lon = 35.8469 + 0.002
+    # shares a whole border with parcel 1: allowed
+    r = client.post(f"{API}/farms/{farm['id']}/plots", json={"label": "2", "name": "Neighbour", "polygon": square(lon=lon + 0.001)}, headers=h)
+    assert r.status_code == 201, r.text
+    # covers half of parcel 1: refused, with the number of the parcel it overlaps
+    r = client.post(f"{API}/farms/{farm['id']}/plots", json={"label": "3", "name": "Overlap", "polygon": square(lon=lon - 0.0005)}, headers=h)
+    assert r.status_code == 422 and r.json()["error"]["code"] == "INVALID_GEOMETRY" and r.json()["error"]["details"] == ["overlaps_parcel", "1"]
+    # a sliver (1 % of the parcel) is tolerated
+    r = client.post(f"{API}/farms/{farm['id']}/plots", json={"label": "4", "name": "Sliver", "polygon": square(lon=lon - 0.00099)}, headers=h)
+    assert r.status_code == 201, r.text
+    # moving a boundary onto another parcel is refused; saving a parcel's own boundary again is fine
+    r = client.patch(f"{API}/plots/{first['id']}", json={"polygon": square(lon=lon + 0.0008)}, headers=h)
+    assert r.status_code == 422 and r.json()["error"]["details"][0] == "overlaps_parcel"
+    assert client.patch(f"{API}/plots/{first['id']}", json={"polygon": first["polygon"]}, headers=h).status_code == 200
+    # another farm's parcels do not count
+    other = make_farm(client, h, "Other farm")
+    assert client.post(f"{API}/farms/{other['id']}/plots", json={"label": "1", "name": "Same place", "polygon": first["polygon"]}, headers=h).status_code == 201
+
+
+def test_laboratory_soil_test_is_stored_with_the_parcel(client):
+    h = auth_headers(client)
+    farm = make_farm(client, h)
+    p = make_plot(client, h, farm["id"], "1", soil_lab={"ph": 6.9, "sand": 70, "silt": 20, "clay": 10, "cec": 14.5})
+    assert p["soil_lab"] == {"ph": 6.9, "sand": 70.0, "silt": 20.0, "clay": 10.0, "cec": 14.5}
+    assert make_plot(client, h, farm["id"], "2")["soil_lab"] is None
+    # sand, silt and clay are one measurement; out-of-range values are refused
+    for bad in ({"sand": 70}, {"ph": 15}, {"clay": 120, "sand": 1, "silt": 1}):
+        r = client.patch(f"{API}/plots/{p['id']}", json={"soil_lab": bad}, headers=h)
+        assert r.status_code == 422 and r.json()["error"]["code"] == "VALIDATION_ERROR", bad
+    r = client.patch(f"{API}/plots/{p['id']}", json={"soil_lab": {"ph": 7.4}}, headers=h)
+    assert r.status_code == 200 and r.json()["soil_lab"] == {"ph": 7.4}
+    # other edits leave it alone; null clears it
+    assert client.patch(f"{API}/plots/{p['id']}", json={"name": "Renamed"}, headers=h).json()["soil_lab"] == {"ph": 7.4}
+    assert client.patch(f"{API}/plots/{p['id']}", json={"soil_lab": None}, headers=h).json()["soil_lab"] is None
+
+
+def test_database_made_by_an_earlier_version_gets_the_new_column():
+    from sqlalchemy import inspect, text
+    from sqlmodel import create_engine
+
+    from app.core import db
+
+    engine = create_engine("sqlite://")
+    with engine.begin() as conn:
+        conn.execute(text("CREATE TABLE plot (id VARCHAR PRIMARY KEY, label VARCHAR)"))
+        conn.execute(text("INSERT INTO plot VALUES ('a', '1')"))
+    previous = db._engine
+    db.set_engine(engine)
+    try:
+        db._add_missing_columns()
+        db._add_missing_columns()  # running it again changes nothing
+        assert "soil_lab" in {c["name"] for c in inspect(engine).get_columns("plot")}
+        with engine.begin() as conn:
+            assert conn.execute(text("SELECT id, label, soil_lab FROM plot")).all() == [("a", "1", None)]
+    finally:
+        db.set_engine(previous)

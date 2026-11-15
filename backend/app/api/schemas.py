@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 IrrigationMethod = Literal["drip", "sprinkler", "surface", "none"]
 SoilType = Literal["clay", "loam", "sandy", "silty", "calcareous", "unknown"]
@@ -99,6 +99,26 @@ class FarmOut(BaseModel):
     created_at: datetime
 
 
+class SoilLab(BaseModel):
+    """Laboratory soil test results. Every value is optional; a given value replaces the estimated one and keeps its source."""
+
+    ph: Optional[float] = Field(default=None, ge=0, le=14)
+    sand: Optional[float] = Field(default=None, ge=0, le=100)
+    silt: Optional[float] = Field(default=None, ge=0, le=100)
+    clay: Optional[float] = Field(default=None, ge=0, le=100)
+    organic_carbon: Optional[float] = Field(default=None, ge=0)
+    nitrogen: Optional[float] = Field(default=None, ge=0)
+    cec: Optional[float] = Field(default=None, ge=0)
+    coarse_fragments: Optional[float] = Field(default=None, ge=0, le=100)
+
+    @model_validator(mode="after")
+    def texture_is_one_measurement(self):
+        given = [v is not None for v in (self.sand, self.silt, self.clay)]
+        if any(given) and not all(given):
+            raise ValueError("sand, silt and clay must be given together")
+        return self
+
+
 class PlotIn(BaseModel):
     model_config = ConfigDict(extra="ignore")
     label: str = Field(min_length=1, max_length=12)
@@ -117,6 +137,7 @@ class PlotIn(BaseModel):
     cultivation_type: CultivationType = "open_field"
     soil_type: Optional[SoilType] = None
     soil_ph: Optional[float] = Field(default=None, ge=3.0, le=10.5)
+    soil_lab: Optional[SoilLab] = None
 
 
 class PlotUpdateIn(BaseModel):
@@ -137,6 +158,7 @@ class PlotUpdateIn(BaseModel):
     cultivation_type: Optional[CultivationType] = None
     soil_type: Optional[SoilType] = None
     soil_ph: Optional[float] = Field(default=None, ge=3.0, le=10.5)
+    soil_lab: Optional[SoilLab] = None  # null clears the stored test
 
 
 class PlotOut(BaseModel):
@@ -160,6 +182,7 @@ class PlotOut(BaseModel):
     cultivation_type: str
     soil_type: Optional[str]
     soil_ph: Optional[float]
+    soil_lab: Optional[dict] = None
     created_at: datetime
     updated_at: datetime
     latest_score: Optional[float] = None

@@ -9,6 +9,7 @@ import { useSettings } from '../../lib/settings'
 import type { PlotDraft, PlotStatus } from '../../lib/types'
 import { PARCEL_COLORS } from './io'
 import { SoilInfo } from '../outlook/SoilInfo'
+import { LabSoil } from '../outlook/FarmHistory'
 
 const METHODS = ['drip', 'sprinkler', 'surface'] as const
 export const STATUSES: PlotStatus[] = ['planted', 'fallow', 'preparing', 'unused']
@@ -132,6 +133,7 @@ export function ParcelForm({ value, onChange, errors, farmName }: { value: PlotD
         </Field>
       </div>
       {soilAt && <SoilInfo lat={soilAt.lat} lon={soilAt.lon} />}
+      <LabSoil value={value.soil_lab ?? {}} onChange={(lab) => onChange({ soil_lab: Object.keys(lab).length ? lab : null })} idPrefix="parcel" note={t('parcels.labNote')} narrow />
       <Field label={t('parcels.color')}>
         <ColorPicker value={value.color} onChange={(color) => onChange({ color })} />
       </Field>

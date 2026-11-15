@@ -216,3 +216,36 @@ def test_model_registry_reads_manifests(tmp_path):
     entries, problems = load_registry(tmp_path)
     assert [e.model_id for e in entries] == ["t2m-7d"] and entries[0].feature_names == ["a", "b"]
     assert len(problems) == 1 and "broken.json" in problems[0]
+
+
+def test_laboratory_soil_test_reaches_the_analyses(client):
+    h = auth_headers(client)
+    farm, plots = demo(client, h)
+    row = lambda a: next(r for r in a["result"]["plots"][0]["requirements"] if r["key"] == "soil_ph")  # noqa: E731
+    before = run(client, h, analysis_type="crop_suitability", farm_id=farm["id"], plot_ids=[plots[0]["id"]], crop_id="wheat")
+    assert row(before)["status"] == "unknown" and row(before)["observed"] == "—"
+    assert any("soil test" in x["en"] for x in before["result"]["plots"][0]["recommended_actions"])
+    r = client.patch(f"{API}/plots/{plots[0]['id']}", json={"soil_lab": {"ph": 6.8, "sand": 40, "silt": 40, "clay": 20}}, headers=h)
+    assert r.status_code == 200
+    after = run(client, h, analysis_type="crop_suitability", farm_id=farm["id"], plot_ids=[plots[0]["id"]], crop_id="wheat")
+    assert row(after)["observed"] == "6.8" and row(after)["observed_source"]["en"] == "laboratory test" and row(before).get("observed_source") is None
+    assert row(after)["status"] in ("match", "partial", "mismatch")
+    assert not any("soil test" in x["en"] for x in after["result"]["plots"][0]["recommended_actions"])
+    # the score itself has no soil factor, so it does not move
+    assert after["result"]["plots"][0]["suitability_score"] == before["result"]["plots"][0]["suitability_score"]
+    rot = run(client, h, analysis_type="rotation", farm_id=farm["id"], plot_ids=[plots[0]["id"]])
+    import json
+
+    assert "information_gaps" in json.dumps(rot["result"]) and "No soil test" not in json.dumps(rot["result"])
+    other = run(client, h, analysis_type="rotation", farm_id=farm["id"], plot_ids=[plots[1]["id"]])
+    assert "No soil test" in json.dumps(other["result"])  # a parcel with no laboratory test still says so
+
+
+def test_data_status_names_the_forecast_dataset(client):
+    d = client.get(f"{API}/data/status").json()
+    assert d["not_integrated"] == []
+    f = d["forecast_dataset"]
+    assert {"NASA POWER", "NASA SMAP", "NASA GPM IMERG", "ISRIC SoilGrids", "Copernicus DEM GLO-30"} == set(f["sources"])
+    assert f["kind"] == "prepared historical dataset" and f["available"] in (True, False)
+    if f["available"]:
+        assert f["default_forecast_origin"] == "2026-05-01" and f["rule_version"] == "mvp-2"

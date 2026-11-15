@@ -2,6 +2,16 @@
 
 Last updated 2026-11-15.
 
+## Four gaps closed (2026-11-15, user request)
+
+Found while writing the technical documentation; the user asked for all four to be fixed.
+
+- **Parcel overlap**: a boundary that overlaps another parcel of the same farm by more than 2 % of the smaller one is refused, in the frontend (`overlappingParcel`, `lib/geometry.ts`) and in the backend (`overlap_share`, `services/geo.py`, error detail `overlaps_parcel` + the parcel number). Shared borders are allowed. Existing parcels are untouched; the check runs only when a boundary is created or changed.
+- **Laboratory soil test per parcel**: new JSON column `plot.soil_lab`, added in place at start-up (`core/db.py`, `ADDED_COLUMNS`; `create_all` never alters a table). The parcel form has the shared `LabSoil` form; the forecast page and the rotation planner start from the parcel's stored test. In the six analyses the test supplies the pH of the requirements table (`observed_source` = laboratory test) and removes the "run a soil test" advice; the score is unchanged because it has no soil-chemistry factor.
+- **Notifications**: the header bell lists finished or failed analyses and parcels with a moderate or high top risk (`features/notifications/`). Built from data the backend already returns; the two Settings switches filter it; "new" is counted since the menu was last opened (stored per browser). The bell is now shown on phones too.
+- **`GET /data/status`**: no longer says SMAP, IMERG, SoilGrids and the DEM are "not integrated"; it describes the forecast dataset (sources, default origin, date range).
+- Tests: backend 103, frontend 13. Checked in the browser on the local test account.
+
 ## Renamed to AgriVision (2026-11-15, user decision)
 
 The app is now called AgriVision in both languages, with the logo the user supplied.

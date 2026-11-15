@@ -60,7 +60,28 @@ export function centroidOf(poly: Polygon): { lat: number; lon: number } {
   return { lat: c[1], lon: c[0] }
 }
 
-export type GeometryIssue = 'too_few_points' | 'invalid_number' | 'out_of_range' | 'duplicate_points' | 'self_intersecting' | 'too_small' | 'outside_jordan'
+export type GeometryIssue = 'too_few_points' | 'invalid_number' | 'out_of_range' | 'duplicate_points' | 'self_intersecting' | 'too_small' | 'outside_jordan' | 'overlaps_parcel'
+
+// Two parcels may share a border, and hand-drawn neighbours overlap by slivers. A boundary is refused when the
+// shared area exceeds this share of the smaller parcel. Same value as the backend (services/geo.py).
+export const MAX_OVERLAP_SHARE = 0.02
+
+/** The number of the first parcel this boundary overlaps beyond the tolerance, or null. The backend repeats the check. */
+export function overlappingParcel(poly: Polygon, others: { id: string; label: string; polygon: Polygon }[], selfId?: string | null): string | null {
+  const a = turf.polygon(poly.coordinates)
+  const areaA = turf.area(a)
+  for (const o of others) {
+    if (o.id === selfId) continue
+    try {
+      const b = turf.polygon(o.polygon.coordinates)
+      const shared = turf.intersect(turf.featureCollection([a, b]))
+      if (shared && turf.area(shared) / Math.min(areaA, turf.area(b)) > MAX_OVERLAP_SHARE) return o.label
+    } catch {
+      /* a shape turf cannot intersect is left to the backend */
+    }
+  }
+  return null
+}
 
 /** Returns every reason a ring cannot be saved; empty array = valid. */
 export function validateRing(pts: LatLon[]): GeometryIssue[] {

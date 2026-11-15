@@ -146,7 +146,10 @@ export function RequirementsTable({ rows }: { rows: RequirementMatch[] }) {
             <tr key={r.key} className="border-t border-border align-top">
               <td className="py-2 pe-3">{loc(r.label)}</td>
               <td className="py-2 pe-3 tabular-nums" dir="ltr" style={{ textAlign: 'start' }}>{r.required}</td>
-              <td className="py-2 pe-3 tabular-nums" dir="ltr" style={{ textAlign: 'start' }}>{r.observed}</td>
+              <td className="py-2 pe-3">
+                <span className="tabular-nums" dir="ltr">{r.observed}</span>
+                {r.observed_source && <span className="block text-caption text-green-700">{loc(r.observed_source)}</span>}
+              </td>
               <td className="py-2 pe-3">
                 <Pill tone={tone[r.status]} icon={icon[r.status]}>{t(`results.match.${r.status}`)}</Pill>
               </td>

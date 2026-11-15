@@ -44,6 +44,7 @@ class PlotCtx:
     irrigation_method: Optional[str] = None
     soil_ph: Optional[float] = None
     soil_type: Optional[str] = None
+    soil_ph_from_lab: bool = False
 
     @property
     def key(self) -> str:
@@ -453,6 +454,7 @@ def build_requirements(e: Evaluation, plot: PlotCtx) -> list[dict]:
          "status": "match", "source": crop["season_length"]["source"], "needs_review": bool(crop["season_length"].get("needs_review"))},
         {"key": "soil_ph", "label": {"ar": "حموضة التربة pH", "en": "Soil pH"},
          "required": f"{n(P[1])}–{n(P[2])} ({n(P[0])}–{n(P[3])})", "observed": "—" if plot.soil_ph is None else n(plot.soil_ph),
+         "observed_source": {"ar": "فحص مخبري", "en": "laboratory test"} if plot.soil_ph_from_lab else None,
          "status": "unknown" if plot.soil_ph is None else within(plot.soil_ph, *P),
          "source": crop["ph"]["opt_min"]["source"], "needs_review": False},
         {"key": "root_depth", "label": {"ar": "عمق الجذور", "en": "Rooting depth"},

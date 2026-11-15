@@ -35,6 +35,23 @@ def init_db() -> None:
     from app import models  # noqa: F401  (register tables)
 
     SQLModel.metadata.create_all(get_engine())
+    _add_missing_columns()
+
+
+# Columns added after the first release. `create_all` creates missing tables but never alters an
+# existing one, so a database made by an earlier version gets these added in place (no data is touched).
+ADDED_COLUMNS = [("plot", "soil_lab", "JSON")]
+
+
+def _add_missing_columns() -> None:
+    from sqlalchemy import inspect, text
+
+    engine = get_engine()
+    inspector = inspect(engine)
+    with engine.begin() as conn:
+        for table, column, sql_type in ADDED_COLUMNS:
+            if column not in {c["name"] for c in inspector.get_columns(table)}:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {column} {sql_type}"))
 
 
 def get_session() -> Iterator[Session]:

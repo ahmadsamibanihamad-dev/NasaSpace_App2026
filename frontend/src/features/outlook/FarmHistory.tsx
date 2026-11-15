@@ -37,13 +37,13 @@ export interface FarmHistoryValue {
   lab: LabValues
 }
 
-export const emptyHistory = (irrigation: boolean | null, previous?: string | null): FarmHistoryValue => ({
+export const emptyHistory = (irrigation: boolean | null, previous?: string | null, lab?: LabValues | null): FarmHistoryValue => ({
   previous_crop: previous ?? '',
   previous_crop_year: '',
   earlier: [],
   irrigation: irrigation === null ? 'unknown' : irrigation ? 'yes' : 'no',
   cultivation: 'open_field',
-  lab: {},
+  lab: lab ?? {}, // the parcel's stored laboratory test, when it has one
 })
 
 /** Parse the typed laboratory values. Returns the numbers, or the reason they cannot be used. */
@@ -85,7 +85,7 @@ export function usePreviousCrops() {
   return q.data?.previous_crops ?? []
 }
 
-function LabSoil({ value, onChange, idPrefix }: { value: LabValues; onChange: (v: LabValues) => void; idPrefix: string }) {
+export function LabSoil({ value, onChange, idPrefix, note, narrow }: { value: LabValues; onChange: (v: LabValues) => void; idPrefix: string; note?: string; narrow?: boolean }) {
   const { t } = useTranslation()
   const applied = Object.keys(value).length
   const [open, setOpen] = useState(applied > 0)
@@ -125,8 +125,8 @@ function LabSoil({ value, onChange, idPrefix }: { value: LabValues; onChange: (v
       </div>
       {open && (
         <>
-          <p className="text-caption text-text-secondary">{t('history.lab.body')}</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <p className="text-caption text-text-secondary">{note ?? t('history.lab.body')}</p>
+          <div className={narrow ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 sm:grid-cols-4 gap-3'}>
             {LAB_FIELDS.map((f) => (
               <Field key={f.key} label={`${t(`soilInfo.props.${f.key}`)}${f.unit ? ` (${f.unit})` : ''}`} htmlFor={`${idPrefix}-lab-${f.key}`}>
                 <Input

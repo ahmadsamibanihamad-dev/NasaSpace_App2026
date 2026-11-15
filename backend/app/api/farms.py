@@ -9,7 +9,7 @@ from app.core.db import get_session
 from app.core.errors import AppError
 from app.models import Analysis, CropHistory, Farm, Plot, User, utcnow, RotationPlan
 from app.services.crops import CROP_IDS as ANALYSIS_CROP_IDS
-from app.services.geo import geodesic_area_m2, governorate_for, governorate_info, perimeter_m, require_in_jordan, to_geojson, validate_parcel
+from app.services.geo import MAX_OVERLAP_SHARE, geodesic_area_m2, governorate_for, governorate_info, overlap_share, perimeter_m, require_in_jordan, to_geojson, validate_parcel
 
 router = APIRouter(tags=["farms"])
 
@@ -85,14 +85,26 @@ def _check_crop(cid: str | None) -> None:
         raise AppError(422, "UNSUPPORTED_CROP", f"Unsupported crop '{cid}'", {"supported": sorted(CROP_IDS)})
 
 
+def _lab(lab) -> dict | None:
+    """Laboratory results as stored: only the values that were given; None when there are none."""
+    values = lab.model_dump(exclude_none=True) if lab else {}
+    return values or None
+
+
 def _check_label(session: Session, farm_id: str, label: str, self_id: str | None = None) -> None:
     clash = session.exec(select(Plot).where(Plot.farm_id == farm_id, Plot.label == label)).first()
     if clash and clash.id != self_id:
         raise AppError(409, "DUPLICATE_LABEL", "Parcel number already used in this farm")
 
 
-def _apply_polygon(p: Plot, polygon: dict) -> None:
+def _apply_polygon(session: Session, p: Plot, polygon: dict) -> None:
+    """Validate a boundary, refuse it when it overlaps another parcel of the farm, then store it with its measurements."""
+    from shapely.geometry import shape
+
     g = validate_parcel(polygon)
+    for other in session.exec(select(Plot).where(Plot.farm_id == p.farm_id)).all():
+        if other.id != p.id and other.polygon and overlap_share(g, shape(other.polygon)) > MAX_OVERLAP_SHARE:
+            raise AppError(422, "INVALID_GEOMETRY", f"The boundary overlaps parcel {other.label}", ["overlaps_parcel", other.label])
     p.polygon = to_geojson(g)
     p.area_m2 = geodesic_area_m2(g)
     p.perimeter_m = perimeter_m(g)
@@ -221,10 +233,11 @@ def create_plot(farm_id: str, body: PlotIn, user: User = Depends(current_user), 
     label = body.label.strip()
     _check_label(session, f.id, label)
     data = body.model_dump(exclude={"polygon", "label", "name"})
+    data["soil_lab"] = _lab(body.soil_lab)
     if not data["irrigation_available"]:
         data["irrigation_method"] = "none"
     p = Plot(farm_id=f.id, label=label, name=body.name.strip(), polygon={}, area_m2=0, **data)
-    _apply_polygon(p, body.polygon)
+    _apply_polygon(session, p, body.polygon)
     session.add(p)
     session.flush()
     recenter_farm(session, f)
@@ -250,6 +263,8 @@ def update_plot(plot_id: str, body: PlotUpdateIn, user: User = Depends(current_u
         data["label"] = data["label"].strip()
         _check_label(session, p.farm_id, data["label"], p.id)
     polygon = data.pop("polygon", None)
+    if "soil_lab" in data:
+        data["soil_lab"] = _lab(body.soil_lab)
     required = {"label", "name", "color", "status", "irrigation_available", "cultivation_type", "region", "notes", "owner_name", "owner_phone"}
     for k, val in data.items():
         if val is None and k in required:
@@ -258,7 +273,7 @@ def update_plot(plot_id: str, body: PlotUpdateIn, user: User = Depends(current_u
     if not p.irrigation_available:
         p.irrigation_method = "none"
     if polygon is not None:
-        _apply_polygon(p, polygon)
+        _apply_polygon(session, p, polygon)
     p.updated_at = utcnow()
     session.add(p)
     if polygon is not None:

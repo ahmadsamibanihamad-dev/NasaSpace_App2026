@@ -99,7 +99,16 @@ def ranked_crops(sc: Scanner, ctx: PlotCtx, detailed: bool = True) -> list[dict]
 
 
 def plot_ctx(p) -> PlotCtx:
-    return PlotCtx(bool(p.irrigation_available), p.irrigation_method, p.soil_ph, p.soil_type)
+    """What the analyses know about a parcel. A laboratory soil test stored with the parcel supplies the pH and
+    the texture class; without one both stay unknown (nothing is estimated here)."""
+    lab = getattr(p, "soil_lab", None) or {}
+    ph = lab.get("ph", p.soil_ph)
+    texture = p.soil_type
+    if all(lab.get(k) is not None for k in ("sand", "silt", "clay")):
+        from nasa_final.AI.environment_service import texture_class  # USDA texture class; pure function
+
+        texture = texture_class(lab["sand"], lab["silt"], lab["clay"]) or texture
+    return PlotCtx(bool(p.irrigation_available), p.irrigation_method, ph, texture, ph is not None and "ph" in lab)
 
 
 def suitability_for(sc: Scanner, p, crop: dict, anomaly: Optional[float], planting_date: Optional[str] = None) -> dict:

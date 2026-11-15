@@ -22,7 +22,7 @@ python -m venv .venv
 ```
 
 - توثيق تفاعلي لكل الواجهات: <http://localhost:8765/api/v1/docs>
-- الاختبارات: `.venv\Scripts\python.exe -m pytest -q` (98 اختباراً)
+- الاختبارات: `.venv\Scripts\python.exe -m pytest -q` (103 اختبارات)
 - قاعدة البيانات ملف `backend/ardna.db` يُنشأ تلقائياً.
 
 ## الإعدادات
