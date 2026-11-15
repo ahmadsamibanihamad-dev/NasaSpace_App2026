@@ -208,15 +208,18 @@ def soil(lat: float = Query(ge=-90, le=90), lon: float = Query(ge=-180, le=180))
     }
 
 
-@router.post("", dependencies=[Depends(limit("guest", _s.rate_limit_guest))])
-def outlook(body: OutlookIn):
-    """Forecast for the 30 and 90 days from a planting date at a location in Jordan, with three ranked crops per period."""
-    require_in_jordan(body.lat, body.lon)
+def forecast_context(lat: float, lon: float, planting_date: Optional[date]) -> dict:
+    """The team's 30- and 90-day forecasts for a location and planting date, with grid, soil and data mode.
+
+    Shared by the outlook and by the crop rotation planner so that both use the same location,
+    the same forecast origin and the same cached models.
+    """
+    require_in_jordan(lat, lon)
     api = _package()
-    demo_row, dist = _nearest_grid(api, body.lat, body.lon)
+    demo_row, dist = _nearest_grid(api, lat, lon)
     grid_id = str(demo_row.GRID_ID.iloc[0])
     dates = _dates(api)
-    planting = body.planting_date or dates["default"]
+    planting = planting_date or dates["default"]
     if not (dates["min"] <= planting <= dates["max"]):
         raise AppError(
             422,
@@ -225,7 +228,6 @@ def outlook(body: OutlookIn):
             {"min": str(dates["min"]), "max": str(dates["max"]), "default": str(dates["default"])},
         )
     origin = planting - timedelta(days=1)  # the last day with observations; the period starts the next day
-
     try:
         if origin == dates["demo_origin"]:
             row, mode = demo_row, "historical_demo"
@@ -234,29 +236,56 @@ def outlook(body: OutlookIn):
         from nasa_final.AI.forecasting.mvp_inference import predict_entry
 
         registry = _registry()
-        soil_info = _soil(grid_id)
-        ph = next((x["value"] for x in (soil_info or {}).get("properties", []) if x["key"] == "ph"), None)
-
-        # Same steps as the team's demo endpoint: forecast the four variables, then rank the crops.
-        periods, warnings = [], []
+        values, meta = {}, {}
         for days in (30, 90):
-            values, forecast = {}, []
+            values[days], meta[days] = {}, []
             for key, (variable, agg, unit) in VARIABLES.items():
                 target = f"{variable}_target_{agg}_{days}d"
                 entry = registry[target]
-                values[key] = float(predict_entry(row, target, entry, FORECAST_DIR)[0])
-                forecast.append(
+                values[days][key] = float(predict_entry(row, target, entry, FORECAST_DIR)[0])
+                meta[days].append(
                     {
                         "key": key,
                         "variable": variable,
-                        "value": values[key],
+                        "value": values[days][key],
                         "unit": unit,
                         "method": entry["method"],  # baseline | direct_xgb | residual_xgb
                         "baseline": entry.get("baseline"),
                         "validation_mae": entry.get("validation_mae"),
                     }
                 )
-            result = api.recommend(days, **values, irrigation_available=body.irrigation_available, soil_ph=ph)
+    except AppError:
+        raise
+    except (FileNotFoundError, ImportError, KeyError, ValueError) as e:
+        log.warning("Forecast failed: %r", e)
+        raise AppError(503, "MODEL_UNAVAILABLE", "The forecast package is unavailable or incompatible.") from e
+    soil_info = _soil(grid_id)
+    return {
+        "api": api,
+        "mode": mode,
+        "planting": planting,
+        "origin": origin,
+        "dates": dates,
+        "values": values,
+        "meta": meta,
+        "soil": soil_info,
+        "soil_ph": next((x["value"] for x in (soil_info or {}).get("properties", []) if x["key"] == "ph"), None),
+        "location": {"lat": lat, "lon": lon, "governorate": governorate_for(lat, lon)},
+        "grid": {"id": grid_id, "lat": float(demo_row.LATITUDE.iloc[0]), "lon": float(demo_row.LONGITUDE.iloc[0]), "distance_km": round(dist, 2)},
+    }
+
+
+@router.post("", dependencies=[Depends(limit("guest", _s.rate_limit_guest))])
+def outlook(body: OutlookIn):
+    """Forecast for the 30 and 90 days from a planting date at a location in Jordan, with three ranked crops per period."""
+    ctx = forecast_context(body.lat, body.lon, body.planting_date)
+    api, planting, origin, dates = ctx["api"], ctx["planting"], ctx["origin"], ctx["dates"]
+    try:
+        # Same steps as the team's demo endpoint: forecast the four variables, then rank the crops.
+        periods, warnings = [], []
+        for days in (30, 90):
+            values, forecast = ctx["values"][days], ctx["meta"][days]
+            result = api.recommend(days, **values, irrigation_available=body.irrigation_available, soil_ph=ctx["soil_ph"])
             periods.append(
                 {
                     "horizon_days": days,
@@ -290,17 +319,17 @@ def outlook(body: OutlookIn):
         raise AppError(503, "MODEL_UNAVAILABLE", "The forecast package is unavailable or incompatible.") from e
 
     return {
-        "data_mode": mode,
+        "data_mode": ctx["mode"],
         "planting_date": str(planting),
         "forecast_origin": str(origin),
         "is_default_date": planting == dates["default"],
         "planting_date_min": str(dates["min"]),
         "planting_date_max": str(dates["max"]),
         "saved": False,
-        "location": {"lat": body.lat, "lon": body.lon, "governorate": governorate_for(body.lat, body.lon)},
-        "grid": {"id": grid_id, "lat": float(demo_row.LATITUDE.iloc[0]), "lon": float(demo_row.LONGITUDE.iloc[0]), "distance_km": round(dist, 2)},
+        "location": ctx["location"],
+        "grid": ctx["grid"],
         "irrigation_available": body.irrigation_available,
-        "soil": soil_info,
+        "soil": ctx["soil"],
         "rule_version": api.CATALOG["version"],
         "periods": periods,
         "warnings": [_both(w) for w in warnings],

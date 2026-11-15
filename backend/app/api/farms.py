@@ -7,7 +7,7 @@ from app.api.deps import current_user, owned_farm, owned_plot
 from app.api.schemas import FarmIn, FarmOut, FarmUpdateIn, HistoryItem, HistoryReplaceIn, PlotIn, PlotOut, PlotUpdateIn
 from app.core.db import get_session
 from app.core.errors import AppError
-from app.models import Analysis, CropHistory, Farm, Plot, User, utcnow
+from app.models import Analysis, CropHistory, Farm, Plot, User, utcnow, RotationPlan
 from app.services.crops import CROP_IDS
 from app.services.geo import geodesic_area_m2, governorate_for, governorate_info, perimeter_m, require_in_jordan, to_geojson, validate_parcel
 
@@ -170,6 +170,8 @@ def delete_farm(farm_id: str, user: User = Depends(current_user), session: Sessi
     plots = session.exec(select(Plot).where(Plot.farm_id == f.id)).all()
     for a in session.exec(select(Analysis).where(Analysis.farm_id == f.id)).all():
         session.delete(a)
+    for rp in session.exec(select(RotationPlan).where(RotationPlan.farm_id == f.id)).all():
+        session.delete(rp)
     for p in plots:
         for h in session.exec(select(CropHistory).where(CropHistory.plot_id == p.id)).all():
             session.delete(h)

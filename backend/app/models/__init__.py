@@ -117,3 +117,17 @@ class Forecast(SQLModel, table=True):
     response: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
     data_mode: str = "mock"
     created_at: datetime = Field(default_factory=utcnow, index=True)
+
+
+class RotationPlan(SQLModel, table=True):
+    """A crop rotation plan a signed-in user chose to keep. Guests never get a row here."""
+
+    id: str = Field(default_factory=new_id, primary_key=True)
+    user_id: str = Field(foreign_key="user.id", index=True)
+    farm_id: str = Field(foreign_key="farm.id", index=True)
+    plot_id: Optional[str] = Field(default=None, index=True)  # not a foreign key: the plan outlives the parcel
+    plot_label: str = ""
+    request: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    plan: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    summary: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    created_at: datetime = Field(default_factory=utcnow, index=True)

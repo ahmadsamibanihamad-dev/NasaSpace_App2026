@@ -63,7 +63,7 @@
   "dashboard": "Dashboard",
   "myFarm": "My Farm",
   "newAnalysis": "New Analysis",
-  "rotation": "Crop Rotation",
+  "rotation": "Rotation Planner",
   "analytics": "Analytics",
   "risks": "Risks",
   "reports": "Reports",
@@ -552,7 +552,13 @@
   "olive": "Olive",
   "date_palm": "Date palm",
   "citrus": "Citrus",
-  "fallow": "Fallow"
+  "fallow": "Fallow",
+  "radish": "Early radish",
+  "arugula": "Baby arugula",
+  "spinach": "Baby spinach",
+  "carrot": "Carrot",
+  "beet": "Beetroot",
+  "bush_bean": "Bush green bean"
  },
  "months": [
   "January",
@@ -773,5 +779,70 @@
    "organic_carbon": "Organic carbon",
    "nitrogen": "Nitrogen"
   }
+ },
+ "planner": {
+  "title": "Crop Rotation Planner",
+  "subtitle": "A preliminary sequential planting plan for ninety days, built on the team's forecasts and recommendation system.",
+  "inputs": "Plan details",
+  "h90": "90-day rotation",
+  "h30": "Single crop, 30 days",
+  "previous": "Previous crop",
+  "previousUnknown": "Unknown",
+  "cultivation": "Cultivation type",
+  "openField": "Open field",
+  "greenhouse": "Greenhouse",
+  "irrigation": "Irrigation",
+  "irr": {
+   "yes": "Available",
+   "no": "Not available",
+   "unknown": "Unknown"
+  },
+  "save": "Save plan",
+  "saved": "Plan saved.",
+  "forecastTitle": "Expected conditions for each phase",
+  "forecastBody": "Temperature, humidity and soil moisture are phase averages; rainfall is the phase total.",
+  "phase1": "Phase 1 · days 1–30",
+  "phase2": "Phase 2 · days 31–90 (derived)",
+  "derivedNote": "Second-phase values are derived arithmetically from the 30- and 90-day forecasts; they are not an independent forecast.",
+  "derivedBad": "The 30- and 90-day forecasts are inconsistent for this location and date, so second-phase values are not relied on.",
+  "timeline": "Rotation timeline",
+  "day": "Day {{n}}",
+  "firstCrop": "First crop",
+  "secondCrop": "Second crop",
+  "noSecond": "No second crop recommended",
+  "best": "Recommended rotation",
+  "alternative": "Alternative {{n}}",
+  "rotationScore": "Rotation score",
+  "suitability": "Suitability",
+  "planting": "Planting",
+  "harvest": "Expected harvest",
+  "growth": "Growth takes {{a}}–{{b}} days",
+  "conditions": "Conditions and risks",
+  "compare": "Compare rotation plans",
+  "totalDays": "Approximate total duration {{a}}–{{b}} days",
+  "c": {
+   "first": "First crop suitability",
+   "second": "Second crop suitability",
+   "family": "Botanical family diversity",
+   "duration": "Duration compatibility"
+  },
+  "optionStatus": {
+   "suitable": "Suitable",
+   "conditionally_suitable": "Suitable with conditions"
+  },
+  "show": "Show this plan",
+  "shown": "Shown now",
+  "whyTitle": "Why this rotation",
+  "weightsNote": "Rotation score = 40% first crop suitability + 40% second crop suitability + 15% family diversity + 5% duration compatibility. Heuristic weights, not scientifically validated values.",
+  "warningsTitle": "Data quality and warnings",
+  "noPlan": "No suitable plan right now",
+  "partial": "Partial plan: a first crop only",
+  "families": {
+   "Brassicaceae": "Mustard family",
+   "Amaranthaceae": "Amaranth family",
+   "Apiaceae": "Carrot family",
+   "Fabaceae": "Legume family"
+  },
+  "tab": "Rotation planner"
  }
 }

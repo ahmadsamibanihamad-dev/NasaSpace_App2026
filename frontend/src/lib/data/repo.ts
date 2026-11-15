@@ -195,3 +195,98 @@ export const getOutlook = (input: { lat: number; lon: number; irrigation_availab
 /** Soil properties for a location, from the AI team's static soil table. `soil` is null where the table has no value. */
 export const getSoil = (lat: number, lon: number) =>
   api<{ grid: { id: string; lat: number; lon: number; distance_km: number }; soil: SoilInfoData | null }>(`/outlook/soil?${q({ lat, lon })}`)
+
+// ---------------- Crop Rotation Planner (AI team's forecasts + rules) ----------------
+
+export type ForecastKey = 'temperature_c' | 'humidity_pct' | 'soil_moisture_m3_m3' | 'rainfall_mm'
+
+export interface RotationPhase extends Record<ForecastKey, number> {
+  start_day: number
+  end_day: number
+  start_date: string
+  end_date: string
+  method: string
+  reliable: boolean
+}
+
+export interface RotationStep {
+  phase: 1 | 2
+  crop_id: string
+  crop_name_ar: string
+  crop_name_en: string
+  family: string
+  planting_day: number
+  planting_date: string
+  phase_end_date: string
+  growth_days: [number, number]
+  earliest_harvest_date: string
+  latest_harvest_date: string
+  suitability_score: number
+  suitability_status: 'suitable_candidate' | 'conditional' | 'not_recommended'
+  factor_scores: Record<string, number>
+  duration_score: number
+  requires_early_cultivar: boolean
+  note: Text2
+  reasons: Text2[]
+  conditions: Text2[]
+}
+
+export interface RotationOption {
+  rotation_score: number
+  status: 'suitable' | 'conditionally_suitable'
+  components: { first_crop_suitability: number; second_crop_suitability: number | null; family_diversity_score: number; duration_compatibility_score: number }
+  estimated_total_days: [number, number]
+  sequence: RotationStep[]
+}
+
+export interface RotationPlanData {
+  status: 'success' | 'partial_plan' | 'no_plan_available'
+  data_mode: 'historical_demo' | 'historical_data'
+  planning_horizon_days: 30 | 90
+  planting_date: string
+  forecast_origin: string
+  is_default_date: boolean
+  planting_date_min: string
+  planting_date_max: string
+  location: { grid_id: string; latitude: number; longitude: number; grid_distance_km: number; governorate: { id: string; name_ar: string; name_en: string } | null }
+  previous_crop: string | null
+  irrigation_available: boolean | null
+  cultivation_type: string | null
+  soil: SoilInfoData | null
+  forecasts: { phase_1: RotationPhase; phase_2?: RotationPhase }
+  best_rotation: RotationOption | null
+  alternative_rotations: RotationOption[]
+  explanation: Text2[]
+  warnings: Text2[]
+  saved: boolean
+}
+
+export interface RotationPlanInput {
+  latitude: number
+  longitude: number
+  planning_horizon_days: 30 | 90
+  planting_date: string | null
+  previous_crop: string | null
+  irrigation_available: boolean | null
+  cultivation_type: 'open_field' | 'greenhouse' | null
+}
+
+export interface SavedPlan {
+  id: string
+  farm_id: string
+  plot_id: string | null
+  plot_label: string
+  created_at: string
+  summary: { status: string; planning_horizon_days: number; planting_date: string; rotation_score: number | null; crops: string[] }
+  plan?: RotationPlanData
+}
+
+export const getRotationPlan = (input: RotationPlanInput) => api<RotationPlanData>('/crop-rotation/plan', { body: input })
+
+export const saveRotationPlan = (input: RotationPlanInput & { farm_id: string; plot_id: string | null }) => api<SavedPlan>('/crop-rotation/plans', { body: input })
+
+export const listRotationPlans = (farmId: string) => api<SavedPlan[]>(`/crop-rotation/plans?${q({ farm_id: farmId })}`)
+
+export const getSavedPlan = (id: string) => api<SavedPlan>(`/crop-rotation/plans/${id}`)
+
+export const deleteSavedPlan = (id: string) => api<void>(`/crop-rotation/plans/${id}`, { method: 'DELETE' })
