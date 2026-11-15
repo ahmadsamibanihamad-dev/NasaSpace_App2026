@@ -579,7 +579,8 @@
   "myLocation": "My location",
   "fitFarm": "Back to farm extent",
   "searchPlaceholder": "Search an area or type coordinates: 32.55, 35.84",
-  "goToCoords": "Go to coordinates"
+  "goToCoords": "Go to coordinates",
+  "credit": "Map imagery credit"
  },
  "parcels": {
   "title": "Parcel management",

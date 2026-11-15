@@ -57,6 +57,38 @@ function AutoResize() {
 }
 
 /** Small card with the pointer coordinates (updates only its own state, not the parent tree). */
+/**
+ * Imagery credit, collapsed to a small "©" button that opens on click.
+ * The tile providers' terms require the credit to stay reachable on the map, so it is compact, not removed.
+ */
+function MapCredit({ html }: { html: string }) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (ref.current) {
+      L.DomEvent.disableClickPropagation(ref.current)
+      L.DomEvent.disableScrollPropagation(ref.current)
+    }
+  }, [])
+  if (!html) return null
+  return (
+    <div ref={ref} className="absolute bottom-3 end-3 z-[1000] flex flex-row-reverse items-center gap-1 max-w-[70%] no-print">
+      {open && <span dir="ltr" className="bg-surface/95 rounded-pill px-3 py-1 text-[10px] leading-4 text-text-secondary shadow-soft [&_a]:underline" dangerouslySetInnerHTML={{ __html: html }} />}
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-label={t('map.credit')}
+        title={t('map.credit')}
+        onClick={() => setOpen((o) => !o)}
+        className="size-6 shrink-0 rounded-pill bg-surface/90 text-text-secondary text-[11px] leading-none flex items-center justify-center shadow-soft hover:bg-surface"
+      >
+        ©
+      </button>
+    </div>
+  )
+}
+
 function CursorCoords() {
   const { t } = useTranslation()
   const [ll, setLl] = useState<{ lat: number; lng: number } | null>(null)
@@ -161,13 +193,14 @@ export function JordanMap({
       touchZoom={interactive}
       keyboard={interactive}
       doubleClickZoom={false}
-      attributionControl
+      attributionControl={false}
     >
-      <TileLayer key={src.id + src.url} url={src.url} attribution={src.attribution} maxNativeZoom={src.maxNativeZoom} maxZoom={20} />
+      <TileLayer key={src.id + src.url} url={src.url} maxNativeZoom={src.maxNativeZoom} maxZoom={20} />
+      <MapCredit html={src.attribution} />
       <JordanMask />
       <AutoResize />
       {showCoords && <CursorCoords />}
-      {showCoords && <ScaleControl position="bottomright" imperial={false} />}
+      {showCoords && <ScaleControl position="bottomleft" imperial={false} />}
       {children}
     </MapContainer>
   )
