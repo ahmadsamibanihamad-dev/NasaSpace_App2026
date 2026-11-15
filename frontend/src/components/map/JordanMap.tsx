@@ -37,10 +37,16 @@ export function FlyTo({ center, zoom }: { center: LatLngExpression | null; zoom?
 }
 
 /** Fits the map to bounds whenever `token` changes. */
-export function FitBounds({ bounds, token, maxZoom = 18 }: { bounds: [[number, number], [number, number]] | null; token: unknown; maxZoom?: number }) {
+/** Fit the map to `bounds`. `tight` is for small preview maps: little padding and fractional zoom, so the shapes fill the frame. */
+export function FitBounds({ bounds, token, maxZoom = 18, tight = false }: { bounds: [[number, number], [number, number]] | null; token: unknown; maxZoom?: number; tight?: boolean }) {
   const map = useMap()
   useEffect(() => {
-    if (bounds) map.fitBounds(bounds, { padding: [48, 48], maxZoom })
+    if (!bounds) return
+    if (tight) {
+      map.options.zoomSnap = 0.1
+      map.invalidateSize()
+    }
+    map.fitBounds(bounds, { padding: tight ? [18, 18] : [48, 48], maxZoom, animate: !tight })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
   return null

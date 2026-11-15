@@ -31,7 +31,7 @@ export function FarmMiniMap({
   return (
     <div className={`rounded-tile overflow-hidden relative ${className}`}>
       <JordanMap center={[farm.centroid.lat, farm.centroid.lon]} zoom={15} interactive={interactive}>
-        <FitBounds bounds={bounds} token={plots.map((p) => p.id + p.updated_at).join()} />
+        <FitBounds bounds={bounds} token={plots.map((p) => p.id + p.updated_at).join()} tight />
         <ParcelsLayer plots={plots} colorOf={colorOf} onSelect={onPick} labelMode="short" />
       </JordanMap>
     </div>

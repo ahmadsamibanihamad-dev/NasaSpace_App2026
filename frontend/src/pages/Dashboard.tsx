@@ -132,16 +132,17 @@ export default function Dashboard() {
                 <p className="text-metric font-light tabular-nums">{plotsQ.isLoading ? '—' : plots.length}</p>
               </div>
             </div>
-            {plotsQ.isLoading ? <Skeleton className="h-56" /> : plots.length > 0 && <FarmMiniMap farm={farm} plots={plots} className="h-56" />}
-            <div className="flex items-center justify-between">
-              <span className="text-caption text-text-secondary flex items-center gap-2">
-                {[['#2F8F4E', '80+'], ['#7FC190', '60+'], ['#D7ECDC', '40+'], ['#F6F6F4', '—']].map(([c, l]) => (
-                  <span key={l} className="flex items-center gap-1">
-                    <span className="size-3 rounded-pill border border-border" style={{ background: c }} /> {l}
+            {plotsQ.isLoading ? <Skeleton className="h-56" /> : plots.length > 0 && <FarmMiniMap farm={farm} plots={plots} mode="color" className="h-56" />}
+            <div className="flex items-start justify-between gap-3">
+              {/* each parcel in the colour the user gave it */}
+              <span className="text-caption text-text-secondary flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
+                {plots.map((p) => (
+                  <span key={p.id} className="flex items-center gap-1 min-w-0">
+                    <span className="size-3 rounded-pill border border-border shrink-0" style={{ background: p.color }} /> <span className="truncate max-w-32">{p.name || p.label}</span>
                   </span>
                 ))}
               </span>
-              <Link to="/app/farm" className="text-label text-green-600 hover:underline">
+              <Link to="/app/farm" className="text-label text-green-600 hover:underline shrink-0">
                 {t('nav.myFarm')}
               </Link>
             </div>
