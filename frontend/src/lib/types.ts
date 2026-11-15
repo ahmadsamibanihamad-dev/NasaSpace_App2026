@@ -232,6 +232,7 @@ export interface CalendarRow {
   plot_id: string
   plot_label: string
   crop: string
+  perennial?: boolean
   period_scores: { period: string; start: string; score: number }[]
   best_window: { start: string; end: string } | null
 }

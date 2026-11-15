@@ -231,10 +231,21 @@ def run_analysis(
         rain_clim = monthly_climatology(rows, lambda r: r.rain)
         sm_clim = monthly_climatology(rows, lambda r: r.gwr)
         cal_rows = []
-        for p in plots:
-            crop = crop_for(p)
-            evals = sc.scan(crop, plot_ctx(p))
-            cal_rows.append({"plot_id": p.id, "plot_label": p.label, "crop": crop["id"], "period_scores": period_scores(evals, sc.today.year), "best_window": sc.window(crop, best_window(evals))})
+        if crop_id:
+            # One chosen crop: a row per parcel.
+            groups = [(p, p.label) for p in plots]
+        else:
+            # Every crop, best first. Parcels of one farm share the same climate, so parcels that
+            # also share the same irrigation get one set of rows instead of thirteen rows each.
+            by_water: dict = {}
+            for p in plots:
+                by_water.setdefault((bool(p.irrigation_available), p.irrigation_method if p.irrigation_available else None), []).append(p)
+            groups = [(ps[0], "، ".join(x.label for x in ps)) for ps in by_water.values()]
+        for p, label in groups:
+            ctx = plot_ctx(p)
+            for crop in [CROPS[crop_id]] if crop_id else [c for c, _, _ in sc.ranked(ctx)]:
+                evals = sc.scan(crop, ctx)
+                cal_rows.append({"plot_id": p.id, "plot_label": label, "irrigation_available": bool(p.irrigation_available), "crop": crop["id"], "perennial": bool(crop["perennial"]), "period_scores": period_scores(evals, sc.today.year), "best_window": sc.window(crop, best_window(evals))})
         result["calendar"] = {
             "rows": cal_rows,
             "frost_periods": [{"period": str(k), "probability": r1(x * 100) / 100} for k, x in enumerate(probs["frost"])],

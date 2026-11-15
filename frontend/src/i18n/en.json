@@ -313,7 +313,9 @@
   "bestDate": "Best date (suggested automatically)",
   "failedOffline": "Climate data could not be loaded. Check your internet connection and try again.",
   "failedInterrupted": "The analysis stopped because the page was closed or reloaded before it finished. Run it again.",
-  "resultTitle": "Analysis results"
+  "resultTitle": "Analysis results",
+  "allCrops": "All crops",
+  "cropOptionalAll": "Optional: leave it on \"All crops\" to see the best planting period for every crop, best first."
  },
  "results": {
   "suitability": "Suitability result",
@@ -393,7 +395,7 @@
   "newAnalysis": "New analysis",
   "exportPdf": "Export PDF",
   "notFound": "This analysis was not found.",
-  "noWindow": "No suitable window during the year.",
+  "noWindow": "No suitable period",
   "yearRound": "Perennial crop",
   "probability": "Probability"
  },

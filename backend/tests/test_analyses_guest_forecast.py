@@ -1,5 +1,6 @@
 import pytest
 
+from app.services.crops import CROP_IDS
 from tests.conftest import API, auth_headers, make_farm, make_plot
 
 STAGES = ["retrieving_environmental_data", "processing_satellite_information", "evaluating_crop_requirements", "generating_recommendations"]
@@ -57,7 +58,14 @@ def test_recommendation_calendar_water_risk(client):
     assert all(c["water_demand"] in (1, 2, 3) and c["main_reason"]["ar"] and c["requirements"] for c in rec[0]["ranked"])
 
     cal = run(client, h, analysis_type="planting_window", farm_id=farm["id"])["result"]["calendar"]
-    assert len(cal["rows"]) == 6 and len(cal["frost_periods"]) == 36 and len(cal["monthly_rainfall_mm"]) == 12
+    # no crop chosen: every crop is listed, once per distinct irrigation setting, best first
+    assert len(cal["rows"]) % 13 == 0 and {r["crop"] for r in cal["rows"]} == set(CROP_IDS)
+    first = [r for r in cal["rows"] if r["plot_id"] == cal["rows"][0]["plot_id"]]
+    assert len(first) == 13 and all(len(r["period_scores"]) == 36 for r in first)
+    assert len(cal["frost_periods"]) == 36 and len(cal["monthly_rainfall_mm"]) == 12
+    # a chosen crop: one row per parcel
+    one = run(client, h, analysis_type="planting_window", farm_id=farm["id"], crop_id="wheat")["result"]["calendar"]
+    assert len(one["rows"]) == 6 and {r["crop"] for r in one["rows"]} == {"wheat"}
 
     water = run(client, h, analysis_type="water", farm_id=farm["id"], plot_ids=[plots[5]["id"]])["result"]["water"][0]
     assert water["crop"] == "tomato" and water["season_total"]["irrigation_m3"] > 0

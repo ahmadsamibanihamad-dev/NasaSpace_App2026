@@ -205,12 +205,12 @@ export default function NewAnalysis() {
             <>
               <div>
                 <h2 className="text-h1 font-semibold">{t('analysis.chooseCrop')}</h2>
-                {cropOptional && <p className="text-label text-text-secondary mt-1">{t('analysis.cropOptional')}</p>}
+                {cropOptional && <p className="text-label text-text-secondary mt-1">{t(type === 'planting_window' ? 'analysis.cropOptionalAll' : 'analysis.cropOptional')}</p>}
               </div>
               <div role="radiogroup" aria-label={t('analysis.chooseCrop')} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {cropOptional && (
                   <button role="radio" aria-checked={crop === null} onClick={() => setCrop(null)} className={cx('rounded-tile border p-4 flex items-center gap-3 text-label', crop === null ? 'border-green-600 bg-green-50' : 'border-border hover:border-green-300')}>
-                    <CropIcon crop={null} size={36} /> {t('analysis.currentCrops')}
+                    <CropIcon crop={null} size={36} /> {t(type === 'planting_window' ? 'analysis.allCrops' : 'analysis.currentCrops')}
                   </button>
                 )}
                 {CROP_IDS.map((c) => (
@@ -281,7 +281,7 @@ function Summary({ farmName, plots, whole, type, crop, date: d, priority, large 
     [t('analysis.scope'), whole ? `${t('analysis.wholeFarm')} (${plots.length})` : plots.length ? plots.join('، ') : '—'],
     [t('analysis.objective'), type ? t(`analysis.objectives.${type}`) : '—'],
   ]
-  if (crop !== undefined) rows.push([t('analysis.crop'), crop ? cropName(crop) : type === 'crop_suitability' ? '—' : t('analysis.currentCrops')])
+  if (crop !== undefined) rows.push([t('analysis.crop'), crop ? cropName(crop) : type === 'crop_suitability' ? '—' : t(type === 'planting_window' ? 'analysis.allCrops' : 'analysis.currentCrops')])
   if (d !== undefined) rows.push([t('analysis.date'), d ? date(d) : t('analysis.bestDate')])
   if (priority) rows.push([t('analysis.priority'), t(`analysis.priorities.${priority}`)])
   return (

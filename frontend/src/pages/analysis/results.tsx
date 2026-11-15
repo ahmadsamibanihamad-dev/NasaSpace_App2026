@@ -344,6 +344,7 @@ export function CalendarView({ result }: { result: AnalysisResult }) {
   const cal = result.calendar
   if (!cal) return <EmptyState title={t('states.missingData')} />
   const months = Array.from({ length: 12 }, (_, i) => monthName(i + 1, true))
+  const manyPlots = new Set(cal.rows.map((r) => r.plot_id)).size > 1
   const maxRain = Math.max(...cal.monthly_rainfall_mm.map((m) => m.value), 1)
   const dekadOfIso = (iso: string) => (new Date(iso).getUTCMonth()) * 3 + (new Date(iso).getUTCDate() >= 21 ? 2 : new Date(iso).getUTCDate() >= 11 ? 1 : 0)
   const Row = ({ label, sub, children }: { label: ReactNode; sub?: ReactNode; children: ReactNode }) => (
@@ -380,16 +381,16 @@ export function CalendarView({ result }: { result: AnalysisResult }) {
             </div>
             {cal.rows.map((r) => (
               <Row
-                key={r.plot_id}
+                key={`${r.plot_id}-${r.crop}`}
                 label={
                   <>
-                    <CropIcon crop={r.crop} size={28} /> {r.plot_label}
+                    <CropIcon crop={r.crop} size={28} /> {cropName(r.crop)}
                   </>
                 }
                 sub={
                   <>
-                    {cropName(r.crop)}
-                    {r.best_window && ` · ${dayMonth(r.best_window.start)} – ${dayMonth(r.best_window.end)}`}
+                    {manyPlots && `${r.plot_label} · `}
+                    {r.best_window ? `${dayMonth(r.best_window.start)} – ${dayMonth(r.best_window.end)}` : t(r.perennial ? 'results.yearRound' : 'results.noWindow')}
                   </>
                 }
               >
