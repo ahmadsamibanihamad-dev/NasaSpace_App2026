@@ -6,7 +6,6 @@ os.environ["OFFLINE_MODE"] = "true"
 os.environ["JWT_SECRET"] = "test-secret-that-is-long-enough-for-hs256-0123456789"
 os.environ["RATE_LIMIT_AUTH"] = "1000"
 os.environ["RATE_LIMIT_GUEST"] = "1000"
-os.environ["AI_MODE"] = "off"
 
 import pytest
 from fastapi.testclient import TestClient
@@ -23,8 +22,8 @@ API = "/api/v1"
 
 @pytest.fixture(scope="session")
 def climate():
-    """Deterministic synthetic climate (the same record the frontend engine was tested with)."""
-    return build_climate(Daily.from_lists(json.loads((FIXTURES / "parity.json").read_text(encoding="utf-8"))["daily"]))
+    """Deterministic synthetic climate (not real data)."""
+    return build_climate(Daily.from_lists(json.loads((FIXTURES / "climate.json").read_text(encoding="utf-8"))["daily"]))
 
 
 @pytest.fixture()
@@ -40,18 +39,14 @@ def client(climate, monkeypatch):
     from app import models  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
-    from app.api import analyses, forecasts, public
+    from app.api import public
     from app.main import create_app
-    from app.ml import service
 
     # never touch the network in tests: every location gets the synthetic climate
-    for mod in (analyses, forecasts, public):
-        monkeypatch.setattr(mod, "get_climate", lambda session, lat, lon: climate)
+    monkeypatch.setattr(public, "get_climate", lambda session, lat, lon: climate)
     ratelimit.reset()
-    service.set_prediction_service(None)
     with TestClient(create_app()) as c:
         yield c
-    service.set_prediction_service(None)
     db.set_engine(None)
 
 

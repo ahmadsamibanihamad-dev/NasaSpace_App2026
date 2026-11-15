@@ -1,8 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as repo from '../lib/data/repo'
-import type { AnalysisType, CropHistoryItem, Farm, PlotDraft } from '../lib/types'
-
-export type { NewAnalysisInput } from '../lib/data/repo'
+import type { CropHistoryItem, Farm, PlotDraft } from '../lib/types'
 
 export const useFarms = (enabled = true) => useQuery({ queryKey: ['farms'], queryFn: repo.listFarms, enabled })
 export const usePlots = (farmId?: string) => useQuery({ queryKey: ['plots', farmId], queryFn: () => repo.listPlots(farmId!), enabled: !!farmId })
@@ -28,28 +26,11 @@ export const useTimeSeries = (farm: Farm | null | undefined, variable: string, r
     retry: 0,
   })
 
-export const useAnalyses = (farmId?: string, type?: AnalysisType) =>
-  useQuery({ queryKey: ['analyses', farmId, type], queryFn: () => repo.listAnalyses(farmId!, type), enabled: !!farmId })
+export const useSavedPlans = (farmId?: string) => useQuery({ queryKey: ['rotation-plans', farmId], queryFn: () => repo.listRotationPlans(farmId!), enabled: !!farmId })
 
-export const useAnalysis = (id?: string | null, poll = false) =>
-  useQuery({
-    queryKey: ['analysis', id],
-    queryFn: () => repo.getAnalysis(id!),
-    enabled: !!id,
-    refetchInterval: (q) => {
-      const s = q.state.data?.status
-      return poll && (s === 'queued' || s === 'running' || !s) ? 800 : false
-    },
-  })
-
-export function useCreateAnalysis() {
+export function useDeleteSavedPlan() {
   const qc = useQueryClient()
-  return useMutation({ mutationFn: repo.createAnalysis, onSuccess: () => qc.invalidateQueries({ queryKey: ['analyses'] }) })
-}
-
-export function useDeleteAnalysis() {
-  const qc = useQueryClient()
-  return useMutation({ mutationFn: repo.deleteAnalysis, onSuccess: () => qc.invalidateQueries({ queryKey: ['analyses'] }) })
+  return useMutation({ mutationFn: repo.deleteSavedPlan, onSuccess: () => qc.invalidateQueries({ queryKey: ['rotation-plans'] }) })
 }
 
 export function useCreateFarm() {

@@ -57,6 +57,7 @@ export default function Rotation() {
         lon={point.lon}
         place={place}
         defaultIrrigation={plot ? plot.irrigation_available : null}
+        defaultPrevious={plot?.current_crop_id ?? null}
         farmId={farm.id}
         plotId={plot?.id ?? null}
         onSaved={() => {

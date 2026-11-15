@@ -4,7 +4,7 @@ import { Icon, type IconName } from '../components/ui/Icon'
 import { Card } from '../components/ui/primitives'
 import { CropIcon } from '../components/crops/CropIcon'
 
-const CROPS = ['wheat', 'barley', 'lentil', 'chickpea', 'vetch', 'tomato', 'cucumber', 'potato', 'onion', 'eggplant', 'olive', 'date_palm', 'citrus']
+const CROPS = ['radish', 'arugula', 'spinach', 'carrot', 'beet', 'bush_bean']
 
 export default function Landing() {
   const { t, i18n } = useTranslation()

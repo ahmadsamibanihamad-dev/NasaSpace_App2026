@@ -320,6 +320,7 @@ export function RotationPlanner({
   lon,
   place,
   defaultIrrigation,
+  defaultPrevious,
   farmId,
   plotId,
   onSaved,
@@ -329,6 +330,8 @@ export function RotationPlanner({
   /** Farm / parcel / governorate line shown in the inputs card. */
   place: string
   defaultIrrigation: boolean | null
+  /** The parcel's current crop, offered as the previous crop when it is one of the six. */
+  defaultPrevious?: string | null
   /** When set (signed-in user with a farm) the plan can be saved. */
   farmId?: string
   plotId?: string | null
@@ -338,7 +341,7 @@ export function RotationPlanner({
   const toast = useToast()
   const [horizon, setHorizon] = useState<'90' | '30'>('90')
   const [planting, setPlanting] = useState('') // '' = default date from the backend
-  const [previous, setPrevious] = useState('')
+  const [previous, setPrevious] = useState(defaultPrevious && (PLAN_CROPS as readonly string[]).includes(defaultPrevious) ? defaultPrevious : '')
   const [irr, setIrr] = useState<Irr>(defaultIrrigation === null ? 'unknown' : defaultIrrigation ? 'yes' : 'no')
   const [cultivation, setCultivation] = useState<'open_field' | 'greenhouse'>('open_field')
 

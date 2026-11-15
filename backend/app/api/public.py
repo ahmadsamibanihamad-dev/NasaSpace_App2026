@@ -1,4 +1,4 @@
-"""Crops, environment, guest recommendations and system status."""
+"""Observed environment (NASA POWER) for the dashboard and analytics, and system status."""
 
 from typing import Literal
 
@@ -6,39 +6,21 @@ from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select
 
 from app.api.deps import current_user
-from app.api.schemas import GuestRecommendIn
-from app.core.config import APP_NAME, get_settings
+from app.core.config import APP_NAME
 from app.core.db import get_session
-from app.core.errors import AppError
-from app.core.ratelimit import limit
-from app.engine.config import ENGINE_VERSION, crop_list, crops
 from app.engine.environment import RESOLUTIONS, VARIABLES, env_summary, time_series
-from app.engine.run import recommend_for_location
-from app.engine.suitability import PlotCtx
-from app.ml.service import get_prediction_service
 from app.models import EnvCache, User
 from app.services.climate import get_climate
-from app.services.geo import governorate_for, require_in_jordan
+from app.services.crops import CATALOG, load_crops
+from app.services.geo import require_in_jordan
 
 router = APIRouter()
-_s = get_settings()
 
 
-# ---------------- crops ----------------
+def _rules_version() -> str:
+    import json
 
-
-@router.get("/crops", tags=["crops"])
-def list_crops():
-    """The crop knowledge base. Every value carries its source; needs_review marks values to confirm locally."""
-    return crop_list()
-
-
-@router.get("/crops/{crop_id}", tags=["crops"])
-def get_crop(crop_id: str):
-    c = crops().get(crop_id)
-    if not c:
-        raise AppError(404, "UNSUPPORTED_CROP", f"Unsupported crop '{crop_id}'", {"supported": sorted(crops())})
-    return c
+    return json.loads(CATALOG.read_text(encoding="utf-8"))["version"]
 
 
 # ---------------- environment (signed-in) ----------------
@@ -64,41 +46,16 @@ def environment_timeseries(
     return time_series(get_climate(session, lat, lon), variable, resolution)
 
 
-# ---------------- guests ----------------
-
-
-@router.post("/guest/recommendations", tags=["guest"], dependencies=[Depends(limit("guest", _s.rate_limit_guest))])
-def guest_recommendations(body: GuestRecommendIn, session: Session = Depends(get_session)):
-    """A guest picks a location and gets what to grow. No account, no farm, nothing saved."""
-    require_in_jordan(body.lat, body.lon)
-    ctx = PlotCtx(body.irrigation_available, (body.irrigation_method or "surface") if body.irrigation_available else "none")
-    out = recommend_for_location(get_climate(session, body.lat, body.lon), ctx)
-    return {
-        "location": {"lat": body.lat, "lon": body.lon, "governorate": governorate_for(body.lat, body.lon)},
-        "irrigation_available": body.irrigation_available,
-        "saved": False,
-        **out,
-    }
-
-
 # ---------------- system ----------------
 
 
 @router.get("/health", tags=["system"])
 def health():
-    return {"ok": True, "app": APP_NAME, "engine": ENGINE_VERSION, "ai_mode": _s.ai_mode}
-
-
-@router.get("/models/status", tags=["system"])
-def models_status():
-    return get_prediction_service().status()
+    return {"ok": True, "app": APP_NAME, "recommendation_rules": _rules_version(), "crops": sorted(load_crops())}
 
 
 @router.get("/data/status", tags=["system"])
 def data_status(session: Session = Depends(get_session)):
-    """Freshness of the cached climate record per source and cell."""
+    """Freshness of the cached NASA POWER record (dashboard and analytics) per cell."""
     rows = session.exec(select(EnvCache)).all()
-    return {
-        "sources": [{"source": r.source, "cell": r.cell, "latest_observation_date": r.last_date, "fetched_at": r.fetched_at} for r in rows],
-        "not_integrated": ["NASA SMAP", "NASA IMERG", "ISRIC SoilGrids", "Copernicus DEM"],
-    }
+    return {"sources": [{"source": r.source, "cell": r.cell, "latest_observation_date": r.last_date, "fetched_at": r.fetched_at} for r in rows]}

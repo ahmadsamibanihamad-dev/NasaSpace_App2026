@@ -2,6 +2,22 @@
 
 Last updated 2026-11-15.
 
+## Whole site rebuilt on the AI team's material (2026-11-15, user decision)
+
+The user: the 13 crops are cancelled; everything must work from what the team sent; for crop rotation follow the team's prompt ("AI-Powered Crop Rotation Planner").
+
+- **Removed**: the 13-crop rule engine (`app/engine/suitability, rotation, run, decision, config`), its data (`crops.json`, `engine_config.json`, ECOCROP/FAO extracts), the six analyses and their API, guest 13-crop recommendations, the unused `app/ml` layer and `/forecasts`, the parity tests; in the frontend the New Analysis wizard, result pages, Risks page and the old Rotation page.
+- **Crop Rotation Planner**: `backend/nasa_final/AI/crop_rotation.py` (pure logic) + `app/api/crop_rotation.py` + `frontend/src/features/rotation/RotationPlanner.tsx`. Phase 1 = days 1-30 (short crop), phase 2 = days 31-90 (longer crop). Phase 2 conditions are derived from the 30- and 90-day forecasts and never clipped; inconsistency gives a partial plan. Scores come from the team's `recommend()`. Weights 0.40/0.40/0.15/0.05.
+- `crop_requirements.json` gained a `family` per crop (the team's prompt asked for it).
+- Saved plans: table `rotationplan`; Reports page lists, opens, compares, prints and deletes them.
+- Six crops everywhere a crop is picked; demo farm uses them.
+- Dashboard: farm card, observed NASA POWER cards, parcels table, quick links, saved plans.
+- Guest page: forecast tab and planner tab.
+- **Finding**: the team's 30-day rain forecast (moving average) and 90-day one (climatology) often contradict each other, so many dates give only a partial plan. Sample of ten locations: all ten on 2026-05-02 (the default date) and 2025-12-20, eight on 2026-02-01, three on 2026-03-15, two on 2025-09-01, none on 2025-11-15.
+- **Still not from the team's files**: dashboard cards and the Analytics page read live NASA POWER through `app/engine/features.py` and `environment.py`.
+- Legacy tables `analysis` and `forecast` are still defined (old rows are cleaned on farm delete) but unused.
+- Tests: backend 41, frontend 8. Browser pass after the rebuild: all pages in Arabic, three in English, five at phone width, save / open / compare / delete a plan.
+
 ## Full test pass (2026-11-15)
 
 Run with a fresh account against the live backend and real NASA POWER data.

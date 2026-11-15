@@ -12,23 +12,18 @@ import { cropName } from '../lib/format'
 const NAV: { to: string; key: string; icon: IconName; primary?: boolean }[] = [
   { to: '/app', key: 'dashboard', icon: 'home' },
   { to: '/app/farm', key: 'myFarm', icon: 'farm' },
-  { to: '/app/analysis/new', key: 'newAnalysis', icon: 'plus', primary: true },
-  { to: '/app/rotation', key: 'rotation', icon: 'rotate' },
+  { to: '/app/rotation', key: 'rotation', icon: 'rotate', primary: true },
   { to: '/app/outlook', key: 'outlook', icon: 'cloudRain' },
   { to: '/app/analytics', key: 'analytics', icon: 'chart' },
-  { to: '/app/risks', key: 'risks', icon: 'alert' },
   { to: '/app/reports', key: 'reports', icon: 'file' },
   { to: '/app/settings', key: 'settings', icon: 'settings' },
 ]
 
 const TITLES: [RegExp, string][] = [
   [/^\/app\/farm/, 'nav.myFarm'],
-  [/^\/app\/analysis\/new/, 'nav.newAnalysis'],
-  [/^\/app\/analysis\//, 'analysis.resultTitle'],
   [/^\/app\/rotation/, 'nav.rotation'],
   [/^\/app\/outlook/, 'nav.outlook'],
   [/^\/app\/analytics/, 'nav.analytics'],
-  [/^\/app\/risks/, 'nav.risks'],
   [/^\/app\/reports/, 'nav.reports'],
   [/^\/app\/settings/, 'nav.settings'],
   [/^\/app\/?$/, 'nav.dashboard'],

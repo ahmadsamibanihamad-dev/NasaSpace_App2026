@@ -2,7 +2,8 @@ import * as turf from '@turf/turf'
 import type { Feature, Polygon } from 'geojson'
 import governorates from '../data/geo/governorates.json'
 
-export const CROP_IDS = ['wheat', 'barley', 'lentil', 'chickpea', 'vetch', 'tomato', 'cucumber', 'potato', 'onion', 'eggplant', 'olive', 'date_palm', 'citrus'] as const
+/** The crops of the AI team's recommendation system. */
+export const CROP_IDS = ['radish', 'arugula', 'spinach', 'carrot', 'beet', 'bush_bean'] as const
 
 export interface Place {
   id: string

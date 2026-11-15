@@ -11,12 +11,12 @@ CELL_LON = 0.000746  # about 70 m east-west at this latitude
 COLORS = ["#2F8F4E", "#7FC190", "#134324", "#2F7FD1", "#E8892B", "#D64533"]
 SEASONS = ["2023-2024", "2024-2025", "2025-2026"]
 PLOTS = [
-    ("A1", "wheat", ["wheat", "lentil", "wheat"], False),
-    ("A2", "wheat", ["barley", "wheat", "wheat"], False),
-    ("A3", "barley", ["chickpea", "wheat", "barley"], False),
-    ("B1", "lentil", ["wheat", "barley", "lentil"], False),
-    ("B2", None, ["wheat", None, None], False),
-    ("B3", "tomato", ["cucumber", "tomato", "tomato"], True),
+    ("A1", "radish", ["carrot", "spinach", "radish"], False),
+    ("A2", "carrot", ["bush_bean", "radish", "carrot"], False),
+    ("A3", "spinach", ["beet", "arugula", "spinach"], False),
+    ("B1", "bush_bean", ["radish", "carrot", "bush_bean"], True),
+    ("B2", None, ["arugula", None, None], False),
+    ("B3", "beet", ["bush_bean", "arugula", "beet"], True),
 ]
 
 
