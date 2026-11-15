@@ -147,16 +147,49 @@ export interface OutlookForecast {
   validation_mae: number | null
 }
 
+/** One reason behind a score. `effect` says which way it pushed. */
+export interface Explanation {
+  component: string
+  effect: 'positive' | 'negative' | 'caution' | 'unknown'
+  ar: string
+  en: string
+}
+
+/** null = the factor could not be evaluated (no data). */
+export type GroupScores = Record<'climate' | 'water' | 'soil' | 'fertility' | 'rotation', number | null>
+
 export interface OutlookCrop {
   crop_id: string
   name: Text2
+  family: string
   score: number
+  environment_score: number
   status: 'suitable_candidate' | 'conditional' | 'not_recommended'
   days_to_harvest: [number, number]
   note: Text2
-  reasons: Text2[]
-  risks: Text2[]
-  factor_scores: Record<string, number>
+  component_scores: Record<string, number | null>
+  group_scores: GroupScores
+  rotation: { score: number | null; evaluated: boolean }
+  coverage_pct: number
+  missing_factors: string[]
+  critical_failures: { component: string; ar: string; en: string }[]
+  explanations: Explanation[]
+}
+
+/** Observed in the same calendar window of earlier years. Not a forecast. */
+export interface HistoricalIndicators {
+  kind: 'historical_observation'
+  years: number[]
+  window_days: number
+  t2m_min_mean_c: number
+  t2m_max_mean_c: number
+  frost_frequency: number
+  root_zone_moisture_m3_m3: number
+  profile_moisture_m3_m3: number
+  solar_radiation: number
+  wind_speed_m_s: number
+  dew_point_c: number
+  pressure_kpa: number
 }
 
 export interface OutlookPeriod {
@@ -164,6 +197,8 @@ export interface OutlookPeriod {
   period_start: string
   period_end: string
   forecast: OutlookForecast[]
+  historical_indicators: HistoricalIndicators | null
+  status: 'ok' | 'no_suitable_recommendation'
   best_candidate: string | null
   recommendations: OutlookCrop[]
 }
@@ -171,7 +206,16 @@ export interface OutlookPeriod {
 export interface SoilInfoData {
   source: string
   depth_cm: [number, number]
-  properties: { key: string; value: number; unit: string }[]
+  properties: { key: string; value: number; unit: string; source: string | null }[]
+  texture_class: Record<string, string | null>
+  has_laboratory_values: boolean
+}
+
+export interface TerrainData {
+  elevation_m: number | null
+  slope_deg: number | null
+  slope_pct: number | null
+  aspect_deg: number | null
 }
 
 export interface Outlook {
@@ -183,18 +227,36 @@ export interface Outlook {
   planting_date_max: string
   grid: { id: string; lat: number; lon: number; distance_km: number }
   irrigation_available: boolean | null
+  previous_crops: { crop_id: string; years_ago: number; family: string | null; name: Text2 }[]
   soil: SoilInfoData | null
+  terrain: TerrainData | null
   rule_version: string
+  weight_policy: Text2
   periods: OutlookPeriod[]
   warnings: Text2[]
 }
 
-export const getOutlook = (input: { lat: number; lon: number; irrigation_available: boolean | null; planting_date?: string | null }) =>
-  api<Outlook>('/outlook', { body: input })
+/** What the user knows about the land. Soil and terrain are looked up by the backend. */
+export interface FarmHistoryInput {
+  irrigation_available: boolean | null
+  previous_crop: string | null
+  previous_crop_year: number | null
+  crop_history: { year: number; crop_id: string }[]
+}
 
-/** Soil properties for a location, from the AI team's static soil table. `soil` is null where the table has no value. */
+export const getOutlook = (input: { lat: number; lon: number; planting_date?: string | null } & FarmHistoryInput) => api<Outlook>('/outlook', { body: input })
+
+export interface OutlookStatus {
+  available: boolean
+  rule_version: string | null
+  previous_crops: { crop_id: string; name: Text2; family: string | null }[]
+}
+
+export const getOutlookStatus = () => api<OutlookStatus>('/outlook/status')
+
+/** Soil and terrain of a location, from the AI team's dataset. `soil` is null where the dataset has no value. */
 export const getSoil = (lat: number, lon: number) =>
-  api<{ grid: { id: string; lat: number; lon: number; distance_km: number }; soil: SoilInfoData | null }>(`/outlook/soil?${q({ lat, lon })}`)
+  api<{ grid: { id: string; lat: number; lon: number; distance_km: number }; soil: SoilInfoData | null; terrain: TerrainData | null }>(`/outlook/soil?${q({ lat, lon })}`)
 
 // ---------------- Crop Rotation Planner (AI team's forecasts + rules) ----------------
 
@@ -223,7 +285,9 @@ export interface RotationStep {
   latest_harvest_date: string
   suitability_score: number
   suitability_status: 'suitable_candidate' | 'conditional' | 'not_recommended'
-  factor_scores: Record<string, number>
+  environment_score: number
+  group_scores: GroupScores
+  coverage_pct: number
   duration_score: number
   requires_early_cultivar: boolean
   note: Text2
@@ -253,6 +317,7 @@ export interface RotationPlanData {
   irrigation_available: boolean | null
   cultivation_type: string | null
   soil: SoilInfoData | null
+  terrain: TerrainData | null
   forecasts: { phase_1: RotationPhase; phase_2?: RotationPhase }
   best_rotation: RotationOption | null
   alternative_rotations: RotationOption[]
@@ -266,9 +331,11 @@ export interface RotationPlanInput {
   longitude: number
   planning_horizon_days: 30 | 90
   planting_date: string | null
-  previous_crop: string | null
-  irrigation_available: boolean | null
   cultivation_type: 'open_field' | 'greenhouse' | null
+  irrigation_available: boolean | null
+  previous_crop: string | null
+  previous_crop_year: number | null
+  crop_history: { year: number; crop_id: string }[]
 }
 
 export interface SavedPlan {

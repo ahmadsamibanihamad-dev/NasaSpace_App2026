@@ -2,6 +2,21 @@
 
 Last updated 2026-11-15.
 
+## Multi-factor recommendation engine, mvp-2 (2026-11-15, team prompt "message (5).txt")
+
+The team's prompt asked to replace the temperature-dominated rules with a real multi-factor, crop-specific system using the soil, terrain and history already in the dataset, plus crop-history rotation.
+
+- `backend/nasa_final/AI/crop_requirements.json` -> version `mvp-2`: per-crop texture, drainage, rooting depth, moisture, nutrient demand, frost and heat notes, each with a reference key or `evidence: insufficient`; 27 previous crops with families; weights and scoring constants. The team's temp / pH / days ranges were not changed.
+- `recommendation_system.py` rewritten: nine factors (weights 20/15/20/10/10/10/5/5/5), unknown factors excluded with `coverage_pct`, critical rules apart from the score, bilingual explanations per factor.
+- New `environment_service.py`: soil by rooting depth, USDA texture class, fertility percentile among Jordan's grids, terrain, and historical observations of the same calendar window (needs the master dataset).
+- `crop_rotation.py` now scores sequences from environment scores plus the engine's rotation scores (no double counting); previous crop may be any of the 27.
+- API: `/outlook` and `/crop-rotation/plan` accept `previous_crop`, `previous_crop_year`, `crop_history`, `soil_lab`, `horizon_days`; return soil, terrain, historical indicators, component and group scores.
+- Frontend: `FarmHistory` (previous crop, year, earlier crops, irrigation), `CropScore` (five group scores + reasons), soil and terrain tiles, historical indicators card.
+- References read in the browser: the five URLs of the prompt plus the USU beet, radish, spinach and bean fact sheets (same series as the cited carrot one). No USU arugula page exists; arugula uses the leafy-greens group rules.
+- Effect on the "same result everywhere" problem: ranking now changes with previous crop and with soil texture. Arugula and spinach still tie when the previous crop is unrelated, because the references give them the same requirements.
+- Soil pH in the dataset is 7.5-8.2 everywhere, above the range of five crops.
+- Docs: `backend/nasa_final/README_RECOMMENDATION_MVP2.md`. Tests: backend 95 (14 new engine tests, outlook and rotation tests updated), frontend 8.
+
 ## Analyses restored (2026-11-15, user decision)
 
 Removing the six analyses in the rebuild was my inference, not the user's request, and the user asked for them back ("اه رجعها ليش حذفتها اصلا"). The removal commit (6e21b1f) was reverted, then the planner-era pieces were put back on top.

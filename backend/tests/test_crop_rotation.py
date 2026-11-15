@@ -56,31 +56,35 @@ def test_inconsistent_forecasts_are_reported_and_never_clipped():
 
 
 def test_same_family_sequences_are_penalised():
-    assert cr.family_pair_score("radish", "arugula") == 0  # both Brassicaceae
-    assert cr.family_pair_score("spinach", "beet") == 0  # both Amaranthaceae
-    assert cr.family_pair_score("radish", "carrot") == 100
-    assert cr.family_pair_score(None, "carrot") is None
-    assert cr.family_diversity(None, ["spinach", "beet"])["score"] < cr.family_diversity(None, ["radish", "beet"])["score"]
+    out = cr.plan(COOL_30, COOL_90, previous_crop="wheat", irrigation_available=True, soil_ph=7.0)
+    ranked = {tuple(seq(r)): r for r in [out["best_rotation"], *out["alternative_rotations"]]}
+    all_pairs = {}
+    # score every sequence, not only the top three
+    for first in cr.SHORT_TERM:
+        recs_2 = cr.evaluate_phase(90, 60, out["forecasts"]["phase_2"], True, 7.0, history=[{"crop_id": first, "years_ago": 1}, {"crop_id": "wheat", "years_ago": 2}])
+        for second, r in recs_2.items():
+            all_pairs[(first, second)] = r["rotation"]["score"]
+    assert all_pairs[("spinach", "beet")] < all_pairs[("radish", "beet")]  # spinach and beet are both Amaranthaceae
+    assert all_pairs[("radish", "carrot")] == 100  # different families
+    assert all(r["components"]["family_diversity_score"] is not None for r in ranked.values())
+    # the engine explains the repeat on the second crop
+    recs = cr.evaluate_phase(90, 60, out["forecasts"]["phase_2"], True, 7.0, history=[{"crop_id": "spinach", "years_ago": 1}])
+    assert any("same family" in n["en"] for n in recs["beet"]["explanations"])
 
 
 def test_previous_crop_changes_the_ranking():
     fresh = cr.plan(COOL_30, COOL_90, irrigation_available=True, soil_ph=7.0)
     after_radish = cr.plan(COOL_30, COOL_90, previous_crop="radish", irrigation_available=True, soil_ph=7.0)
-
-    def score_of(plan, first, second):
-        for r in [plan["best_rotation"], *plan["alternative_rotations"]]:
-            if seq(r) == [first, second]:
-                return r
-        return None
-
-    # the same sequence scores lower when it repeats the previous crop's family
-    a, b = score_of(fresh, "radish", "carrot"), score_of(after_radish, "radish", "carrot")
-    if a and b:
-        assert b["rotation_score"] < a["rotation_score"]
-    best = after_radish["best_rotation"]
-    assert best["sequence"][0]["family"] != "Brassicaceae" or any("Same botanical family" in c["en"] for c in best["sequence"][0]["conditions"])
+    after_wheat = cr.plan(COOL_30, COOL_90, previous_crop="wheat", irrigation_available=True, soil_ph=7.0)  # not one of the six candidates
+    assert seq(after_radish["best_rotation"])[0] == "spinach"  # the only short crop outside the cabbage family
+    assert seq(after_radish["best_rotation"]) != seq(cr.plan(COOL_30, COOL_90, previous_crop="spinach", irrigation_available=True, soil_ph=7.0)["best_rotation"])
+    assert after_wheat["previous_crop"] == "wheat" and after_wheat["crop_history"] == [{"crop_id": "wheat", "years_ago": 1, "family": "Poaceae"}]
+    first = after_radish["best_rotation"]["sequence"][0]
+    assert first["rotation"]["evaluated"] is True and any("different botanical family" in r["en"].lower() for r in first["reasons"])
     assert any("previous crop is unknown" in w["en"] for w in fresh["warnings"])
     assert not any("previous crop is unknown" in w["en"] for w in after_radish["warnings"])
+    # the second crop is always judged against the first one
+    assert all(r["sequence"][1]["rotation"]["evaluated"] for r in [fresh["best_rotation"], *fresh["alternative_rotations"]])
 
 
 def test_a_different_family_alone_does_not_make_a_crop_recommended():
@@ -141,8 +145,9 @@ def test_crop_scores_come_from_the_existing_recommendation_engine():
 def test_missing_soil_and_unknown_irrigation_are_said_not_guessed():
     out = cr.plan(COOL_30, COOL_90)
     text = " ".join(w["en"] for w in out["warnings"])
-    assert "Soil pH is not available" in text and "Irrigation availability is unknown" in text
-    assert "soil_ph" not in out["best_rotation"]["sequence"][0]["factor_scores"]
+    assert "Soil data is not available" in text and "Irrigation availability is unknown" in text
+    first = out["best_rotation"]["sequence"][0]
+    assert first["component_scores"]["soil_ph"] is None and first["component_scores"]["fertility"] is None and first["coverage_pct"] < 100
 
 
 def test_thirty_day_horizon_gives_a_single_crop():
@@ -152,7 +157,7 @@ def test_thirty_day_horizon_gives_a_single_crop():
     with pytest.raises(ValueError):
         cr.plan(COOL_30, COOL_90, planning_horizon_days=60)
     with pytest.raises(ValueError):
-        cr.plan(COOL_30, COOL_90, previous_crop="wheat")
+        cr.plan(COOL_30, COOL_90, previous_crop="mango")
 
 
 # ---------------- API, with the real saved forecasting artifacts ----------------
@@ -186,7 +191,6 @@ def test_api_plan_with_real_forecasts(client):
 def test_api_validation(client):
     bad = [
         {**WEST_IRBID, "planning_horizon_days": 60},
-        {**WEST_IRBID, "previous_crop": "wheat"},
         {**WEST_IRBID, "cultivation_type": "hydroponic"},
         {"latitude": 200, "longitude": 35.7},
         {"longitude": 35.7},
@@ -194,6 +198,10 @@ def test_api_validation(client):
     for body in bad:
         r = client.post(f"{API}/crop-rotation/plan", json=body)
         assert r.status_code == 422 and r.json()["error"]["code"] == "VALIDATION_ERROR", body
+    unknown = client.post(f"{API}/crop-rotation/plan", json={**WEST_IRBID, "previous_crop": "mango"})
+    assert unknown.status_code == 422 and unknown.json()["error"]["code"] == "UNSUPPORTED_CROP"
+    ok = client.post(f"{API}/crop-rotation/plan", json={**WEST_IRBID, "previous_crop": "wheat", "previous_crop_year": 2025, "crop_history": [{"year": 2024, "crop_id": "tomato"}]})
+    assert ok.status_code == 200 and [(h["crop_id"], h["years_ago"]) for h in ok.json()["crop_history"]] == [("wheat", 1), ("tomato", 2)]
     out = client.post(f"{API}/crop-rotation/plan", json={"latitude": 30.0, "longitude": 30.0})
     assert out.status_code == 422 and out.json()["error"]["code"] == "UNSUPPORTED_LOCATION"
     # a planting date the data does not cover is refused, never served from other dates

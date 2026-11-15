@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from sqlmodel import Session, col, select
 
 from app.api.deps import current_user, owned_farm
-from app.api.outlook import _both, forecast_context
+from app.api.outlook import FarmHistoryIn, _both, _lab, _site, forecast_context, history_items
 from app.core.config import get_settings
 from app.core.db import get_session
 from app.core.errors import AppError
@@ -30,19 +30,18 @@ from app.models import Plot, RotationPlan, User
 router = APIRouter(prefix="/crop-rotation", tags=["crop rotation"])
 _s = get_settings()
 
-CropId = Literal["radish", "arugula", "spinach", "carrot", "beet", "bush_bean"]
+class PlanIn(FarmHistoryIn):
+    """Location and planning window, plus the land's history (previous crops, irrigation, optional lab soil results).
 
+    `cultivation_type` is recorded with the plan; it is not an input of the forecasting models or of the rules.
+    The previous crop may be any crop of the previous-crop list, not only the six candidates.
+    """
 
-class PlanIn(BaseModel):
     latitude: float = Field(ge=-90, le=90)
     longitude: float = Field(ge=-180, le=180)
     planning_horizon_days: Literal[30, 90] = 90
     # Omitted = the default date of the available data. A date outside the data is refused.
     planting_date: Optional[date] = None
-    previous_crop: Optional[CropId] = None  # None = unknown
-    irrigation_available: Optional[bool] = None
-    # Recorded with the plan. It is not an input of the forecasting models or of the rules.
-    cultivation_type: Optional[Literal["open_field", "greenhouse"]] = None
 
 
 class SavePlanIn(PlanIn):
@@ -65,16 +64,20 @@ def _add_dates(rotation: Optional[dict], planting: date) -> None:
 def build_plan(body: PlanIn) -> dict:
     from nasa_final.AI import crop_rotation as planner
 
-    ctx = forecast_context(body.latitude, body.longitude, body.planting_date)
+    ctx = forecast_context(body.latitude, body.longitude, body.planting_date, _lab(body))
     planting, dates = ctx["planting"], ctx["dates"]
+    history = history_items(ctx["api"], body, planting)
+    # Historical observations for the second phase are those of days 31-90, not of the whole window.
+    site_2 = _site(ctx["grid_id"], planting + timedelta(days=30), 60, ctx["lab"]) if body.planning_horizon_days == 90 else None
     try:
         out = planner.plan(
             ctx["values"][30],
             ctx["values"][90] if body.planning_horizon_days == 90 else None,
             planning_horizon_days=body.planning_horizon_days,
-            previous_crop=body.previous_crop,
+            crop_history=history,
             irrigation_available=body.irrigation_available,
-            soil_ph=ctx["soil_ph"],
+            site_phase_1=ctx["sites"][30],
+            site_phase_2=site_2,
             translate=_both,
         )
     except ValueError as e:
@@ -119,10 +122,13 @@ def build_plan(body: PlanIn) -> dict:
             "grid_distance_km": ctx["grid"]["distance_km"],
             "governorate": ctx["location"]["governorate"],
         },
-        "previous_crop": body.previous_crop,
+        "previous_crop": out["previous_crop"],
+        "crop_history": out["crop_history"],
         "irrigation_available": body.irrigation_available,
         "cultivation_type": body.cultivation_type,
         "soil": ctx["soil"],
+        "terrain": ctx["terrain"],
+        "historical_indicators": {"phase_1": ctx["sites"][30]["history"], "phase_2": site_2["history"] if site_2 else None},
         "forecasts": out["forecasts"],
         # The two forecasts the phases are built from, with the method and validation error of each value.
         "forecast_basis": {"30": ctx["meta"][30], "90": ctx["meta"][90]},

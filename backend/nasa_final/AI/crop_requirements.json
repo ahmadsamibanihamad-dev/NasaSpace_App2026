@@ -1,1 +1,880 @@
-{"version":"mvp-1","sources":["https://extension.umn.edu/vegetable-growing-guides-farmers/crop-and-field-planning-tools-vegetable-farmers","https://extension.oregonstate.edu/catalog/em-9032-educators-guide-vegetable-gardening","https://extension.usu.edu/yardandgarden/research/carrots-in-the-garden","https://extension.usu.edu/yardandgarden/research/solutions-to-soil-problems-ii-high-ph","https://dug.org/wp-content/uploads/2017/06/Grow-a-Garden_Vegetable-Planting-Guide.pdf"],"notes":"Approximate MVP air-temperature screening ranges and days to harvest, not locally validated agronomic thresholds. Baby/early varieties for 30 days; harvest may take longer. Humidity and surface moisture rules are heuristic, not crop water requirements.","crops":[{"id":"radish","name_ar":"الفجل المبكر","name_en":"Early radish","horizon":30,"days":[20,30],"temp":[10,18],"ph":[6,7.5],"note_ar":"صنف سريع النضج","family":"Brassicaceae"},{"id":"arugula","name_ar":"الجرجير الصغير","name_en":"Baby arugula","horizon":30,"days":[25,45],"temp":[10,22],"ph":[6,7.5],"note_ar":"حصاد أوراق صغيرة؛ قد يتجاوز الشهر","family":"Brassicaceae"},{"id":"spinach","name_ar":"السبانخ الصغيرة","name_en":"Baby spinach","horizon":30,"days":[30,40],"temp":[10,20],"ph":[6.5,7.5],"note_ar":"حصاد مبكر للأوراق؛ قد يتجاوز الشهر","family":"Amaranthaceae"},{"id":"carrot","name_ar":"الجزر","name_en":"Carrot","horizon":90,"days":[55,88],"temp":[15,24],"ph":[6,7.5],"note_ar":"يحتاج تربة عميقة جيدة الصرف","family":"Apiaceae"},{"id":"beet","name_ar":"الشمندر","name_en":"Beetroot","horizon":90,"days":[50,60],"temp":[15,22],"ph":[6.5,8],"note_ar":"يحتاج رطوبة منتظمة وصرفًا جيدًا","family":"Amaranthaceae"},{"id":"bush_bean","name_ar":"الفاصولياء الخضراء","name_en":"Bush green bean","horizon":90,"days":[45,65],"temp":[18,27],"ph":[6,7.5],"note_ar":"محصول دافئ حساس للصقيع","family":"Fabaceae"}]}
+{
+ "version": "mvp-2",
+ "notes": "Rule version mvp-2. Temperature, pH and days-to-harvest ranges are the approximate MVP screening values of mvp-1, kept unchanged. Soil, water, nutrient, frost and rotation attributes are qualitative categories taken from the listed extension references. Scoring constants are heuristic design choices, not calibrated agronomic thresholds.",
+ "sources": [
+  "https://extension.umn.edu/vegetable-growing-guides-farmers/crop-and-field-planning-tools-vegetable-farmers",
+  "https://extension.oregonstate.edu/catalog/em-9032-educators-guide-vegetable-gardening",
+  "https://extension.usu.edu/yardandgarden/research/carrots-in-the-garden",
+  "https://extension.usu.edu/yardandgarden/research/solutions-to-soil-problems-ii-high-ph",
+  "https://dug.org/wp-content/uploads/2017/06/Grow-a-Garden_Vegetable-Planting-Guide.pdf"
+ ],
+ "references": {
+  "USU_ROOT": {
+   "url": "https://extension.usu.edu/vegetableguide/root-crops/soil-fertility"
+  },
+  "USU_LEAFY": {
+   "url": "https://extension.usu.edu/vegetableguide/leafy-greens/soil-fertility"
+  },
+  "USU_SOIL": {
+   "url": "https://extension.usu.edu/vegetableguide/management/soil"
+  },
+  "USU_CARROT": {
+   "url": "https://extension.usu.edu/yardandgarden/research/carrots-in-the-garden"
+  },
+  "USU_BEET": {
+   "url": "https://extension.usu.edu/yardandgarden/research/beets-in-the-garden"
+  },
+  "USU_RADISH": {
+   "url": "https://extension.usu.edu/yardandgarden/research/radishes-in-the-garden"
+  },
+  "USU_SPINACH": {
+   "url": "https://extension.usu.edu/yardandgarden/research/spinach-in-the-garden"
+  },
+  "USU_BEAN": {
+   "url": "https://extension.usu.edu/yardandgarden/research/beans-in-the-garden"
+  },
+  "UMN_SOIL": {
+   "url": "https://extension.umn.edu/garden-and-home/yard-and-garden/gardening-in-minnesota/living-soil-healthy-garden"
+  }
+ },
+ "reference_applicability": "All crop references are US university extension publications (Utah State University, University of Minnesota). Utah is semi-arid with alkaline, often calcareous soils and irrigated vegetable production, which is closer to Jordanian conditions than humid regions, but cultivars, seasons, pests and soils differ. Statements were used qualitatively (preferred soil texture, drainage, relative water and nitrogen demand, frost tolerance, plant families). Planting-date advice from the references was not used. Nitrogen rates were used only to rank crops into low / medium / high demand, never to prescribe fertilizer. Nothing here was validated on Jordanian field data.",
+ "weights": {
+  "temperature": 20,
+  "water": 15,
+  "rotation": 20,
+  "texture_drainage": 10,
+  "soil_ph": 10,
+  "fertility": 10,
+  "humidity": 5,
+  "rainfall": 5,
+  "terrain": 5
+ },
+ "groups": {
+  "climate": [
+   "temperature",
+   "humidity"
+  ],
+  "water": [
+   "water",
+   "rainfall"
+  ],
+  "soil": [
+   "texture_drainage",
+   "soil_ph",
+   "terrain"
+  ],
+  "fertility": [
+   "fertility"
+  ],
+  "rotation": [
+   "rotation"
+  ]
+ },
+ "scoring": {
+  "note": "Heuristic MVP constants. Configurable; not scientifically calibrated.",
+  "temperature_margin_c": 10,
+  "moisture_band_m3_m3": [
+   0.15,
+   0.35
+  ],
+  "moisture_margin": 0.15,
+  "irrigation_water_blend": 0.5,
+  "root_zone_share_for_deep_rooted": 0.5,
+  "humidity_band_pct": [
+   40,
+   80
+  ],
+  "humidity_margin": 40,
+  "rain_rate_full_mm_per_day": 1.0,
+  "ph_margin": 2,
+  "texture_scores": {
+   "preferred": 100,
+   "acceptable": 75,
+   "needs_amendment": 45
+  },
+  "coarse_fragment_classes_pct": {
+   "gravelly": 15,
+   "very_gravelly": 35,
+   "source": "USDA Soil Survey Manual rock-fragment modifier classes (15-35 % and 35-60 % by volume)"
+  },
+  "coarse_fragment_penalty": {
+   "gravelly": 15,
+   "very_gravelly": 35
+  },
+  "fertility_demand_sensitivity": {
+   "high": 1.0,
+   "medium": 0.7,
+   "low": 0.4
+  },
+  "slope_classes_pct": [
+   [
+    5,
+    100
+   ],
+   [
+    10,
+    80
+   ],
+   [
+    15,
+    60
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    1000000000.0,
+    0
+   ]
+  ],
+  "slope_source": "FAO Guidelines for Soil Description (2006) slope gradient classes: gently sloping to 5 %, sloping 5-10 %, strongly sloping 10-15 %, moderately steep 15-30 %, steep above 30 %. The score per class is heuristic.",
+  "rotation": {
+   "same_crop_penalty": 70,
+   "same_family_penalty": 45,
+   "year_weights": {
+    "1": 1.0,
+    "2": 0.5,
+    "3": 0.25
+   },
+   "heavy_after_heavy_penalty": 10,
+   "after_legume_bonus": 10
+  },
+  "frost": {
+   "threshold_c": 0.0,
+   "critical_frequency": 0.5
+  },
+  "status": {
+   "not_recommended_below": 50,
+   "conditional_below": 75,
+   "rotation_conditional_below": 60
+  }
+ },
+ "texture_groups": {
+  "note": "USDA soil texture classes grouped into light / medium / heavy.",
+  "light": [
+   "sand",
+   "loamy sand",
+   "sandy loam"
+  ],
+  "medium": [
+   "loam",
+   "silt loam",
+   "silt",
+   "sandy clay loam"
+  ],
+  "heavy": [
+   "clay loam",
+   "silty clay loam",
+   "sandy clay",
+   "silty clay",
+   "clay"
+  ]
+ },
+ "previous_crops": {
+  "note": "Crops a user can pick as a previous crop. Families follow the plant-family list of the UMN reference (beet and spinach listed there as goosefoot family, here Amaranthaceae, the current name of the same family; onion listed there as Liliaceae). Nutrient demand is given only where the references state it.",
+  "source": "UMN_SOIL",
+  "items": [
+   {
+    "id": "radish",
+    "name_ar": "فجل",
+    "name_en": "Radish",
+    "family": "Brassicaceae",
+    "nutrient_demand": "low"
+   },
+   {
+    "id": "arugula",
+    "name_ar": "جرجير",
+    "name_en": "Arugula",
+    "family": "Brassicaceae",
+    "nutrient_demand": "high"
+   },
+   {
+    "id": "spinach",
+    "name_ar": "سبانخ",
+    "name_en": "Spinach",
+    "family": "Amaranthaceae",
+    "nutrient_demand": "high"
+   },
+   {
+    "id": "carrot",
+    "name_ar": "جزر",
+    "name_en": "Carrot",
+    "family": "Apiaceae",
+    "nutrient_demand": "medium"
+   },
+   {
+    "id": "beet",
+    "name_ar": "شمندر",
+    "name_en": "Beetroot",
+    "family": "Amaranthaceae",
+    "nutrient_demand": "medium"
+   },
+   {
+    "id": "bush_bean",
+    "name_ar": "فاصولياء",
+    "name_en": "Beans",
+    "family": "Fabaceae",
+    "nutrient_demand": "low"
+   },
+   {
+    "id": "wheat",
+    "name_ar": "قمح",
+    "name_en": "Wheat",
+    "family": "Poaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "barley",
+    "name_ar": "شعير",
+    "name_en": "Barley",
+    "family": "Poaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "corn",
+    "name_ar": "ذرة",
+    "name_en": "Corn",
+    "family": "Poaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "tomato",
+    "name_ar": "بندورة",
+    "name_en": "Tomato",
+    "family": "Solanaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "potato",
+    "name_ar": "بطاطا",
+    "name_en": "Potato",
+    "family": "Solanaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "eggplant",
+    "name_ar": "باذنجان",
+    "name_en": "Eggplant",
+    "family": "Solanaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "pepper",
+    "name_ar": "فلفل",
+    "name_en": "Pepper",
+    "family": "Solanaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "cucumber",
+    "name_ar": "خيار",
+    "name_en": "Cucumber",
+    "family": "Cucurbitaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "squash",
+    "name_ar": "كوسا",
+    "name_en": "Squash",
+    "family": "Cucurbitaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "melon",
+    "name_ar": "بطيخ وشمام",
+    "name_en": "Melon",
+    "family": "Cucurbitaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "onion",
+    "name_ar": "بصل",
+    "name_en": "Onion",
+    "family": "Liliaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "garlic",
+    "name_ar": "ثوم",
+    "name_en": "Garlic",
+    "family": "Liliaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "cabbage",
+    "name_ar": "ملفوف",
+    "name_en": "Cabbage",
+    "family": "Brassicaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "cauliflower",
+    "name_ar": "زهرة",
+    "name_en": "Cauliflower",
+    "family": "Brassicaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "lettuce",
+    "name_ar": "خس",
+    "name_en": "Lettuce",
+    "family": "Asteraceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "lentil",
+    "name_ar": "عدس",
+    "name_en": "Lentil",
+    "family": "Fabaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "chickpea",
+    "name_ar": "حمص",
+    "name_en": "Chickpea",
+    "family": "Fabaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "pea",
+    "name_ar": "بازيلاء",
+    "name_en": "Pea",
+    "family": "Fabaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "vetch",
+    "name_ar": "بيقيا",
+    "name_en": "Vetch",
+    "family": "Fabaceae",
+    "nutrient_demand": null
+   },
+   {
+    "id": "fallow",
+    "name_ar": "بور (بدون زراعة)",
+    "name_en": "Fallow (no crop)",
+    "family": null,
+    "nutrient_demand": null
+   },
+   {
+    "id": "other",
+    "name_ar": "محصول آخر",
+    "name_en": "Other",
+    "family": null,
+    "nutrient_demand": null
+   }
+  ]
+ },
+ "crops": [
+  {
+   "id": "radish",
+   "name_ar": "الفجل المبكر",
+   "name_en": "Early radish",
+   "horizon": 30,
+   "days": [
+    20,
+    30
+   ],
+   "temp": [
+    10,
+    18
+   ],
+   "ph": [
+    6,
+    7.5
+   ],
+   "note_ar": "صنف سريع النضج",
+   "family": "Brassicaceae",
+   "group": "root",
+   "rooting": {
+    "depth_class": "shallow",
+    "soil_layers_cm": [
+     0,
+     30
+    ],
+    "basis": "Small, fast root. The references give no rooting depth for radish; the topsoil is used.",
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "texture": {
+    "preferred": [
+     "light"
+    ],
+    "acceptable": [
+     "medium"
+    ],
+    "needs_amendment": [
+     "heavy"
+    ],
+    "statement": "Radishes prefer fertile, well-drained, deep, sandy soils rich in organic matter; heavy soils need to be amended with plenty of compost.",
+    "source": "USU_RADISH"
+   },
+   "drainage": {
+    "requirement": "well_drained",
+    "statement": "Root vegetables tolerate a wide range of soil types but require deep, loose, friable soils with good moisture-holding capacity and excellent drainage; avoid soils prone to compaction or with lots of stones.",
+    "source": "USU_ROOT"
+   },
+   "stones_sensitive": {
+    "value": true,
+    "statement": "Avoid soils with lots of stones.",
+    "source": "USU_ROOT"
+   },
+   "moisture": {
+    "demand": "high",
+    "uses_root_zone": false,
+    "statement": "Root crops have high water demands. Moisture fluctuations cause root cracking.",
+    "source": "USU_ROOT"
+   },
+   "humidity_sensitivity": {
+    "note": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "nutrient_demand": {
+    "category": "low",
+    "statement": "Most root vegetables require 50-150 lb nitrogen per acre; use the lowest amount on radish.",
+    "source": "USU_ROOT"
+   },
+   "frost": {
+    "sensitivity": "tolerant",
+    "statement": "Cool-season vegetable, planted 2-3 weeks before the last frost.",
+    "source": "USU_RADISH"
+   },
+   "heat_limit_c": {
+    "value": 26.7,
+    "statement": "Radishes grow best when temperatures do not exceed 80 F.",
+    "source": "USU_RADISH"
+   },
+   "rotation": {
+    "avoid_family_repeat": true,
+    "statement": "Crop rotation is based on plant families; plants in the same family share pests and diseases and have comparable nutrient requirements.",
+    "source": "UMN_SOIL"
+   }
+  },
+  {
+   "id": "arugula",
+   "name_ar": "الجرجير الصغير",
+   "name_en": "Baby arugula",
+   "horizon": 30,
+   "days": [
+    25,
+    45
+   ],
+   "temp": [
+    10,
+    22
+   ],
+   "ph": [
+    6,
+    7.5
+   ],
+   "note_ar": "حصاد أوراق صغيرة؛ قد يتجاوز الشهر",
+   "family": "Brassicaceae",
+   "group": "leafy",
+   "rooting": {
+    "depth_class": "shallow",
+    "soil_layers_cm": [
+     0,
+     30
+    ],
+    "basis": "Leafy greens have shallow root systems, most in the top foot of soil.",
+    "source": "USU_LEAFY",
+    "evidence": "group"
+   },
+   "texture": {
+    "preferred": [
+     "medium",
+     "heavy"
+    ],
+    "acceptable": [
+     "light"
+    ],
+    "needs_amendment": [],
+    "statement": "Leafy greens grow on a wide range of soil types; heavier soils (silt or clays) produce high yields, lighter sandier soils suit early spring, fall or winter production.",
+    "source": "USU_LEAFY"
+   },
+   "drainage": {
+    "requirement": "well_drained_moisture_holding",
+    "statement": "Leafy greens can be grown on a wide range of soil types; the soil must have good moisture-holding capacity with excellent drainage; avoid soils prone to compaction or crusting.",
+    "source": "USU_LEAFY"
+   },
+   "stones_sensitive": {
+    "value": false,
+    "statement": null,
+    "source": null
+   },
+   "moisture": {
+    "demand": "high",
+    "uses_root_zone": false,
+    "statement": "Leafy greens have high water demands.",
+    "source": "USU_LEAFY"
+   },
+   "humidity_sensitivity": {
+    "note": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "nutrient_demand": {
+    "category": "high",
+    "statement": "Most leafy green vegetables require 75-150 lb nitrogen per acre.",
+    "source": "USU_LEAFY"
+   },
+   "frost": {
+    "sensitivity": "unknown",
+    "statement": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "heat_limit_c": {
+    "value": null,
+    "statement": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "rotation": {
+    "avoid_family_repeat": true,
+    "statement": "Crop rotation is based on plant families; plants in the same family share pests and diseases and have comparable nutrient requirements.",
+    "source": "UMN_SOIL"
+   }
+  },
+  {
+   "id": "spinach",
+   "name_ar": "السبانخ الصغيرة",
+   "name_en": "Baby spinach",
+   "horizon": 30,
+   "days": [
+    30,
+    40
+   ],
+   "temp": [
+    10,
+    20
+   ],
+   "ph": [
+    6.5,
+    7.5
+   ],
+   "note_ar": "حصاد مبكر للأوراق؛ قد يتجاوز الشهر",
+   "family": "Amaranthaceae",
+   "group": "leafy",
+   "rooting": {
+    "depth_class": "shallow",
+    "soil_layers_cm": [
+     0,
+     30
+    ],
+    "basis": "Leafy greens have shallow root systems, most in the top foot of soil.",
+    "source": "USU_LEAFY",
+    "evidence": "group"
+   },
+   "texture": {
+    "preferred": [
+     "medium",
+     "heavy"
+    ],
+    "acceptable": [
+     "light"
+    ],
+    "needs_amendment": [],
+    "statement": "Spinach prefers fertile, well-drained soils rich in organic matter; most soils are well suited. Heavier soils produce high yields for leafy greens.",
+    "source": "USU_SPINACH"
+   },
+   "drainage": {
+    "requirement": "well_drained_moisture_holding",
+    "statement": "Leafy greens can be grown on a wide range of soil types; the soil must have good moisture-holding capacity with excellent drainage; avoid soils prone to compaction or crusting.",
+    "source": "USU_LEAFY"
+   },
+   "stones_sensitive": {
+    "value": false,
+    "statement": null,
+    "source": null
+   },
+   "moisture": {
+    "demand": "high",
+    "uses_root_zone": false,
+    "statement": "Water spinach regularly; moisture fluctuations make leaves tough.",
+    "source": "USU_SPINACH"
+   },
+   "humidity_sensitivity": {
+    "note": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "nutrient_demand": {
+    "category": "high",
+    "statement": "Most leafy green vegetables require 75-150 lb nitrogen per acre.",
+    "source": "USU_LEAFY"
+   },
+   "frost": {
+    "sensitivity": "tolerant",
+    "statement": "Temperatures down to 32 F do not seriously damage young plants.",
+    "source": "USU_SPINACH"
+   },
+   "heat_limit_c": {
+    "value": 23.9,
+    "statement": "Spinach grows best when temperatures do not exceed 75 F.",
+    "source": "USU_SPINACH"
+   },
+   "rotation": {
+    "avoid_family_repeat": true,
+    "statement": "Crop rotation is based on plant families; plants in the same family share pests and diseases and have comparable nutrient requirements.",
+    "source": "UMN_SOIL"
+   }
+  },
+  {
+   "id": "carrot",
+   "name_ar": "الجزر",
+   "name_en": "Carrot",
+   "horizon": 90,
+   "days": [
+    55,
+    88
+   ],
+   "temp": [
+    15,
+    24
+   ],
+   "ph": [
+    6,
+    7.5
+   ],
+   "note_ar": "يحتاج تربة عميقة جيدة الصرف",
+   "family": "Apiaceae",
+   "group": "root",
+   "rooting": {
+    "depth_class": "deep",
+    "soil_layers_cm": [
+     0,
+     60
+    ],
+    "basis": "Carrots need deep soils; plants with long roots, like carrots, absorb nutrients deeper in the soil.",
+    "source": "UMN_SOIL",
+    "evidence": "crop"
+   },
+   "texture": {
+    "preferred": [
+     "light"
+    ],
+    "acceptable": [
+     "medium"
+    ],
+    "needs_amendment": [
+     "heavy"
+    ],
+    "statement": "Carrots prefer fertile, well-drained, deep, sandy soils rich in organic matter; heavy soils need to be amended with plenty of compost.",
+    "source": "USU_CARROT"
+   },
+   "drainage": {
+    "requirement": "well_drained",
+    "statement": "Root vegetables tolerate a wide range of soil types but require deep, loose, friable soils with good moisture-holding capacity and excellent drainage; avoid soils prone to compaction or with lots of stones.",
+    "source": "USU_ROOT"
+   },
+   "stones_sensitive": {
+    "value": true,
+    "statement": "Forking is associated with rocky, stony, or heavy soils.",
+    "source": "USU_CARROT"
+   },
+   "moisture": {
+    "demand": "high",
+    "uses_root_zone": true,
+    "statement": "Water carrots regularly; wet and dry periods favor root cracking.",
+    "source": "USU_CARROT"
+   },
+   "humidity_sensitivity": {
+    "note": "Leaf blights occur when foliage remains wet for long periods.",
+    "source": "USU_CARROT",
+    "evidence": "qualitative"
+   },
+   "nutrient_demand": {
+    "category": "medium",
+    "statement": "Most root vegetables require 50-150 lb nitrogen per acre.",
+    "source": "USU_ROOT"
+   },
+   "frost": {
+    "sensitivity": "tolerant",
+    "statement": "Temperatures down to 32 F do not seriously damage plants.",
+    "source": "USU_CARROT"
+   },
+   "heat_limit_c": {
+    "value": 23.9,
+    "statement": "Carrots grow best when temperatures do not exceed 75 F.",
+    "source": "USU_CARROT"
+   },
+   "rotation": {
+    "avoid_family_repeat": true,
+    "statement": "Crop rotation is based on plant families; plants in the same family share pests and diseases and have comparable nutrient requirements.",
+    "source": "UMN_SOIL"
+   }
+  },
+  {
+   "id": "beet",
+   "name_ar": "الشمندر",
+   "name_en": "Beetroot",
+   "horizon": 90,
+   "days": [
+    50,
+    60
+   ],
+   "temp": [
+    15,
+    22
+   ],
+   "ph": [
+    6.5,
+    8
+   ],
+   "note_ar": "يحتاج رطوبة منتظمة وصرفًا جيدًا",
+   "family": "Amaranthaceae",
+   "group": "root",
+   "rooting": {
+    "depth_class": "deep",
+    "soil_layers_cm": [
+     0,
+     60
+    ],
+    "basis": "Beets prefer deep soils; root vegetables require deep, loose soils.",
+    "source": "USU_BEET",
+    "evidence": "crop"
+   },
+   "texture": {
+    "preferred": [
+     "light"
+    ],
+    "acceptable": [
+     "medium"
+    ],
+    "needs_amendment": [
+     "heavy"
+    ],
+    "statement": "Beets prefer fertile, well-drained, deep, sandy soils rich in organic matter; heavy soils need to be amended with plenty of compost.",
+    "source": "USU_BEET"
+   },
+   "drainage": {
+    "requirement": "well_drained",
+    "statement": "Root vegetables tolerate a wide range of soil types but require deep, loose, friable soils with good moisture-holding capacity and excellent drainage; avoid soils prone to compaction or with lots of stones.",
+    "source": "USU_ROOT"
+   },
+   "stones_sensitive": {
+    "value": true,
+    "statement": "Avoid soils with lots of stones.",
+    "source": "USU_ROOT"
+   },
+   "moisture": {
+    "demand": "high",
+    "uses_root_zone": true,
+    "statement": "Water beets regularly; water stress in the first 6 weeks leads to premature flowering and low yields.",
+    "source": "USU_BEET"
+   },
+   "humidity_sensitivity": {
+    "note": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "nutrient_demand": {
+    "category": "medium",
+    "statement": "Most root vegetables require 50-150 lb nitrogen per acre.",
+    "source": "USU_ROOT"
+   },
+   "frost": {
+    "sensitivity": "tolerant",
+    "statement": "Cool-season vegetable; tastes best after several weeks of cool frosty weather.",
+    "source": "USU_BEET"
+   },
+   "heat_limit_c": {
+    "value": 29.4,
+    "statement": "Beets grow best when temperatures do not exceed 85 F.",
+    "source": "USU_BEET"
+   },
+   "rotation": {
+    "avoid_family_repeat": true,
+    "statement": "Crop rotation is based on plant families; plants in the same family share pests and diseases and have comparable nutrient requirements.",
+    "source": "UMN_SOIL"
+   }
+  },
+  {
+   "id": "bush_bean",
+   "name_ar": "الفاصولياء الخضراء",
+   "name_en": "Bush green bean",
+   "horizon": 90,
+   "days": [
+    45,
+    65
+   ],
+   "temp": [
+    18,
+    27
+   ],
+   "ph": [
+    6,
+    7.5
+   ],
+   "note_ar": "محصول دافئ حساس للصقيع",
+   "family": "Fabaceae",
+   "group": "legume",
+   "rooting": {
+    "depth_class": "unknown",
+    "soil_layers_cm": [
+     0,
+     30
+    ],
+    "basis": "The references give no rooting depth for bush beans; the topsoil is used.",
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "texture": {
+    "preferred": [
+     "light",
+     "medium",
+     "heavy"
+    ],
+    "acceptable": [],
+    "needs_amendment": [],
+    "statement": "Beans grow in all soil types provided they are rich in organic matter, well-drained, and fertile.",
+    "source": "USU_BEAN"
+   },
+   "drainage": {
+    "requirement": "well_drained",
+    "statement": "Beans need fertile, well-drained soil.",
+    "source": "USU_BEAN"
+   },
+   "stones_sensitive": {
+    "value": false,
+    "statement": null,
+    "source": null
+   },
+   "moisture": {
+    "demand": "high_at_flowering",
+    "uses_root_zone": false,
+    "statement": "Beans require regular watering, particularly at flowering; water stress reduces yields and pod quality.",
+    "source": "USU_BEAN"
+   },
+   "humidity_sensitivity": {
+    "note": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "nutrient_demand": {
+    "category": "low",
+    "statement": "Beans have a low fertilizer requirement.",
+    "source": "USU_BEAN"
+   },
+   "frost": {
+    "sensitivity": "sensitive",
+    "statement": "Beans are warm weather vegetables that require soil and air temperatures above 60 F; planted about the last frost-free date.",
+    "source": "USU_BEAN"
+   },
+   "heat_limit_c": {
+    "value": null,
+    "statement": null,
+    "source": null,
+    "evidence": "insufficient"
+   },
+   "rotation": {
+    "avoid_family_repeat": true,
+    "statement": "Crop rotation is based on plant families; plants in the same family share pests and diseases and have comparable nutrient requirements.",
+    "source": "UMN_SOIL"
+   }
+  }
+ ]
+}

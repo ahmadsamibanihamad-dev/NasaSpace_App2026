@@ -764,7 +764,21 @@
   "defaultDate": "Default date",
   "dateHint": "Change the date to see the one- and three-month forecast that starts from it.",
   "dateRange": "Data is available for dates between {{a}} and {{b}}.",
-  "dateFixed": "Only the default date is available right now."
+  "dateFixed": "Only the default date is available right now.",
+  "cropsBodyMulti": "Ranked across the factors: expected climate, water, soil, fertility and crop rotation.",
+  "hist": {
+   "title": "Historically observed indicators",
+   "body": "These are readings of the same period in earlier years, not a forecast. No forecasting model exists for them.",
+   "tmin": "Mean daily minimum",
+   "tmax": "Mean daily maximum",
+   "frost": "Years with frost",
+   "root": "Root-zone moisture",
+   "profile": "Profile moisture",
+   "solar": "Solar radiation",
+   "wind": "Wind speed",
+   "dew": "Dew point",
+   "note": "Mean of {{a}}–{{b}} for the same period of the year."
+  }
  },
  "soilInfo": {
   "title": "Soil information",
@@ -778,8 +792,21 @@
    "silt": "Silt",
    "clay": "Clay",
    "organic_carbon": "Organic carbon",
-   "nitrogen": "Nitrogen"
-  }
+   "nitrogen": "Total nitrogen",
+   "cec": "CEC",
+   "bulk_density": "Bulk density",
+   "coarse_fragments": "Coarse fragments"
+  },
+  "titleFull": "Soil and terrain characteristics",
+  "static": "Static properties of the location, fetched automatically; not a forecast.",
+  "texture": "Texture",
+  "lab": "Includes laboratory results",
+  "elevation": "Elevation",
+  "slope": "Slope",
+  "aspect": "Aspect",
+  "flat": "Flat",
+  "terrainSource": "Source: Copernicus DEM, 30 m.",
+  "classes": {}
  },
  "planner": {
   "title": "Crop Rotation Planner",
@@ -864,5 +891,34 @@
    "partial_plan": "Partial plan",
    "no_plan_available": "No plan"
   }
+ },
+ "history": {
+  "title": "Agricultural history of the land",
+  "body": "What was grown on this land before? It feeds the crop rotation compatibility.",
+  "previous": "Previous crop",
+  "unknown": "Unknown",
+  "year": "Year grown",
+  "yearHint": "Leave empty if it was the last season.",
+  "earlier": "Earlier crops (optional)",
+  "addEarlier": "Add an earlier crop",
+  "crop": "Crop",
+  "pick": "Choose a crop"
+ },
+ "score": {
+  "overall": "Overall suitability",
+  "unknown": "unknown",
+  "groups": {
+   "climate": "Climate suitability",
+   "water": "Water availability",
+   "soil": "Soil compatibility",
+   "fertility": "Soil fertility",
+   "rotation": "Crop rotation compatibility"
+  },
+  "coverage": "{{pct}}% of the factors were evaluated. The rest have no data and were not counted.",
+  "why": "Why it fits",
+  "less": "What lowers its suitability",
+  "missing": "Missing information",
+  "blocked": "Why it is not recommended",
+  "note": "Scores are rule-based suitability indicators, not probabilities of crop success."
  }
 }

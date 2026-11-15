@@ -4,7 +4,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
-import { Button, Card, Chip, Field, Input, Pill, Select, Skeleton, Tabs, Tile } from '../../components/ui/primitives'
+import { Button, Card, Field, Input, Pill, Select, Skeleton, Tabs, Tile } from '../../components/ui/primitives'
 import { Banner, ErrorState, StateBlock } from '../../components/ui/states'
 import { FactorBar } from '../../components/ui/viz'
 import { Icon, type IconName } from '../../components/ui/Icon'
@@ -15,6 +15,8 @@ import { getRotationPlan, saveRotationPlan, type ForecastKey, type RotationOptio
 import { date, dayMonth, num } from '../../lib/format'
 import { loc } from '../../i18n'
 import { SoilTiles } from '../outlook/SoilInfo'
+import { GroupScores } from '../outlook/CropScore'
+import { emptyHistory, FarmHistory, historyKey, historyPayload, type FarmHistoryValue } from '../outlook/FarmHistory'
 
 export const PLAN_CROPS = ['radish', 'arugula', 'spinach', 'carrot', 'beet', 'bush_bean'] as const
 const VARS: { key: ForecastKey; icon: IconName }[] = [
@@ -23,7 +25,6 @@ const VARS: { key: ForecastKey; icon: IconName }[] = [
   { key: 'soil_moisture_m3_m3', icon: 'drop' },
   { key: 'rainfall_mm', icon: 'cloudRain' },
 ]
-const FACTORS = ['temperature', 'surface_moisture_proxy', 'humidity_proxy', 'rainfall_proxy', 'soil_ph'] as const
 const STEP_TONE = { suitable_candidate: 'green', conditional: 'warning', not_recommended: 'critical' } as const
 
 function fmtVar(key: ForecastKey, v: number | null | undefined): string {
@@ -115,11 +116,7 @@ function StepCard({ s }: { s: RotationStep }) {
       <p className="text-caption text-text-secondary">
         {t('planner.growth', { a: s.growth_days[0], b: s.growth_days[1] })} · {loc(s.note)}
       </p>
-      <div className="flex flex-col gap-3">
-        {FACTORS.filter((k) => k in s.factor_scores).map((k) => (
-          <FactorBar key={k} label={t(`outlook.factors.${k}`)} value={s.factor_scores[k] ?? null} />
-        ))}
-      </div>
+      <GroupScores groups={s.group_scores} coverage={s.coverage_pct} />
       {s.reasons.length > 0 && (
         <div>
           <p className="text-label font-semibold mb-1">{t('outlook.why')}</p>
@@ -295,7 +292,7 @@ export function PlanView({ plan, header }: { plan: RotationPlanData; header?: Re
 
       <Card className="flex flex-col gap-3">
         <h2 className="text-h2 font-semibold">{t('soilInfo.title')}</h2>
-        <SoilTiles soil={plan.soil} />
+        <SoilTiles soil={plan.soil} terrain={plan.terrain} />
       </Card>
 
       {/* F. data quality and warnings */}
@@ -313,8 +310,6 @@ export function PlanView({ plan, header }: { plan: RotationPlanData; header?: Re
   )
 }
 
-type Irr = 'yes' | 'no' | 'unknown'
-
 export function RotationPlanner({
   lat,
   lon,
@@ -330,7 +325,7 @@ export function RotationPlanner({
   /** Farm / parcel / governorate line shown in the inputs card. */
   place: string
   defaultIrrigation: boolean | null
-  /** The parcel's current crop, offered as the previous crop when it is one of the six. */
+  /** The parcel's current crop, offered as the previous crop. */
   defaultPrevious?: string | null
   /** When set (signed-in user with a farm) the plan can be saved. */
   farmId?: string
@@ -341,8 +336,7 @@ export function RotationPlanner({
   const toast = useToast()
   const [horizon, setHorizon] = useState<'90' | '30'>('90')
   const [planting, setPlanting] = useState('') // '' = default date from the backend
-  const [previous, setPrevious] = useState(defaultPrevious && (PLAN_CROPS as readonly string[]).includes(defaultPrevious) ? defaultPrevious : '')
-  const [irr, setIrr] = useState<Irr>(defaultIrrigation === null ? 'unknown' : defaultIrrigation ? 'yes' : 'no')
+  const [history, setHistory] = useState<FarmHistoryValue>(() => emptyHistory(defaultIrrigation, defaultPrevious))
   const [cultivation, setCultivation] = useState<'open_field' | 'greenhouse'>('open_field')
 
   const input = {
@@ -350,12 +344,11 @@ export function RotationPlanner({
     longitude: lon,
     planning_horizon_days: Number(horizon) as 30 | 90,
     planting_date: planting || null,
-    previous_crop: previous || null,
-    irrigation_available: irr === 'unknown' ? null : irr === 'yes',
     cultivation_type: cultivation,
+    ...historyPayload(history),
   }
   const q = useQuery({
-    queryKey: ['rotation-plan', lat.toFixed(4), lon.toFixed(4), horizon, planting, previous, irr, cultivation],
+    queryKey: ['rotation-plan', lat.toFixed(4), lon.toFixed(4), horizon, planting, historyKey(history), cultivation],
     queryFn: () => getRotationPlan(input),
     staleTime: 10 * 60 * 1000,
     retry: 0,
@@ -392,7 +385,7 @@ export function RotationPlanner({
           ]}
         />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Field label={t('outlook.plantingDate')} htmlFor="plan-date" error={dateError && plan ? t('outlook.dateRange', { a: date(plan.planting_date_min), b: date(plan.planting_date_max) }) : null}>
           <Input
             id="plan-date"
@@ -405,32 +398,16 @@ export function RotationPlanner({
             onChange={(e) => e.target.value && setPlanting(e.target.value)}
           />
         </Field>
-        <Field label={t('planner.previous')} htmlFor="plan-prev">
-          <Select id="plan-prev" value={previous} onChange={(e) => setPrevious(e.target.value)}>
-            <option value="">{t('planner.previousUnknown')}</option>
-            {PLAN_CROPS.map((c) => (
-              <option key={c} value={c}>
-                {t(`crops.${c}`)}
-              </option>
-            ))}
-          </Select>
-        </Field>
         <Field label={t('planner.cultivation')} htmlFor="plan-cult">
           <Select id="plan-cult" value={cultivation} onChange={(e) => setCultivation(e.target.value as 'open_field' | 'greenhouse')}>
             <option value="open_field">{t('planner.openField')}</option>
             <option value="greenhouse">{t('planner.greenhouse')}</option>
           </Select>
         </Field>
-        <div>
-          <p className="text-label text-text-secondary mb-1">{t('planner.irrigation')}</p>
-          <div role="radiogroup" aria-label={t('planner.irrigation')} className="flex flex-wrap gap-2">
-            {(['yes', 'no', 'unknown'] as Irr[]).map((v) => (
-              <Chip key={v} selected={irr === v} onClick={() => setIrr(v)} role="radio" aria-checked={irr === v} className="!h-10">
-                {t(`planner.irr.${v}`)}
-              </Chip>
-            ))}
-          </div>
-        </div>
+      </div>
+      <div>
+        <p className="text-label font-semibold mb-2">{t('history.title')}</p>
+        <FarmHistory value={history} onChange={setHistory} idPrefix="plan" />
       </div>
       <div className="flex flex-wrap items-center gap-3">
         {planting && plan && !plan.is_default_date && (

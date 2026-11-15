@@ -5,13 +5,14 @@ import { useTranslation } from 'react-i18next'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Button, Card, Field, Input, Pill, Skeleton, Tabs, Tile } from '../../components/ui/primitives'
 import { Banner, ErrorState, StateBlock } from '../../components/ui/states'
-import { FactorBar } from '../../components/ui/viz'
 import { Icon, type IconName } from '../../components/ui/Icon'
 import { CropIcon } from '../../components/crops/CropIcon'
 import { ApiError } from '../../lib/api'
-import { getOutlook, type OutlookCrop, type OutlookForecast } from '../../lib/data/repo'
+import { getOutlook, type HistoricalIndicators, type OutlookCrop, type OutlookForecast } from '../../lib/data/repo'
 import { date, num } from '../../lib/format'
 import { loc } from '../../i18n'
+import { Explanations, GroupScores } from './CropScore'
+import { emptyHistory, FarmHistory, historyKey, historyPayload, type FarmHistoryValue } from './FarmHistory'
 import { SoilTiles } from './SoilInfo'
 
 const VAR_ICON: Record<OutlookForecast['key'], IconName> = {
@@ -21,7 +22,6 @@ const VAR_ICON: Record<OutlookForecast['key'], IconName> = {
   rainfall_mm: 'cloudRain',
 }
 const STATUS_TONE = { suitable_candidate: 'green', conditional: 'warning', not_recommended: 'critical' } as const
-const FACTORS = ['temperature', 'surface_moisture_proxy', 'humidity_proxy', 'rainfall_proxy', 'soil_ph'] as const
 
 /** Display value and unit for a forecast variable (soil moisture is shown as % by volume). */
 function shown(f: OutlookForecast, v: number | null): string {
@@ -46,7 +46,9 @@ function CropCard({ c, rank }: { c: OutlookCrop; rank: number }) {
         </div>
         <div className="text-end">
           <p className="text-metric font-light tabular-nums leading-none">{num(c.score, 0)}</p>
-          <p className="text-caption text-text-secondary">#{rank}</p>
+          <p className="text-caption text-text-secondary">
+            {t('score.overall')} · #{rank}
+          </p>
         </div>
       </div>
 
@@ -55,48 +57,50 @@ function CropCard({ c, rank }: { c: OutlookCrop; rank: number }) {
         {t('outlook.harvest', { a: c.days_to_harvest[0], b: c.days_to_harvest[1] })} · {loc(c.note)}
       </p>
 
-      <div className="flex flex-col gap-3">
-        {FACTORS.filter((k) => k in c.factor_scores).map((k) => (
-          <FactorBar key={k} label={t(`outlook.factors.${k}`)} value={c.factor_scores[k] ?? null} />
-        ))}
-      </div>
-
-      {c.reasons.length > 0 && (
-        <div>
-          <p className="text-label font-semibold mb-1">{t('outlook.why')}</p>
-          <ul className="flex flex-col gap-1">
-            {c.reasons.map((r, i) => (
-              <li key={i} className="flex items-start gap-2 text-label">
-                <Icon name="check" size={16} className="mt-0.5 shrink-0 text-green-600" /> {loc(r)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {c.risks.length > 0 && (
-        <div>
-          <p className="text-label font-semibold mb-1">{t('outlook.cautions')}</p>
-          <ul className="flex flex-col gap-1">
-            {c.risks.map((r, i) => (
-              <li key={i} className="flex items-start gap-2 text-label text-text-secondary">
-                <Icon name="alert" size={16} className="mt-0.5 shrink-0 text-warning" /> {loc(r)}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <GroupScores groups={c.group_scores} coverage={c.coverage_pct} />
+      <Explanations items={c.explanations} critical={c.critical_failures} />
     </Card>
   )
 }
 
-export function OutlookView({ lat, lon, irrigation }: { lat: number; lon: number; irrigation: boolean | null }) {
+function HistoryTiles({ h }: { h: HistoricalIndicators }) {
+  const { t } = useTranslation()
+  const items: [string, string][] = [
+    [t('outlook.hist.tmin'), `${num(h.t2m_min_mean_c, 1)} °C`],
+    [t('outlook.hist.tmax'), `${num(h.t2m_max_mean_c, 1)} °C`],
+    [t('outlook.hist.frost'), `${num(h.frost_frequency * 100, 0)} %`],
+    [t('outlook.hist.root'), `${num(h.root_zone_moisture_m3_m3 * 100, 1)} %`],
+    [t('outlook.hist.profile'), `${num(h.profile_moisture_m3_m3 * 100, 1)} %`],
+    [t('outlook.hist.solar'), num(h.solar_radiation, 1)],
+    [t('outlook.hist.wind'), `${num(h.wind_speed_m_s, 1)} m/s`],
+    [t('outlook.hist.dew'), `${num(h.dew_point_c, 1)} °C`],
+  ]
+  return (
+    <div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {items.map(([label, value]) => (
+          <Tile key={label} className="!p-3">
+            <p className="text-caption text-text-secondary">{label}</p>
+            <p className="text-body font-semibold tabular-nums mt-0.5" dir="ltr" style={{ textAlign: 'start' }}>
+              {value}
+            </p>
+          </Tile>
+        ))}
+      </div>
+      <p className="text-caption text-text-tertiary mt-2">{t('outlook.hist.note', { a: Math.min(...h.years), b: Math.max(...h.years) })}</p>
+    </div>
+  )
+}
+
+export function OutlookView({ lat, lon, irrigation, defaultPrevious }: { lat: number; lon: number; irrigation: boolean | null; defaultPrevious?: string | null }) {
   const { t } = useTranslation()
   const [horizon, setHorizon] = useState<'30' | '90'>('30')
   // '' = the default planting date chosen by the backend
   const [planting, setPlanting] = useState('')
+  const [history, setHistory] = useState<FarmHistoryValue>(() => emptyHistory(irrigation, defaultPrevious))
   const q = useQuery({
-    queryKey: ['outlook', lat.toFixed(4), lon.toFixed(4), irrigation, planting],
-    queryFn: () => getOutlook({ lat, lon, irrigation_available: irrigation, planting_date: planting || null }),
+    queryKey: ['outlook', lat.toFixed(4), lon.toFixed(4), planting, historyKey(history)],
+    queryFn: () => getOutlook({ lat, lon, planting_date: planting || null, ...historyPayload(history) }),
     staleTime: 10 * 60 * 1000,
     retry: 0,
     placeholderData: keepPreviousData,
@@ -139,6 +143,15 @@ export function OutlookView({ lat, lon, irrigation }: { lat: number; lon: number
         <b className="font-semibold block">{t('outlook.demoTitle')}</b>
         {t(o.is_default_date ? 'outlook.demoBody' : 'outlook.historyBody', { date: date(o.forecast_origin) })}
       </Banner>
+
+      {/* agricultural history of the land */}
+      <Card className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-h2 font-semibold">{t('history.title')}</h2>
+          <p className="text-label text-text-secondary mt-1">{t('history.body')}</p>
+        </div>
+        <FarmHistory value={history} onChange={setHistory} idPrefix="outlook" />
+      </Card>
 
       <Card className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -214,18 +227,34 @@ export function OutlookView({ lat, lon, irrigation }: { lat: number; lon: number
 
       <div>
         <h2 className="text-h2 font-semibold mb-1">{t('outlook.cropsTitle', { days: p.horizon_days })}</h2>
-        <p className="text-label text-text-secondary mb-4">{p.best_candidate ? t('outlook.cropsBody') : t('outlook.noneBody')}</p>
+        <p className="text-label text-text-secondary mb-4">{p.best_candidate ? t('outlook.cropsBodyMulti') : t('outlook.noneBody')}</p>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {p.recommendations.map((c, i) => (
             <CropCard key={c.crop_id} c={c} rank={i + 1} />
           ))}
         </div>
+        <p className="text-caption text-text-secondary mt-3 flex items-start gap-1">
+          <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {t('score.note')}
+        </p>
       </div>
 
       <Card className="flex flex-col gap-3">
-        <h2 className="text-h2 font-semibold">{t('soilInfo.title')}</h2>
-        <SoilTiles soil={o.soil} />
+        <div>
+          <h2 className="text-h2 font-semibold">{t('soilInfo.titleFull')}</h2>
+          <p className="text-label text-text-secondary mt-1">{t('soilInfo.static')}</p>
+        </div>
+        <SoilTiles soil={o.soil} terrain={o.terrain} />
       </Card>
+
+      {p.historical_indicators && (
+        <Card className="flex flex-col gap-3">
+          <div>
+            <h2 className="text-h2 font-semibold">{t('outlook.hist.title')}</h2>
+            <p className="text-label text-text-secondary mt-1">{t('outlook.hist.body')}</p>
+          </div>
+          <HistoryTiles h={p.historical_indicators} />
+        </Card>
+      )}
 
       <div className="flex flex-col gap-1 px-2 text-caption text-text-secondary">
         {o.warnings.map((w, i) => (
@@ -233,6 +262,9 @@ export function OutlookView({ lat, lon, irrigation }: { lat: number; lon: number
             <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {loc(w)}
           </p>
         ))}
+        <p className="flex items-start gap-1">
+          <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {loc(o.weight_policy)}
+        </p>
       </div>
     </div>
   )

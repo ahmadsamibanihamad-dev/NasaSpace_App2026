@@ -1,26 +1,26 @@
-"""Forecast outlook: the AI team's forecasts (30 and 90 days) and their rule-based crop ranking.
+"""Forecast outlook: the AI team's forecasts (30 and 90 days) and their multi-factor crop ranking.
 
-The forecasting models, the baseline formulas, the crop table and the scoring rules all live in
-`backend/nasa_final/` exactly as the AI team delivered them. This module only adapts them to the
-rest of the API: Jordan boundary check, rate limit, the common error format, soil values from the
-team's static soil table, and English text next to the Arabic text the rules produce.
+The forecasting models, the baseline formulas, the crop table, the scoring rules and the
+environmental data service all live in `backend/nasa_final/`. This module adapts them to the rest
+of the API: Jordan boundary check, rate limit, the common error format, calendar years of the
+user's crop history, and English text next to the Arabic text of fixed notes and warnings.
 
 The forecast is made for a planting start date. The default date is the team's prepared demo
 snapshot (`historical_demo`). Any other date inside the team's dataset is served by building the
 model inputs with the team's own feature code (`app/services/outlook_features.py`), mode
 `historical_data`. Neither is a live forecast: the dataset ends on a fixed day. Nothing is stored.
 
-Soil information is never typed by the user: it is read from the team's static soil table
-(ISRIC SoilGrids values per grid point) and left out where the table has no value.
+Soil and terrain are looked up for the location, never typed by the user, except optional
+laboratory results, which replace the estimate and keep their source. Where the dataset has no
+value the factor is reported as unknown.
 """
 
-import csv
 import json
 import logging
 from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -36,7 +36,6 @@ router = APIRouter(prefix="/outlook", tags=["outlook"])
 _s = get_settings()
 
 PACKAGE = Path(__file__).resolve().parents[2] / "nasa_final"
-SOIL_CSV = PACKAGE / "data" / "processed" / "Jordan_Soil_Properties_Mean.csv"
 FORECAST_DIR = PACKAGE / "AI" / "forecasting"
 REGISTRY = FORECAST_DIR / "Model_Registry.json"
 
@@ -48,23 +47,14 @@ VARIABLES = {
     "rainfall_mm": ("IMERG_PRECTOT", "sum", "mm"),
 }
 
-# English for the Arabic text produced by nasa_final/AI/recommendation_system.py and
-# crop_requirements.json. Unknown text is passed through unchanged in both languages.
+# English for fixed Arabic text (crop notes and general warnings). Explanations of a score come
+# from the engine in both languages already.
 EN = {
-    "متوسط الحرارة ضمن النطاق المقترح للمحصول": "Mean temperature is within the range suggested for the crop",
-    "متوسط الحرارة خارج النطاق المقترح للمحصول": "Mean temperature is outside the range suggested for the crop",
-    "مؤشر رطوبة سطح التربة بعيد عن نطاق الفحص الأولي": "Surface soil moisture is far from the screening range",
-    "الرطوبة الجوية خارج نطاق الفحص الأولي": "Air humidity is outside the screening range",
-    "الأمطار المتوقعة قليلة نسبيًا؛ تحقق من توفر الماء": "Expected rainfall is relatively low; check that water is available",
-    "توفر الري غير معروف": "Irrigation availability is unknown",
-    "حموضة التربة غير متاحة": "Soil pH is not available",
-    "حموضة التربة خارج النطاق التقريبي": "Soil pH is outside the approximate range",
-    "قد يتأخر الحصاد عن الفترة المحددة حسب الصنف والظروف": "Harvest may come later than the period, depending on variety and conditions",
-    "تحقق من خطر الصقيع قبل الزراعة": "Check the frost risk before planting",
     "درجة الملاءمة مؤشر قواعد وليست احتمال نجاح أو ضمان حصاد": "The score is a rule-based index, not a probability of success or a guarantee of harvest",
     "توقع الأمطار ضعيف الدقة؛ لا تستخدمه لتحديد كمية الري": "The rainfall forecast has low accuracy; do not use it to decide irrigation amounts",
     "متوسط الفترة لا يكشف الصقيع أو موجات الحر؛ تحقق من الطقس الفعلي": "A period mean does not reveal frost or heat waves; check the actual weather",
     "قواعد تجريبية غير معايرة محليًا؛ رطوبة السطح ليست رطوبة منطقة الجذور": "Experimental rules, not calibrated locally; surface moisture is not root-zone moisture",
+    "نيتروجين التربة هنا نيتروجين كلي من SoilGrids وليس المتاح للنبات؛ لا تُحدَّد منه كميات السماد": "Soil nitrogen here is total nitrogen from SoilGrids, not plant-available nitrogen; fertilizer amounts are not derived from it",
     "صنف سريع النضج": "Fast-maturing variety",
     "حصاد أوراق صغيرة؛ قد يتجاوز الشهر": "Baby-leaf harvest; may take more than a month",
     "حصاد مبكر للأوراق؛ قد يتجاوز الشهر": "Early leaf harvest; may take more than a month",
@@ -73,32 +63,47 @@ EN = {
     "محصول دافئ حساس للصقيع": "Warm-season crop, sensitive to frost",
 }
 
-# Soil table columns: (prefix in the CSV, key in the API, unit). Units are those of the team's
-# SoilGrids notebook after applying the SoilGrids conversion factors.
-SOIL_PROPS = [
-    ("Soil_pH", "ph", "pH"),
-    ("Sand", "sand", "%"),
-    ("Silt", "silt", "%"),
-    ("Clay", "clay", "%"),
-    ("Organic_Carbon", "organic_carbon", "g/kg"),
-    ("Total_Nitrogen", "nitrogen", "g/kg"),
-    ("Bulk_Density", "bulk_density", "kg/dm3"),
-    ("CEC", "cec", "cmol/kg"),
-    ("Coarse_Fragments", "coarse_fragments", "%"),
-]
-TOPSOIL = [("0_5cm", 5), ("5_15cm", 10), ("15_30cm", 15)]  # layer, thickness in cm
-
 
 def _both(text: str) -> dict:
     return {"ar": text, "en": EN.get(text, text)}
 
 
-class OutlookIn(BaseModel):
+class HistoryIn(BaseModel):
+    year: int = Field(ge=1990, le=2100)
+    crop_id: str
+
+
+class SoilLabIn(BaseModel):
+    """Optional laboratory results. A given value replaces the estimate for this request; its source is kept."""
+
+    ph: Optional[float] = Field(default=None, ge=0, le=14)
+    sand: Optional[float] = Field(default=None, ge=0, le=100)
+    silt: Optional[float] = Field(default=None, ge=0, le=100)
+    clay: Optional[float] = Field(default=None, ge=0, le=100)
+    organic_carbon: Optional[float] = Field(default=None, ge=0)
+    nitrogen: Optional[float] = Field(default=None, ge=0)
+    cec: Optional[float] = Field(default=None, ge=0)
+    coarse_fragments: Optional[float] = Field(default=None, ge=0, le=100)
+
+
+class FarmHistoryIn(BaseModel):
+    """What the user knows about the land: irrigation and what was grown before."""
+
+    irrigation_available: Optional[bool] = None
+    cultivation_type: Optional[Literal["open_field", "greenhouse"]] = None
+    previous_crop: Optional[str] = None  # None = unknown
+    previous_crop_year: Optional[int] = Field(default=None, ge=1990, le=2100)
+    crop_history: list[HistoryIn] = Field(default_factory=list, max_length=10)
+    soil_lab: Optional[SoilLabIn] = None
+
+
+class OutlookIn(FarmHistoryIn):
     lat: float = Field(ge=-90, le=90)
     lon: float = Field(ge=-180, le=180)
-    irrigation_available: Optional[bool] = None
     # First day of the period to plan for. Omitted = the default (demo) date.
     planting_date: Optional[date] = None
+    # Omitted = both horizons.
+    horizon_days: Optional[Literal[30, 90]] = None
 
 
 def _package():
@@ -117,32 +122,33 @@ def _registry() -> dict:
     return json.loads(REGISTRY.read_text(encoding="utf-8"))
 
 
-@lru_cache(maxsize=1)
-def _soil_table() -> dict:
-    """Topsoil (0-30 cm, thickness-weighted mean of the three layers) per grid point."""
-    out = {}
-    if not SOIL_CSV.exists():
-        return out
-    with SOIL_CSV.open(encoding="utf-8", newline="") as f:
-        for row in csv.DictReader(f):
-            props = {}
-            for prefix, key, _unit in SOIL_PROPS:
-                try:
-                    props[key] = round(sum(float(row[f"{prefix}_{layer}_mean"]) * cm for layer, cm in TOPSOIL) / 30, 2)
-                except (KeyError, ValueError):
-                    continue  # no value in the table for this point: leave it out
-            out[row["GRID_ID"]] = props
-    return out
+@lru_cache(maxsize=512)
+def _site(grid_id: str, start: Optional[date], days: Optional[int], lab: tuple) -> dict:
+    """Soil, terrain and historical observations for a grid (cached: the history read takes a moment)."""
+    from nasa_final.AI import environment_service as env
+
+    return env.site_context(grid_id, start, days, dict(lab))
 
 
-def _soil(grid_id: str) -> Optional[dict]:
-    props = _soil_table().get(grid_id)
+def _lab(body: FarmHistoryIn) -> tuple:
+    return tuple(sorted((body.soil_lab.model_dump(exclude_none=True) if body.soil_lab else {}).items()))
+
+
+def soil_summary(site: dict) -> Optional[dict]:
+    """Soil of a location for display: topsoil values with the source of each, texture class per rooting depth."""
+    soil = site["soil"]
+    top = soil["by_depth"]["0-30"]
+    props = [{"key": k, "value": round(v["value"], 2), "unit": v["unit"], "source": v["source"]} for k, v in top.items() if v["value"] is not None]
     if not props:
         return None
     return {
+        "kind": "static_property",
         "source": "ISRIC SoilGrids",
         "depth_cm": [0, 30],
-        "properties": [{"key": key, "value": props[key], "unit": unit} for _p, key, unit in SOIL_PROPS if key in props],
+        "properties": props,
+        "texture_class": soil["texture_class"],
+        "fertility_percentile": soil["fertility_percentile"],
+        "has_laboratory_values": any("laboratory" in (p["source"] or "") for p in props),
     }
 
 
@@ -169,6 +175,19 @@ def _dates(api) -> dict:
     return {"demo_origin": demo_origin, "default": default, "min": lo, "max": hi}
 
 
+def previous_crop_list(api) -> list[dict]:
+    return [{"crop_id": p["id"], "name": {"ar": p["name_ar"], "en": p["name_en"]}, "family": p["family"]} for p in api.CATALOG["previous_crops"]["items"]]
+
+
+def history_items(api, body: FarmHistoryIn, planting: date) -> list[dict]:
+    """The user's crop history as {"crop_id", "years_ago"}; calendar years are relative to the planting year."""
+    known = api.PREVIOUS
+    for cid in [body.previous_crop] + [h.crop_id for h in body.crop_history]:
+        if cid is not None and cid not in known:
+            raise AppError(422, "UNSUPPORTED_CROP", f"Unknown previous crop '{cid}'", {"supported": sorted(known)})
+    return api.history_items(planting.year, body.previous_crop, body.previous_crop_year, body.crop_history)
+
+
 @router.get("/status")
 def outlook_status():
     """Whether the forecast package can be used, and what it covers."""
@@ -189,27 +208,31 @@ def outlook_status():
         "planting_date_max": str(dates["max"]) if dates else None,
         "horizons_days": [30, 90],
         "rule_version": api.CATALOG["version"] if api else None,
+        "weights": api.CATALOG["weights"] if api else None,
         "crops": [
-            {"crop_id": c["id"], "name": {"ar": c["name_ar"], "en": c["name_en"]}, "horizon_days": c["horizon"], "days_to_harvest": c["days"]}
+            {"crop_id": c["id"], "name": {"ar": c["name_ar"], "en": c["name_en"]}, "family": c["family"], "horizon_days": c["horizon"], "days_to_harvest": c["days"]}
             for c in (api.CATALOG["crops"] if api else [])
         ],
+        "previous_crops": previous_crop_list(api) if api else [],
     }
 
 
 @router.get("/soil")
 def soil(lat: float = Query(ge=-90, le=90), lon: float = Query(ge=-180, le=180)):
-    """Soil properties for a location in Jordan, from the team's static soil table. Never invented."""
+    """Soil and terrain of a location in Jordan, from the team's dataset. Never invented."""
     require_in_jordan(lat, lon)
     row, dist = _nearest_grid(_package(), lat, lon)
     grid_id = str(row.GRID_ID.iloc[0])
+    site = _site(grid_id, None, None, ())
     return {
         "grid": {"id": grid_id, "lat": float(row.LATITUDE.iloc[0]), "lon": float(row.LONGITUDE.iloc[0]), "distance_km": round(dist, 2)},
-        "soil": _soil(grid_id),
+        "soil": soil_summary(site),
+        "terrain": site["terrain"],
     }
 
 
-def forecast_context(lat: float, lon: float, planting_date: Optional[date]) -> dict:
-    """The team's 30- and 90-day forecasts for a location and planting date, with grid, soil and data mode.
+def forecast_context(lat: float, lon: float, planting_date: Optional[date], lab: tuple = ()) -> dict:
+    """The team's 30- and 90-day forecasts for a location and planting date, with grid, soil, terrain and data mode.
 
     Shared by the outlook and by the crop rotation planner so that both use the same location,
     the same forecast origin and the same cached models.
@@ -249,17 +272,18 @@ def forecast_context(lat: float, lon: float, planting_date: Optional[date]) -> d
                         "variable": variable,
                         "value": values[days][key],
                         "unit": unit,
+                        "kind": "forecast",
                         "method": entry["method"],  # baseline | direct_xgb | residual_xgb
                         "baseline": entry.get("baseline"),
                         "validation_mae": entry.get("validation_mae"),
                     }
                 )
+        sites = {days: _site(grid_id, planting, days, lab) for days in (30, 90)}
     except AppError:
         raise
     except (FileNotFoundError, ImportError, KeyError, ValueError) as e:
         log.warning("Forecast failed: %r", e)
         raise AppError(503, "MODEL_UNAVAILABLE", "The forecast package is unavailable or incompatible.") from e
-    soil_info = _soil(grid_id)
     return {
         "api": api,
         "mode": mode,
@@ -268,45 +292,61 @@ def forecast_context(lat: float, lon: float, planting_date: Optional[date]) -> d
         "dates": dates,
         "values": values,
         "meta": meta,
-        "soil": soil_info,
-        "soil_ph": next((x["value"] for x in (soil_info or {}).get("properties", []) if x["key"] == "ph"), None),
+        "sites": sites,
+        "grid_id": grid_id,
+        "lab": lab,
+        "soil": soil_summary(sites[30]),
+        "terrain": sites[30]["terrain"],
         "location": {"lat": lat, "lon": lon, "governorate": governorate_for(lat, lon)},
         "grid": {"id": grid_id, "lat": float(demo_row.LATITUDE.iloc[0]), "lon": float(demo_row.LONGITUDE.iloc[0]), "distance_km": round(dist, 2)},
+    }
+
+
+def recommendation_out(r: dict) -> dict:
+    """One ranked crop, ready for the frontend."""
+    return {
+        "crop_id": r["crop_id"],
+        "name": {"ar": r["name_ar"], "en": r["name_en"]},
+        "family": r["family"],
+        "score": r["score"],
+        "environment_score": r["environment_score"],
+        "status": r["status"],  # suitable_candidate | conditional | not_recommended
+        "days_to_harvest": r["days_to_harvest"],
+        "note": _both(r["note_ar"]),
+        "component_scores": r["component_scores"],
+        "group_scores": r["group_scores"],  # climate, water, soil, fertility, rotation
+        "rotation": r["rotation"],
+        "coverage_pct": r["coverage_pct"],
+        "missing_factors": r["missing_factors"],
+        "critical_failures": [{"component": c["component"], "ar": c["ar"], "en": c["en"]} for c in r["critical_failures"]],
+        "explanations": r["explanations"],  # [{component, effect, ar, en}]
+        "soil_used": r["soil_used"],
     }
 
 
 @router.post("", dependencies=[Depends(limit("guest", _s.rate_limit_guest))])
 def outlook(body: OutlookIn):
     """Forecast for the 30 and 90 days from a planting date at a location in Jordan, with three ranked crops per period."""
-    ctx = forecast_context(body.lat, body.lon, body.planting_date)
+    ctx = forecast_context(body.lat, body.lon, body.planting_date, _lab(body))
     api, planting, origin, dates = ctx["api"], ctx["planting"], ctx["origin"], ctx["dates"]
+    history = history_items(api, body, planting)
     try:
-        # Same steps as the team's demo endpoint: forecast the four variables, then rank the crops.
-        periods, warnings = [], []
-        for days in (30, 90):
-            values, forecast = ctx["values"][days], ctx["meta"][days]
-            result = api.recommend(days, **values, irrigation_available=body.irrigation_available, soil_ph=ctx["soil_ph"])
+        periods, warnings, previous = [], [], []
+        for days in (body.horizon_days,) if body.horizon_days else (30, 90):
+            site = ctx["sites"][days]
+            result = api.recommend(days, **ctx["values"][days], irrigation_available=body.irrigation_available, site=site, crop_history=history)
+            previous = result["previous_crops"]
             periods.append(
                 {
                     "horizon_days": days,
                     "period_start": str(planting),
                     "period_end": str(origin + timedelta(days=days)),
-                    "forecast": forecast,
+                    "forecast": ctx["meta"][days],
+                    # Observed in the same calendar window of earlier years. Not a forecast.
+                    "historical_indicators": site["history"],
+                    "status": result["status"],  # ok | no_suitable_recommendation
                     "best_candidate": result["best_candidate"],
-                    "recommendations": [
-                        {
-                            "crop_id": r["crop_id"],
-                            "name": {"ar": r["name_ar"], "en": r["name_en"]},
-                            "score": r["score"],
-                            "status": r["status"],  # suitable_candidate | conditional | not_recommended
-                            "days_to_harvest": r["days_to_harvest"],
-                            "note": _both(r["note_ar"]),
-                            "reasons": [_both(x) for x in r["reasons"]],
-                            "risks": [_both(x) for x in r["risks"]],
-                            "factor_scores": r["factor_scores"],
-                        }
-                        for r in result["recommendations"]
-                    ],
+                    "recommendations": [recommendation_out(r) for r in result["recommendations"]],
                 }
             )
             for w in result["warnings"]:
@@ -318,6 +358,7 @@ def outlook(body: OutlookIn):
         log.warning("Forecast failed: %r", e)
         raise AppError(503, "MODEL_UNAVAILABLE", "The forecast package is unavailable or incompatible.") from e
 
+    names = api.PREVIOUS
     return {
         "data_mode": ctx["mode"],
         "planting_date": str(planting),
@@ -329,8 +370,16 @@ def outlook(body: OutlookIn):
         "location": ctx["location"],
         "grid": ctx["grid"],
         "irrigation_available": body.irrigation_available,
+        "cultivation_type": body.cultivation_type,
+        "previous_crops": [{**p, "name": {"ar": names[p["crop_id"]]["name_ar"], "en": names[p["crop_id"]]["name_en"]}} for p in previous],
         "soil": ctx["soil"],
+        "terrain": ctx["terrain"],
         "rule_version": api.CATALOG["version"],
+        "weights": api.CATALOG["weights"],
+        "weight_policy": {
+            "ar": "العامل الذي لا تتوفر بياناته يُعدّ غير معروف: يُستبعد ويُوزَّع وزنه على العوامل المعروفة. نسبة التغطية هي حصة الأوزان التي قُيِّمت فعلاً.",
+            "en": "A factor with no data is unknown: it is left out and its weight is spread over the known factors. Coverage is the share of the total weight that was actually evaluated.",
+        },
         "periods": periods,
         "warnings": [_both(w) for w in warnings],
     }
