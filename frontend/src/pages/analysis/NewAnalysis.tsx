@@ -73,7 +73,7 @@ export default function NewAnalysis() {
       nav(`/app/analysis/${r.analysis_id}`)
     } catch (e) {
       const a = e as ApiError
-      setErr(a.code?.startsWith('STORAGE') ? t('parcels.saveFailedStorage') : a.message || t('states.errorBody'))
+      setErr(a.code === 'NETWORK_ERROR' ? t('states.serverDownBody') : a.code === 'VALIDATION_ERROR' ? t('states.validation') : t('states.errorBody'))
     }
   }
 

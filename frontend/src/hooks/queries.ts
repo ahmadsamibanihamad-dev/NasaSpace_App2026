@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as repo from '../lib/data/repo'
-import { getEnvSummary, getTimeSeries } from '../lib/climate/environment'
 import type { AnalysisType, CropHistoryItem, Farm, PlotDraft } from '../lib/types'
 
 export type { NewAnalysisInput } from '../lib/data/repo'
@@ -14,7 +13,7 @@ export const useLocate = () => useMutation({ mutationFn: ({ lat, lon }: { lat: n
 export const useEnvSummary = (farm?: Farm | null) =>
   useQuery({
     queryKey: ['env-summary', farm?.centroid.lat.toFixed(2), farm?.centroid.lon.toFixed(2)],
-    queryFn: () => getEnvSummary(farm!.centroid.lat, farm!.centroid.lon),
+    queryFn: () => repo.getEnvSummary(farm!.centroid.lat, farm!.centroid.lon),
     enabled: !!farm,
     staleTime: 60 * 60 * 1000,
     retry: 0,
@@ -23,7 +22,7 @@ export const useEnvSummary = (farm?: Farm | null) =>
 export const useTimeSeries = (farm: Farm | null | undefined, variable: string, resolution: string) =>
   useQuery({
     queryKey: ['ts', farm?.centroid.lat.toFixed(2), farm?.centroid.lon.toFixed(2), variable, resolution],
-    queryFn: () => getTimeSeries(farm!.centroid.lat, farm!.centroid.lon, variable, resolution),
+    queryFn: () => repo.getTimeSeries(farm!.centroid.lat, farm!.centroid.lon, variable, resolution),
     enabled: !!farm,
     staleTime: 60 * 60 * 1000,
     retry: 0,
@@ -39,7 +38,7 @@ export const useAnalysis = (id?: string | null, poll = false) =>
     enabled: !!id,
     refetchInterval: (q) => {
       const s = q.state.data?.status
-      return poll && (s === 'queued' || s === 'running' || !s) ? 500 : false
+      return poll && (s === 'queued' || s === 'running' || !s) ? 800 : false
     },
   })
 

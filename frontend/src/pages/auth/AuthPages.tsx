@@ -66,7 +66,7 @@ export function SignIn() {
       nav(from || '/app', { replace: true })
     } catch (ex) {
       const a = ex as ApiError
-      setErr(a.code === 'INVALID_CREDENTIALS' || a.status === 401 ? t('auth.invalidCredentials') : a.isOffline ? t('states.offline') : t('states.errorBody'))
+      setErr(a.code === 'INVALID_CREDENTIALS' || a.status === 401 ? t('auth.invalidCredentials') : a.isOffline ? t('states.serverDownBody') : t('states.errorBody'))
     } finally {
       setBusy(false)
     }
@@ -125,7 +125,8 @@ export function Register() {
       nav('/setup', { replace: true })
     } catch (ex) {
       const a = ex as ApiError
-      setErr(a.code === 'EMAIL_TAKEN' ? t('auth.emailTaken') : a.isOffline ? t('states.offline') : a.message || t('states.errorBody'))
+      if (a.code === 'VALIDATION_ERROR' && /email/i.test(a.message)) setFe({ email: t('auth.invalidEmail') })
+      else setErr(a.code === 'EMAIL_TAKEN' ? t('auth.emailTaken') : a.isOffline ? t('states.serverDownBody') : a.code === 'RATE_LIMITED' ? t('states.rateLimited') : t('states.errorBody'))
     } finally {
       setBusy(false)
     }

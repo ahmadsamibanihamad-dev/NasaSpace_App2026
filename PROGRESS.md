@@ -1,6 +1,19 @@
 # Ardna (أرضنا) — Progress / Handoff
 
-Last updated 2026-11-14.
+Last updated 2026-11-15.
+
+## Site connected to the backend (done 2026-11-15)
+
+- `frontend/src/lib/data/repo.ts` calls the API (`/api/v1`; Vite proxies `/api` to `127.0.0.1:8765`). It is the only data module. The in-browser engine, climate client and localStorage layer are deleted; the frontend holds no recommendation logic.
+- Backend port is **8765**, not 8000: on the user's machine Docker holds 8000 and answered the proxy with its own 404s.
+- Guest page `src/pages/Guest.tsx` at `/guest`, linked from the landing page. Nothing is stored for guests.
+- `start.bat` opens the backend in a second window (`start-backend.bat`), waits for `/api/v1/health`, then starts the site.
+- Verified in the browser against the live backend with real NASA POWER data: guest flow (outside-Jordan rejection, search, results), register, demo farm, dashboard, all six analysis types and their result pages, parcel create / update / history / delete, duplicate-label and outside-Jordan errors.
+- Not verified: drawing a parcel by hand in the map UI after the switch (the same `createPlot` call was exercised directly), phone-width layout of the guest page, English guest page, `start.bat` end to end by double-click.
+- `backend/tests/fixtures/parity.json` is now frozen reference data; the exporter that produced it was deleted with the frontend engine.
+- `backend/ardna.db-shm` and `-wal` had been committed by mistake; they are untracked and ignored now.
+
+Open questions the user has not answered: the landing page still lists SMAP and GPM IMERG as sources although only NASA POWER is used; whether to add radish, arugula and spinach from the AI team's spec.
 
 ## Backend built (2026-11-15)
 The user asked for the full backend with FastAPI + SQLite, ready for an ML model that the team will deliver, plus a guest mode.

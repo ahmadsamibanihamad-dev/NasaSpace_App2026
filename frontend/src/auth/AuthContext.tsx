@@ -16,7 +16,7 @@ const Ctx = createContext<AuthCtx | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState<boolean>(!!repo.currentUserId())
+  const [loading, setLoading] = useState<boolean>(repo.hasSession())
   const qc = useQueryClient()
 
   const refresh = useCallback(async () => {
@@ -31,7 +31,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     refresh()
-  }, [refresh])
+    // the API client fires this when the server rejects the session (expired or invalid token)
+    const onLogout = () => {
+      setUser(null)
+      qc.clear()
+    }
+    window.addEventListener('ardna:logout', onLogout)
+    return () => window.removeEventListener('ardna:logout', onLogout)
+  }, [refresh, qc])
 
   const login = async (email: string, password: string) => {
     const u = await repo.login(email, password)

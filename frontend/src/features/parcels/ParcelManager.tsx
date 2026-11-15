@@ -133,7 +133,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
   }
   const toForm = () => {
     if (!geometryOk || !draftPolygon) return
-    setDraft((d) => (d ? { ...d, polygon: draftPolygon } : emptyDraft(draftPolygon, nextLabel(farm.id), plots.length)))
+    setDraft((d) => (d ? { ...d, polygon: draftPolygon } : emptyDraft(draftPolygon, nextLabel(plots), plots.length)))
     setMode('form')
   }
   const validateData = (d: PlotDraft, selfId?: string): FormErrors => {
@@ -146,7 +146,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
   const fail = (e: unknown) => {
     const a = e as ApiError
     const msg =
-      a.code === 'UNSUPPORTED_LOCATION' ? t('parcels.issues.outside_jordan') : a.code === 'DUPLICATE_LABEL' ? t('parcels.duplicateNumber') : a.code?.startsWith('STORAGE') ? t('parcels.saveFailedStorage') : t('parcels.saveFailed')
+      a.code === 'UNSUPPORTED_LOCATION' ? t('parcels.issues.outside_jordan') : a.code === 'DUPLICATE_LABEL' ? t('parcels.duplicateNumber') : a.code === 'NETWORK_ERROR' ? t('states.serverDownBody') : a.code === 'INVALID_GEOMETRY' && Array.isArray(a.details) && a.details[0] ? t(`parcels.issues.${a.details[0]}`, { defaultValue: t('parcels.saveFailed') }) : t('parcels.saveFailed')
     toast(msg, 'error')
   }
   const saveNew = async () => {
@@ -222,7 +222,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
   }
   const onImport = async (file: File) => {
     try {
-      const { drafts, skipped } = parseGeoJSON(await file.text(), CROP_IDS, parseInt(nextLabel(farm.id), 10))
+      const { drafts, skipped } = parseGeoJSON(await file.text(), CROP_IDS, parseInt(nextLabel(plots), 10))
       let ok = 0
       for (const d of drafts) {
         try {

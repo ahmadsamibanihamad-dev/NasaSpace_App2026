@@ -5,6 +5,8 @@ __pycache__/
 .pytest_cache/
 backend/.env
 backend/*.db
+backend/*.db-shm
+backend/*.db-wal
 backend/data_store/
 backend/app/ml/artifacts/*
 !backend/app/ml/artifacts/.gitkeep

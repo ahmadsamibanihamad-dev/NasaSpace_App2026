@@ -40,6 +40,8 @@ export interface Farm {
   owner_name: string
   owner_phone: string
   is_demo: boolean
+  plots_count?: number
+  area_m2?: number
   created_at: string
 }
 
@@ -65,6 +67,7 @@ export interface Plot {
   previous_crop_id: string | null
   irrigation_available: boolean
   irrigation_method: string | null
+  cultivation_type?: 'open_field' | 'greenhouse'
   soil_type: string | null
   soil_ph: number | null
   created_at: string

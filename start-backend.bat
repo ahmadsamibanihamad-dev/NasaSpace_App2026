@@ -1,6 +1,6 @@
 @echo off
-rem Ardna - double-click to start the backend API (FastAPI + SQLite) on http://localhost:8000
-rem API documentation: http://localhost:8000/api/v1/docs
+rem Ardna - double-click to start the backend API (FastAPI + SQLite) on http://localhost:8765
+rem API documentation: http://localhost:8765/api/v1/docs
 title Ardna - backend
 cd /d "%~dp0backend"
 
@@ -24,10 +24,10 @@ if not exist .venv (
 )
 
 echo.
-echo Starting the Ardna API on http://localhost:8000
+echo Starting the Ardna API on http://localhost:8765
 echo Keep this window open. Close it to stop the server.
 echo.
-call .venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+call .venv\Scripts\python.exe -m uvicorn app.main:app --port 8765
 
 echo.
 echo The server has stopped.

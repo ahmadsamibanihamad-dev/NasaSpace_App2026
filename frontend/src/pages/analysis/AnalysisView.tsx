@@ -94,7 +94,7 @@ export default function AnalysisView() {
   if (a.status === 'failed') {
     const code = a.error?.code
     const body =
-      code === 'UNSUPPORTED_LOCATION' ? t('states.unsupportedLocationBody') : code === 'UNSUPPORTED_CROP' ? t('states.unsupportedCropBody') : code === 'NETWORK_ERROR' ? t('analysis.failedOffline') : code === 'MISSING_DATA' ? t('states.missingData') : code === 'INTERRUPTED' ? t('analysis.failedInterrupted') : t('states.errorBody')
+      code === 'UNSUPPORTED_LOCATION' ? t('states.unsupportedLocationBody') : code === 'UNSUPPORTED_CROP' ? t('states.unsupportedCropBody') : code === 'NETWORK_ERROR' || code === 'UPSTREAM_UNAVAILABLE' ? t('analysis.failedOffline') : code === 'MISSING_DATA' ? t('states.missingData') : code === 'INTERRUPTED' ? t('analysis.failedInterrupted') : t('states.errorBody')
     return (
       <Card>
         <StateBlock

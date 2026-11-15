@@ -40,10 +40,13 @@ export default function Landing() {
           <div className="lg:col-span-5 flex flex-col justify-center py-6 lg:py-12">
             <h1 className="text-[34px] leading-[44px] sm:text-[44px] sm:leading-[54px] xl:text-[56px] xl:leading-[64px] font-light tracking-tight">{t('landing.heroTitle')}</h1>
             <p className="text-body text-text-secondary mt-6 max-w-lg">{t('landing.heroBody')}</p>
-            <div className="mt-6 sm:mt-10">
+            <div className="mt-6 sm:mt-10 flex flex-wrap gap-3">
               <Link to="/register" className="inline-flex items-center gap-2 h-12 px-8 rounded-pill bg-green-600 text-white text-body hover:bg-green-700">
                 {t('landing.start')}
                 <Icon name="arrowRight" size={18} className="rtl:-scale-x-100" />
+              </Link>
+              <Link to="/guest" className="inline-flex items-center gap-2 h-12 px-6 rounded-pill bg-surface border border-border text-body hover:bg-surface-muted">
+                <Icon name="pin" size={18} className="text-green-600" /> {t('guest.try')}
               </Link>
             </div>
             <p className="text-caption text-text-tertiary mt-6 flex items-center gap-2">

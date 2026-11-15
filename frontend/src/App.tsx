@@ -10,6 +10,7 @@ import { Skeleton } from './components/ui/primitives'
 import { ErrorState, StateBlock } from './components/ui/states'
 
 const SetupWizard = lazy(() => import('./pages/setup/SetupWizard'))
+const Guest = lazy(() => import('./pages/Guest'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const MyFarm = lazy(() => import('./pages/MyFarm'))
 const NewAnalysis = lazy(() => import('./pages/analysis/NewAnalysis'))
@@ -61,6 +62,7 @@ export default function App() {
     <Suspense fallback={<div className="p-8"><PageFallback /></div>}>
       <Routes>
         <Route path="/" element={user ? <Navigate to="/app" replace /> : <Landing />} />
+        <Route path="/guest" element={<Guest />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

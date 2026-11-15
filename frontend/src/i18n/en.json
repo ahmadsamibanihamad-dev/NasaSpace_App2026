@@ -526,7 +526,10 @@
   "unsupportedCropBody": "This crop is not among the 13 supported crops.",
   "validation": "Please check the data you entered.",
   "notFound": "Page not found",
-  "goHome": "Back to home"
+  "goHome": "Back to home",
+  "serverDown": "Can't reach the server",
+  "serverDownBody": "Check your internet connection and try again.",
+  "rateLimited": "Too many attempts in a short time. Wait a minute and try again."
  },
  "crops": {
   "wheat": "Wheat",
@@ -685,5 +688,21 @@
   "dragTooSmall": "Press and drag a longer distance to mark the area.",
   "moveShape": "Drag to move the whole parcel",
   "rotateShape": "Drag to rotate the parcel"
+ },
+ "guest": {
+  "title": "What should I grow on my land?",
+  "body": "Set your land's location and we'll suggest the crops that suit it best. No account needed.",
+  "try": "Try without an account",
+  "water": "Is irrigation available on your land?",
+  "rainfed": "No, rainfed",
+  "resultsTitle": "Suggested crops for your location",
+  "loading": "Analysing your area's climate…",
+  "loadingBody": "This can take a few seconds the first time.",
+  "changeLocation": "Change location",
+  "notSaved": "This result won't be saved.",
+  "saveCta": "Create an account to save your land, its parcels and your analysis history, and get an analysis for each parcel.",
+  "register": "Create a free account",
+  "noCrops": "No crop suits this location under the current conditions. Try with irrigation available.",
+  "others": "Other crops"
  }
 }

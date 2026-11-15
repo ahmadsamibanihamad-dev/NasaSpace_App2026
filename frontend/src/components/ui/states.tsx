@@ -32,7 +32,7 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
   if (e?.code === 'UNSUPPORTED_LOCATION') return <StateBlock icon="pin" tone="warning" title={t('states.unsupportedLocation')} body={t('states.unsupportedLocationBody')} />
   if (e?.code === 'UNSUPPORTED_CROP') return <StateBlock icon="leaf" tone="warning" title={t('states.unsupportedCrop')} body={t('states.unsupportedCropBody')} />
   if (e?.code === 'VALIDATION_ERROR') return <StateBlock icon="info" tone="warning" title={t('states.validation')} body={e.message} />
-  if (e?.isOffline) return <StateBlock icon="wifiOff" tone="warning" title={t('states.errorTitle')} body={t('states.offline')} action={onRetry && <Button variant="secondary" onClick={onRetry}>{t('common.retry')}</Button>} />
+  if (e?.isOffline) return <StateBlock icon="wifiOff" tone="warning" title={t('states.serverDown')} body={t('states.serverDownBody')} action={onRetry && <Button variant="secondary" onClick={onRetry}>{t('common.retry')}</Button>} />
   if (e?.status === 404) return <StateBlock icon="search" title={t('states.notFound')} />
   return (
     <StateBlock

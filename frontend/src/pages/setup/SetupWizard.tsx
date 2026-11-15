@@ -8,7 +8,7 @@ import { Banner } from '../../components/ui/states'
 import { Icon } from '../../components/ui/Icon'
 import { useCreateFarm } from '../../hooks/queries'
 import { useFarmCtx } from '../../layout/FarmContext'
-import { createDemoFarm } from '../../lib/data/demo'
+import { createDemoFarm } from '../../lib/data/repo'
 import { ApiError } from '../../lib/api'
 import { num } from '../../lib/format'
 
@@ -40,7 +40,7 @@ export default function SetupWizard() {
       nav('/app/farm?add=1', { replace: true })
     } catch (e) {
       const a = e as ApiError
-      setErr(a.code === 'UNSUPPORTED_LOCATION' ? t('states.unsupportedLocationBody') : a.code?.startsWith('STORAGE') ? t('parcels.saveFailedStorage') : t('states.errorBody'))
+      setErr(a.code === 'UNSUPPORTED_LOCATION' ? t('states.unsupportedLocationBody') : a.code === 'NETWORK_ERROR' ? t('states.serverDownBody') : t('states.errorBody'))
     }
   }
 
@@ -48,7 +48,7 @@ export default function SetupWizard() {
     setDemoBusy(true)
     setErr(null)
     try {
-      const id = await createDemoFarm()
+      const { id } = await createDemoFarm()
       await qc.invalidateQueries({ queryKey: ['farms'] })
       setFarmId(id)
       nav('/app', { replace: true })
