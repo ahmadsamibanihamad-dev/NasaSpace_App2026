@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 .pytest_cache/
 backend/.env
+backend/.jwt_secret
 backend/*.db
 backend/*.db-shm
 backend/*.db-wal

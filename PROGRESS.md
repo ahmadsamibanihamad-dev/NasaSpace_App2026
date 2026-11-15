@@ -2,6 +2,20 @@
 
 Last updated 2026-11-15.
 
+## AI team package integrated (2026-11-15)
+
+The team delivered `NASA_FINAL.zip` (forecast models, baselines, rule-based ranking, FastAPI router).
+
+- Vendored unmodified in `backend/nasa_final/` (models, registry, demo features, crop table, soil table). The 47 MB master dataset and the notebooks were not copied.
+- `backend/app/api/outlook.py` wraps the team's functions: `GET /api/v1/outlook/status`, `POST /api/v1/outlook` (public, rate-limited, Jordan-only, nothing stored). It adds soil pH from the team's SoilGrids table and English text for the Arabic reasons.
+- Frontend: `features/outlook/OutlookView.tsx` (shared), page `/app/outlook` (nav item "التوقعات", parcel picker), and a second tab on the guest page. Six new crop icons.
+- MVP data mode is `historical_demo` (feature snapshot with origin 2026-05-01). The UI says so in a banner. Live forecasting needs a feature builder per location and date: not built.
+- Only one of the eight targets used is a trained model (T2M 90-day, XGBoost); the other seven are baseline formulas the team selected on validation.
+- xgboost: trained with 3.4.1 (needs Python 3.12). The backend venv is Python 3.11 with xgboost 3.2.0; the models load and predict without warnings, parity with 3.4.1 not verified.
+- `JWT_SECRET` unset now falls back to a generated secret kept in `backend/.jwt_secret` (git-ignored), so restarts no longer sign everyone out.
+- Tests: backend 61 passing (6 new in `tests/test_outlook.py`), frontend 8.
+- The older `app/ml/` layer and `/forecasts` endpoints are still there but unused by the UI.
+
 ## Site connected to the backend (done 2026-11-15)
 
 - `frontend/src/lib/data/repo.ts` calls the API (`/api/v1`; Vite proxies `/api` to `127.0.0.1:8765`). It is the only data module. The in-browser engine, climate client and localStorage layer are deleted; the frontend holds no recommendation logic.

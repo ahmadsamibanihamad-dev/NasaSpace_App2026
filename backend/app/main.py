@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from app.api import analyses, auth, farms, forecasts, geo, public
+from app.api import analyses, auth, farms, forecasts, geo, outlook, public
 from app.core.config import APP_NAME, get_settings
 from app.core.db import get_engine, init_db
 from app.core.errors import install_error_handlers
@@ -46,7 +46,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     install_error_handlers(app)
-    for r in (auth.router, geo.router, farms.router, analyses.router, forecasts.router, public.router):
+    for r in (auth.router, geo.router, farms.router, analyses.router, forecasts.router, outlook.router, public.router):
         app.include_router(r, prefix="/api/v1")
     return app
 

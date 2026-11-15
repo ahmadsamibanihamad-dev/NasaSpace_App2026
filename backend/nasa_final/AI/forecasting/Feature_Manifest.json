@@ -1,0 +1,1442 @@
+{
+  "features": [
+    "LATITUDE",
+    "LONGITUDE",
+    "T2M_lag_0",
+    "T2M_lag_1",
+    "T2M_lag_2",
+    "T2M_lag_3",
+    "T2M_lag_7",
+    "T2M_lag_14",
+    "T2M_lag_29",
+    "T2M_lag_60",
+    "T2M_lag_90",
+    "T2M_lag_365",
+    "T2M_MAX_lag_0",
+    "T2M_MAX_lag_1",
+    "T2M_MAX_lag_2",
+    "T2M_MAX_lag_3",
+    "T2M_MAX_lag_7",
+    "T2M_MAX_lag_14",
+    "T2M_MAX_lag_29",
+    "T2M_MAX_lag_60",
+    "T2M_MAX_lag_90",
+    "T2M_MAX_lag_365",
+    "T2M_MIN_lag_0",
+    "T2M_MIN_lag_1",
+    "T2M_MIN_lag_2",
+    "T2M_MIN_lag_3",
+    "T2M_MIN_lag_7",
+    "T2M_MIN_lag_14",
+    "T2M_MIN_lag_29",
+    "T2M_MIN_lag_60",
+    "T2M_MIN_lag_90",
+    "T2M_MIN_lag_365",
+    "RH2M_lag_0",
+    "RH2M_lag_1",
+    "RH2M_lag_2",
+    "RH2M_lag_3",
+    "RH2M_lag_7",
+    "RH2M_lag_14",
+    "RH2M_lag_29",
+    "RH2M_lag_60",
+    "RH2M_lag_90",
+    "RH2M_lag_365",
+    "ALLSKY_SFC_SW_DWN_lag_0",
+    "ALLSKY_SFC_SW_DWN_lag_1",
+    "ALLSKY_SFC_SW_DWN_lag_2",
+    "ALLSKY_SFC_SW_DWN_lag_3",
+    "ALLSKY_SFC_SW_DWN_lag_7",
+    "ALLSKY_SFC_SW_DWN_lag_14",
+    "ALLSKY_SFC_SW_DWN_lag_29",
+    "ALLSKY_SFC_SW_DWN_lag_60",
+    "ALLSKY_SFC_SW_DWN_lag_90",
+    "ALLSKY_SFC_SW_DWN_lag_365",
+    "WS2M_lag_0",
+    "WS2M_lag_1",
+    "WS2M_lag_2",
+    "WS2M_lag_3",
+    "WS2M_lag_7",
+    "WS2M_lag_14",
+    "WS2M_lag_29",
+    "WS2M_lag_60",
+    "WS2M_lag_90",
+    "WS2M_lag_365",
+    "PRECTOTCORR_lag_0",
+    "PRECTOTCORR_lag_1",
+    "PRECTOTCORR_lag_2",
+    "PRECTOTCORR_lag_3",
+    "PRECTOTCORR_lag_7",
+    "PRECTOTCORR_lag_14",
+    "PRECTOTCORR_lag_29",
+    "PRECTOTCORR_lag_60",
+    "PRECTOTCORR_lag_90",
+    "PRECTOTCORR_lag_365",
+    "T2MDEW_lag_0",
+    "T2MDEW_lag_1",
+    "T2MDEW_lag_2",
+    "T2MDEW_lag_3",
+    "T2MDEW_lag_7",
+    "T2MDEW_lag_14",
+    "T2MDEW_lag_29",
+    "T2MDEW_lag_60",
+    "T2MDEW_lag_90",
+    "T2MDEW_lag_365",
+    "PS_lag_0",
+    "PS_lag_1",
+    "PS_lag_2",
+    "PS_lag_3",
+    "PS_lag_7",
+    "PS_lag_14",
+    "PS_lag_29",
+    "PS_lag_60",
+    "PS_lag_90",
+    "PS_lag_365",
+    "SFMC_lag_0",
+    "SFMC_lag_1",
+    "SFMC_lag_2",
+    "SFMC_lag_3",
+    "SFMC_lag_7",
+    "SFMC_lag_14",
+    "SFMC_lag_29",
+    "SFMC_lag_60",
+    "SFMC_lag_90",
+    "SFMC_lag_365",
+    "RZMC_lag_0",
+    "RZMC_lag_1",
+    "RZMC_lag_2",
+    "RZMC_lag_3",
+    "RZMC_lag_7",
+    "RZMC_lag_14",
+    "RZMC_lag_29",
+    "RZMC_lag_60",
+    "RZMC_lag_90",
+    "RZMC_lag_365",
+    "PRMC_lag_0",
+    "PRMC_lag_1",
+    "PRMC_lag_2",
+    "PRMC_lag_3",
+    "PRMC_lag_7",
+    "PRMC_lag_14",
+    "PRMC_lag_29",
+    "PRMC_lag_60",
+    "PRMC_lag_90",
+    "PRMC_lag_365",
+    "GWETTOP_lag_0",
+    "GWETTOP_lag_1",
+    "GWETTOP_lag_2",
+    "GWETTOP_lag_3",
+    "GWETTOP_lag_7",
+    "GWETTOP_lag_14",
+    "GWETTOP_lag_29",
+    "GWETTOP_lag_60",
+    "GWETTOP_lag_90",
+    "GWETTOP_lag_365",
+    "GWETROOT_lag_0",
+    "GWETROOT_lag_1",
+    "GWETROOT_lag_2",
+    "GWETROOT_lag_3",
+    "GWETROOT_lag_7",
+    "GWETROOT_lag_14",
+    "GWETROOT_lag_29",
+    "GWETROOT_lag_60",
+    "GWETROOT_lag_90",
+    "GWETROOT_lag_365",
+    "GWETPROF_lag_0",
+    "GWETPROF_lag_1",
+    "GWETPROF_lag_2",
+    "GWETPROF_lag_3",
+    "GWETPROF_lag_7",
+    "GWETPROF_lag_14",
+    "GWETPROF_lag_29",
+    "GWETPROF_lag_60",
+    "GWETPROF_lag_90",
+    "GWETPROF_lag_365",
+    "IMERG_PRECTOT_lag_0",
+    "IMERG_PRECTOT_lag_1",
+    "IMERG_PRECTOT_lag_2",
+    "IMERG_PRECTOT_lag_3",
+    "IMERG_PRECTOT_lag_7",
+    "IMERG_PRECTOT_lag_14",
+    "IMERG_PRECTOT_lag_29",
+    "IMERG_PRECTOT_lag_60",
+    "IMERG_PRECTOT_lag_90",
+    "IMERG_PRECTOT_lag_365",
+    "IMERG_PRECLIQUID_PROB_lag_0",
+    "IMERG_PRECLIQUID_PROB_lag_1",
+    "IMERG_PRECLIQUID_PROB_lag_2",
+    "IMERG_PRECLIQUID_PROB_lag_3",
+    "IMERG_PRECLIQUID_PROB_lag_7",
+    "IMERG_PRECLIQUID_PROB_lag_14",
+    "IMERG_PRECLIQUID_PROB_lag_29",
+    "IMERG_PRECLIQUID_PROB_lag_60",
+    "IMERG_PRECLIQUID_PROB_lag_90",
+    "IMERG_PRECLIQUID_PROB_lag_365",
+    "T2M_rolling_3_mean",
+    "T2M_rolling_3_std",
+    "T2M_rolling_7_mean",
+    "T2M_rolling_7_std",
+    "T2M_rolling_14_mean",
+    "T2M_rolling_14_std",
+    "T2M_rolling_30_mean",
+    "T2M_rolling_30_std",
+    "T2M_rolling_60_mean",
+    "T2M_rolling_60_std",
+    "T2M_rolling_90_mean",
+    "T2M_rolling_90_std",
+    "T2M_MAX_rolling_3_mean",
+    "T2M_MAX_rolling_3_std",
+    "T2M_MAX_rolling_7_mean",
+    "T2M_MAX_rolling_7_std",
+    "T2M_MAX_rolling_14_mean",
+    "T2M_MAX_rolling_14_std",
+    "T2M_MAX_rolling_30_mean",
+    "T2M_MAX_rolling_30_std",
+    "T2M_MAX_rolling_60_mean",
+    "T2M_MAX_rolling_60_std",
+    "T2M_MAX_rolling_90_mean",
+    "T2M_MAX_rolling_90_std",
+    "T2M_MIN_rolling_3_mean",
+    "T2M_MIN_rolling_3_std",
+    "T2M_MIN_rolling_7_mean",
+    "T2M_MIN_rolling_7_std",
+    "T2M_MIN_rolling_14_mean",
+    "T2M_MIN_rolling_14_std",
+    "T2M_MIN_rolling_30_mean",
+    "T2M_MIN_rolling_30_std",
+    "T2M_MIN_rolling_60_mean",
+    "T2M_MIN_rolling_60_std",
+    "T2M_MIN_rolling_90_mean",
+    "T2M_MIN_rolling_90_std",
+    "RH2M_rolling_3_mean",
+    "RH2M_rolling_3_std",
+    "RH2M_rolling_7_mean",
+    "RH2M_rolling_7_std",
+    "RH2M_rolling_14_mean",
+    "RH2M_rolling_14_std",
+    "RH2M_rolling_30_mean",
+    "RH2M_rolling_30_std",
+    "RH2M_rolling_60_mean",
+    "RH2M_rolling_60_std",
+    "RH2M_rolling_90_mean",
+    "RH2M_rolling_90_std",
+    "SFMC_rolling_3_mean",
+    "SFMC_rolling_3_std",
+    "SFMC_rolling_7_mean",
+    "SFMC_rolling_7_std",
+    "SFMC_rolling_14_mean",
+    "SFMC_rolling_14_std",
+    "SFMC_rolling_30_mean",
+    "SFMC_rolling_30_std",
+    "SFMC_rolling_60_mean",
+    "SFMC_rolling_60_std",
+    "SFMC_rolling_90_mean",
+    "SFMC_rolling_90_std",
+    "RZMC_rolling_3_mean",
+    "RZMC_rolling_3_std",
+    "RZMC_rolling_7_mean",
+    "RZMC_rolling_7_std",
+    "RZMC_rolling_14_mean",
+    "RZMC_rolling_14_std",
+    "RZMC_rolling_30_mean",
+    "RZMC_rolling_30_std",
+    "RZMC_rolling_60_mean",
+    "RZMC_rolling_60_std",
+    "RZMC_rolling_90_mean",
+    "RZMC_rolling_90_std",
+    "WS2M_rolling_3_mean",
+    "WS2M_rolling_3_std",
+    "WS2M_rolling_7_mean",
+    "WS2M_rolling_7_std",
+    "WS2M_rolling_14_mean",
+    "WS2M_rolling_14_std",
+    "WS2M_rolling_30_mean",
+    "WS2M_rolling_30_std",
+    "WS2M_rolling_60_mean",
+    "WS2M_rolling_60_std",
+    "WS2M_rolling_90_mean",
+    "WS2M_rolling_90_std",
+    "ALLSKY_SFC_SW_DWN_rolling_3_mean",
+    "ALLSKY_SFC_SW_DWN_rolling_3_std",
+    "ALLSKY_SFC_SW_DWN_rolling_7_mean",
+    "ALLSKY_SFC_SW_DWN_rolling_7_std",
+    "ALLSKY_SFC_SW_DWN_rolling_14_mean",
+    "ALLSKY_SFC_SW_DWN_rolling_14_std",
+    "ALLSKY_SFC_SW_DWN_rolling_30_mean",
+    "ALLSKY_SFC_SW_DWN_rolling_30_std",
+    "ALLSKY_SFC_SW_DWN_rolling_60_mean",
+    "ALLSKY_SFC_SW_DWN_rolling_60_std",
+    "ALLSKY_SFC_SW_DWN_rolling_90_mean",
+    "ALLSKY_SFC_SW_DWN_rolling_90_std",
+    "PS_rolling_3_mean",
+    "PS_rolling_3_std",
+    "PS_rolling_7_mean",
+    "PS_rolling_7_std",
+    "PS_rolling_14_mean",
+    "PS_rolling_14_std",
+    "PS_rolling_30_mean",
+    "PS_rolling_30_std",
+    "PS_rolling_60_mean",
+    "PS_rolling_60_std",
+    "PS_rolling_90_mean",
+    "PS_rolling_90_std",
+    "IMERG_PRECTOT_rolling_3_sum",
+    "IMERG_PRECTOT_rolling_7_sum",
+    "IMERG_PRECTOT_rolling_14_sum",
+    "IMERG_PRECTOT_rolling_30_sum",
+    "IMERG_PRECTOT_rolling_60_sum",
+    "IMERG_PRECTOT_rolling_90_sum",
+    "PRECTOTCORR_rolling_3_sum",
+    "PRECTOTCORR_rolling_7_sum",
+    "PRECTOTCORR_rolling_14_sum",
+    "PRECTOTCORR_rolling_30_sum",
+    "PRECTOTCORR_rolling_60_sum",
+    "PRECTOTCORR_rolling_90_sum",
+    "T2M_change_1",
+    "T2M_change_3",
+    "T2M_change_7",
+    "T2M_change_14",
+    "RH2M_change_1",
+    "RH2M_change_3",
+    "RH2M_change_7",
+    "RH2M_change_14",
+    "SFMC_change_1",
+    "SFMC_change_3",
+    "SFMC_change_7",
+    "SFMC_change_14",
+    "PS_change_1",
+    "PS_change_3",
+    "PS_change_7",
+    "PS_change_14",
+    "T2M_diurnal_range",
+    "SMAP_imputed_last30",
+    "SMAP_imputed_last90",
+    "SMAP_imputed_lag365",
+    "Day_Sin",
+    "Day_Cos",
+    "Month_Sin",
+    "Month_Cos",
+    "Season_lead_days",
+    "Season_length_days",
+    "Season_start_sin",
+    "Season_start_cos",
+    "T2M_clim_h0",
+    "T2M_clim_h1",
+    "T2M_clim_h2",
+    "T2M_clim_h3",
+    "T2M_clim_h4",
+    "T2M_clim_h5",
+    "T2M_clim_h6",
+    "T2M_clim_h7",
+    "T2M_clim_h8",
+    "T2M_clim_h9",
+    "T2M_clim_h10",
+    "T2M_clim_h11",
+    "T2M_clim_h12",
+    "T2M_clim_h13",
+    "T2M_clim_h14",
+    "T2M_clim_h15",
+    "T2M_clim_h16",
+    "T2M_clim_h17",
+    "T2M_clim_h18",
+    "T2M_clim_h19",
+    "T2M_clim_h20",
+    "T2M_clim_h21",
+    "T2M_clim_h22",
+    "T2M_clim_h23",
+    "T2M_clim_h24",
+    "T2M_clim_h25",
+    "T2M_clim_h26",
+    "T2M_clim_h27",
+    "T2M_clim_h28",
+    "T2M_clim_h29",
+    "T2M_clim_h30",
+    "RH2M_clim_h0",
+    "RH2M_clim_h1",
+    "RH2M_clim_h2",
+    "RH2M_clim_h3",
+    "RH2M_clim_h4",
+    "RH2M_clim_h5",
+    "RH2M_clim_h6",
+    "RH2M_clim_h7",
+    "RH2M_clim_h8",
+    "RH2M_clim_h9",
+    "RH2M_clim_h10",
+    "RH2M_clim_h11",
+    "RH2M_clim_h12",
+    "RH2M_clim_h13",
+    "RH2M_clim_h14",
+    "RH2M_clim_h15",
+    "RH2M_clim_h16",
+    "RH2M_clim_h17",
+    "RH2M_clim_h18",
+    "RH2M_clim_h19",
+    "RH2M_clim_h20",
+    "RH2M_clim_h21",
+    "RH2M_clim_h22",
+    "RH2M_clim_h23",
+    "RH2M_clim_h24",
+    "RH2M_clim_h25",
+    "RH2M_clim_h26",
+    "RH2M_clim_h27",
+    "RH2M_clim_h28",
+    "RH2M_clim_h29",
+    "RH2M_clim_h30",
+    "SFMC_clim_h0",
+    "SFMC_clim_h1",
+    "SFMC_clim_h2",
+    "SFMC_clim_h3",
+    "SFMC_clim_h4",
+    "SFMC_clim_h5",
+    "SFMC_clim_h6",
+    "SFMC_clim_h7",
+    "SFMC_clim_h8",
+    "SFMC_clim_h9",
+    "SFMC_clim_h10",
+    "SFMC_clim_h11",
+    "SFMC_clim_h12",
+    "SFMC_clim_h13",
+    "SFMC_clim_h14",
+    "SFMC_clim_h15",
+    "SFMC_clim_h16",
+    "SFMC_clim_h17",
+    "SFMC_clim_h18",
+    "SFMC_clim_h19",
+    "SFMC_clim_h20",
+    "SFMC_clim_h21",
+    "SFMC_clim_h22",
+    "SFMC_clim_h23",
+    "SFMC_clim_h24",
+    "SFMC_clim_h25",
+    "SFMC_clim_h26",
+    "SFMC_clim_h27",
+    "SFMC_clim_h28",
+    "SFMC_clim_h29",
+    "SFMC_clim_h30",
+    "IMERG_PRECTOT_clim_h0",
+    "IMERG_PRECTOT_clim_h1",
+    "IMERG_PRECTOT_clim_h2",
+    "IMERG_PRECTOT_clim_h3",
+    "IMERG_PRECTOT_clim_h4",
+    "IMERG_PRECTOT_clim_h5",
+    "IMERG_PRECTOT_clim_h6",
+    "IMERG_PRECTOT_clim_h7",
+    "IMERG_PRECTOT_clim_h8",
+    "IMERG_PRECTOT_clim_h9",
+    "IMERG_PRECTOT_clim_h10",
+    "IMERG_PRECTOT_clim_h11",
+    "IMERG_PRECTOT_clim_h12",
+    "IMERG_PRECTOT_clim_h13",
+    "IMERG_PRECTOT_clim_h14",
+    "IMERG_PRECTOT_clim_h15",
+    "IMERG_PRECTOT_clim_h16",
+    "IMERG_PRECTOT_clim_h17",
+    "IMERG_PRECTOT_clim_h18",
+    "IMERG_PRECTOT_clim_h19",
+    "IMERG_PRECTOT_clim_h20",
+    "IMERG_PRECTOT_clim_h21",
+    "IMERG_PRECTOT_clim_h22",
+    "IMERG_PRECTOT_clim_h23",
+    "IMERG_PRECTOT_clim_h24",
+    "IMERG_PRECTOT_clim_h25",
+    "IMERG_PRECTOT_clim_h26",
+    "IMERG_PRECTOT_clim_h27",
+    "IMERG_PRECTOT_clim_h28",
+    "IMERG_PRECTOT_clim_h29",
+    "IMERG_PRECTOT_clim_h30",
+    "T2M_clim_mean_7d",
+    "T2M_clim_mean_30d",
+    "T2M_clim_mean_90d",
+    "RH2M_clim_mean_7d",
+    "RH2M_clim_mean_30d",
+    "RH2M_clim_mean_90d",
+    "SFMC_clim_mean_7d",
+    "SFMC_clim_mean_30d",
+    "SFMC_clim_mean_90d",
+    "IMERG_PRECTOT_clim_sum_7d",
+    "IMERG_PRECTOT_clim_sum_30d",
+    "IMERG_PRECTOT_clim_sum_90d",
+    "T2M_clim_mean_season",
+    "RH2M_clim_mean_season",
+    "SFMC_clim_mean_season",
+    "IMERG_PRECTOT_clim_sum_season",
+    "T2M_anomaly",
+    "RH2M_anomaly",
+    "SFMC_anomaly",
+    "IMERG_PRECTOT_anomaly",
+    "Soil_pH_0_5cm_mean",
+    "Soil_pH_5_15cm_mean",
+    "Soil_pH_15_30cm_mean",
+    "Soil_pH_30_60cm_mean",
+    "Soil_pH_60_100cm_mean",
+    "Total_Nitrogen_0_5cm_mean",
+    "Total_Nitrogen_5_15cm_mean",
+    "Total_Nitrogen_15_30cm_mean",
+    "Total_Nitrogen_30_60cm_mean",
+    "Total_Nitrogen_60_100cm_mean",
+    "Organic_Carbon_0_5cm_mean",
+    "Organic_Carbon_5_15cm_mean",
+    "Organic_Carbon_15_30cm_mean",
+    "Organic_Carbon_30_60cm_mean",
+    "Organic_Carbon_60_100cm_mean",
+    "Sand_0_5cm_mean",
+    "Sand_5_15cm_mean",
+    "Sand_15_30cm_mean",
+    "Sand_30_60cm_mean",
+    "Sand_60_100cm_mean",
+    "Silt_0_5cm_mean",
+    "Silt_5_15cm_mean",
+    "Silt_15_30cm_mean",
+    "Silt_30_60cm_mean",
+    "Silt_60_100cm_mean",
+    "Clay_0_5cm_mean",
+    "Clay_5_15cm_mean",
+    "Clay_15_30cm_mean",
+    "Clay_30_60cm_mean",
+    "Clay_60_100cm_mean",
+    "Bulk_Density_0_5cm_mean",
+    "Bulk_Density_5_15cm_mean",
+    "Bulk_Density_15_30cm_mean",
+    "Bulk_Density_30_60cm_mean",
+    "Bulk_Density_60_100cm_mean",
+    "CEC_0_5cm_mean",
+    "CEC_5_15cm_mean",
+    "CEC_15_30cm_mean",
+    "CEC_30_60cm_mean",
+    "CEC_60_100cm_mean",
+    "Coarse_Fragments_0_5cm_mean",
+    "Coarse_Fragments_5_15cm_mean",
+    "Coarse_Fragments_15_30cm_mean",
+    "Coarse_Fragments_30_60cm_mean",
+    "Coarse_Fragments_60_100cm_mean",
+    "Elevation",
+    "Slope",
+    "Aspect"
+  ],
+  "targets": [
+    "T2M_target_h1",
+    "T2M_target_h2",
+    "T2M_target_h3",
+    "T2M_target_h4",
+    "T2M_target_h5",
+    "T2M_target_h6",
+    "T2M_target_h7",
+    "T2M_target_h8",
+    "T2M_target_h9",
+    "T2M_target_h10",
+    "T2M_target_h11",
+    "T2M_target_h12",
+    "T2M_target_h13",
+    "T2M_target_h14",
+    "T2M_target_h15",
+    "T2M_target_h16",
+    "T2M_target_h17",
+    "T2M_target_h18",
+    "T2M_target_h19",
+    "T2M_target_h20",
+    "T2M_target_h21",
+    "T2M_target_h22",
+    "T2M_target_h23",
+    "T2M_target_h24",
+    "T2M_target_h25",
+    "T2M_target_h26",
+    "T2M_target_h27",
+    "T2M_target_h28",
+    "T2M_target_h29",
+    "T2M_target_h30",
+    "RH2M_target_h1",
+    "RH2M_target_h2",
+    "RH2M_target_h3",
+    "RH2M_target_h4",
+    "RH2M_target_h5",
+    "RH2M_target_h6",
+    "RH2M_target_h7",
+    "RH2M_target_h8",
+    "RH2M_target_h9",
+    "RH2M_target_h10",
+    "RH2M_target_h11",
+    "RH2M_target_h12",
+    "RH2M_target_h13",
+    "RH2M_target_h14",
+    "RH2M_target_h15",
+    "RH2M_target_h16",
+    "RH2M_target_h17",
+    "RH2M_target_h18",
+    "RH2M_target_h19",
+    "RH2M_target_h20",
+    "RH2M_target_h21",
+    "RH2M_target_h22",
+    "RH2M_target_h23",
+    "RH2M_target_h24",
+    "RH2M_target_h25",
+    "RH2M_target_h26",
+    "RH2M_target_h27",
+    "RH2M_target_h28",
+    "RH2M_target_h29",
+    "RH2M_target_h30",
+    "SFMC_target_h1",
+    "SFMC_target_h2",
+    "SFMC_target_h3",
+    "SFMC_target_h4",
+    "SFMC_target_h5",
+    "SFMC_target_h6",
+    "SFMC_target_h7",
+    "SFMC_target_h8",
+    "SFMC_target_h9",
+    "SFMC_target_h10",
+    "SFMC_target_h11",
+    "SFMC_target_h12",
+    "SFMC_target_h13",
+    "SFMC_target_h14",
+    "SFMC_target_h15",
+    "SFMC_target_h16",
+    "SFMC_target_h17",
+    "SFMC_target_h18",
+    "SFMC_target_h19",
+    "SFMC_target_h20",
+    "SFMC_target_h21",
+    "SFMC_target_h22",
+    "SFMC_target_h23",
+    "SFMC_target_h24",
+    "SFMC_target_h25",
+    "SFMC_target_h26",
+    "SFMC_target_h27",
+    "SFMC_target_h28",
+    "SFMC_target_h29",
+    "SFMC_target_h30",
+    "IMERG_PRECTOT_target_h1",
+    "IMERG_PRECTOT_target_h2",
+    "IMERG_PRECTOT_target_h3",
+    "IMERG_PRECTOT_target_h4",
+    "IMERG_PRECTOT_target_h5",
+    "IMERG_PRECTOT_target_h6",
+    "IMERG_PRECTOT_target_h7",
+    "IMERG_PRECTOT_target_h8",
+    "IMERG_PRECTOT_target_h9",
+    "IMERG_PRECTOT_target_h10",
+    "IMERG_PRECTOT_target_h11",
+    "IMERG_PRECTOT_target_h12",
+    "IMERG_PRECTOT_target_h13",
+    "IMERG_PRECTOT_target_h14",
+    "IMERG_PRECTOT_target_h15",
+    "IMERG_PRECTOT_target_h16",
+    "IMERG_PRECTOT_target_h17",
+    "IMERG_PRECTOT_target_h18",
+    "IMERG_PRECTOT_target_h19",
+    "IMERG_PRECTOT_target_h20",
+    "IMERG_PRECTOT_target_h21",
+    "IMERG_PRECTOT_target_h22",
+    "IMERG_PRECTOT_target_h23",
+    "IMERG_PRECTOT_target_h24",
+    "IMERG_PRECTOT_target_h25",
+    "IMERG_PRECTOT_target_h26",
+    "IMERG_PRECTOT_target_h27",
+    "IMERG_PRECTOT_target_h28",
+    "IMERG_PRECTOT_target_h29",
+    "IMERG_PRECTOT_target_h30",
+    "T2M_target_mean_7d",
+    "T2M_target_mean_30d",
+    "T2M_target_mean_90d",
+    "RH2M_target_mean_7d",
+    "RH2M_target_mean_30d",
+    "RH2M_target_mean_90d",
+    "SFMC_target_mean_7d",
+    "SFMC_target_mean_30d",
+    "SFMC_target_mean_90d",
+    "IMERG_PRECTOT_target_sum_7d",
+    "IMERG_PRECTOT_target_sum_30d",
+    "IMERG_PRECTOT_target_sum_90d",
+    "T2M_target_mean_season",
+    "RH2M_target_mean_season",
+    "SFMC_target_mean_season",
+    "IMERG_PRECTOT_target_sum_season"
+  ],
+  "target_spec": {
+    "T2M_target_h1": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 1
+    },
+    "T2M_target_h2": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 2
+    },
+    "T2M_target_h3": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 3
+    },
+    "T2M_target_h4": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 4
+    },
+    "T2M_target_h5": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 5
+    },
+    "T2M_target_h6": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 6
+    },
+    "T2M_target_h7": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 7
+    },
+    "T2M_target_h8": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 8
+    },
+    "T2M_target_h9": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 9
+    },
+    "T2M_target_h10": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 10
+    },
+    "T2M_target_h11": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 11
+    },
+    "T2M_target_h12": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 12
+    },
+    "T2M_target_h13": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 13
+    },
+    "T2M_target_h14": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 14
+    },
+    "T2M_target_h15": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 15
+    },
+    "T2M_target_h16": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 16
+    },
+    "T2M_target_h17": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 17
+    },
+    "T2M_target_h18": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 18
+    },
+    "T2M_target_h19": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 19
+    },
+    "T2M_target_h20": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 20
+    },
+    "T2M_target_h21": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 21
+    },
+    "T2M_target_h22": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 22
+    },
+    "T2M_target_h23": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 23
+    },
+    "T2M_target_h24": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 24
+    },
+    "T2M_target_h25": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 25
+    },
+    "T2M_target_h26": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 26
+    },
+    "T2M_target_h27": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 27
+    },
+    "T2M_target_h28": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 28
+    },
+    "T2M_target_h29": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 29
+    },
+    "T2M_target_h30": {
+      "variable": "T2M",
+      "kind": "daily",
+      "days": 30
+    },
+    "T2M_target_mean_7d": {
+      "variable": "T2M",
+      "kind": "mean",
+      "days": 7
+    },
+    "T2M_target_mean_30d": {
+      "variable": "T2M",
+      "kind": "mean",
+      "days": 30
+    },
+    "T2M_target_mean_90d": {
+      "variable": "T2M",
+      "kind": "mean",
+      "days": 90
+    },
+    "T2M_target_mean_season": {
+      "variable": "T2M",
+      "kind": "season",
+      "aggregation": "mean"
+    },
+    "RH2M_target_h1": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 1
+    },
+    "RH2M_target_h2": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 2
+    },
+    "RH2M_target_h3": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 3
+    },
+    "RH2M_target_h4": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 4
+    },
+    "RH2M_target_h5": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 5
+    },
+    "RH2M_target_h6": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 6
+    },
+    "RH2M_target_h7": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 7
+    },
+    "RH2M_target_h8": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 8
+    },
+    "RH2M_target_h9": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 9
+    },
+    "RH2M_target_h10": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 10
+    },
+    "RH2M_target_h11": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 11
+    },
+    "RH2M_target_h12": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 12
+    },
+    "RH2M_target_h13": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 13
+    },
+    "RH2M_target_h14": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 14
+    },
+    "RH2M_target_h15": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 15
+    },
+    "RH2M_target_h16": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 16
+    },
+    "RH2M_target_h17": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 17
+    },
+    "RH2M_target_h18": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 18
+    },
+    "RH2M_target_h19": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 19
+    },
+    "RH2M_target_h20": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 20
+    },
+    "RH2M_target_h21": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 21
+    },
+    "RH2M_target_h22": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 22
+    },
+    "RH2M_target_h23": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 23
+    },
+    "RH2M_target_h24": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 24
+    },
+    "RH2M_target_h25": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 25
+    },
+    "RH2M_target_h26": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 26
+    },
+    "RH2M_target_h27": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 27
+    },
+    "RH2M_target_h28": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 28
+    },
+    "RH2M_target_h29": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 29
+    },
+    "RH2M_target_h30": {
+      "variable": "RH2M",
+      "kind": "daily",
+      "days": 30
+    },
+    "RH2M_target_mean_7d": {
+      "variable": "RH2M",
+      "kind": "mean",
+      "days": 7
+    },
+    "RH2M_target_mean_30d": {
+      "variable": "RH2M",
+      "kind": "mean",
+      "days": 30
+    },
+    "RH2M_target_mean_90d": {
+      "variable": "RH2M",
+      "kind": "mean",
+      "days": 90
+    },
+    "RH2M_target_mean_season": {
+      "variable": "RH2M",
+      "kind": "season",
+      "aggregation": "mean"
+    },
+    "SFMC_target_h1": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 1
+    },
+    "SFMC_target_h2": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 2
+    },
+    "SFMC_target_h3": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 3
+    },
+    "SFMC_target_h4": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 4
+    },
+    "SFMC_target_h5": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 5
+    },
+    "SFMC_target_h6": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 6
+    },
+    "SFMC_target_h7": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 7
+    },
+    "SFMC_target_h8": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 8
+    },
+    "SFMC_target_h9": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 9
+    },
+    "SFMC_target_h10": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 10
+    },
+    "SFMC_target_h11": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 11
+    },
+    "SFMC_target_h12": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 12
+    },
+    "SFMC_target_h13": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 13
+    },
+    "SFMC_target_h14": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 14
+    },
+    "SFMC_target_h15": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 15
+    },
+    "SFMC_target_h16": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 16
+    },
+    "SFMC_target_h17": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 17
+    },
+    "SFMC_target_h18": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 18
+    },
+    "SFMC_target_h19": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 19
+    },
+    "SFMC_target_h20": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 20
+    },
+    "SFMC_target_h21": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 21
+    },
+    "SFMC_target_h22": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 22
+    },
+    "SFMC_target_h23": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 23
+    },
+    "SFMC_target_h24": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 24
+    },
+    "SFMC_target_h25": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 25
+    },
+    "SFMC_target_h26": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 26
+    },
+    "SFMC_target_h27": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 27
+    },
+    "SFMC_target_h28": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 28
+    },
+    "SFMC_target_h29": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 29
+    },
+    "SFMC_target_h30": {
+      "variable": "SFMC",
+      "kind": "daily",
+      "days": 30
+    },
+    "SFMC_target_mean_7d": {
+      "variable": "SFMC",
+      "kind": "mean",
+      "days": 7
+    },
+    "SFMC_target_mean_30d": {
+      "variable": "SFMC",
+      "kind": "mean",
+      "days": 30
+    },
+    "SFMC_target_mean_90d": {
+      "variable": "SFMC",
+      "kind": "mean",
+      "days": 90
+    },
+    "SFMC_target_mean_season": {
+      "variable": "SFMC",
+      "kind": "season",
+      "aggregation": "mean"
+    },
+    "IMERG_PRECTOT_target_h1": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 1
+    },
+    "IMERG_PRECTOT_target_h2": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 2
+    },
+    "IMERG_PRECTOT_target_h3": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 3
+    },
+    "IMERG_PRECTOT_target_h4": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 4
+    },
+    "IMERG_PRECTOT_target_h5": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 5
+    },
+    "IMERG_PRECTOT_target_h6": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 6
+    },
+    "IMERG_PRECTOT_target_h7": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 7
+    },
+    "IMERG_PRECTOT_target_h8": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 8
+    },
+    "IMERG_PRECTOT_target_h9": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 9
+    },
+    "IMERG_PRECTOT_target_h10": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 10
+    },
+    "IMERG_PRECTOT_target_h11": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 11
+    },
+    "IMERG_PRECTOT_target_h12": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 12
+    },
+    "IMERG_PRECTOT_target_h13": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 13
+    },
+    "IMERG_PRECTOT_target_h14": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 14
+    },
+    "IMERG_PRECTOT_target_h15": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 15
+    },
+    "IMERG_PRECTOT_target_h16": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 16
+    },
+    "IMERG_PRECTOT_target_h17": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 17
+    },
+    "IMERG_PRECTOT_target_h18": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 18
+    },
+    "IMERG_PRECTOT_target_h19": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 19
+    },
+    "IMERG_PRECTOT_target_h20": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 20
+    },
+    "IMERG_PRECTOT_target_h21": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 21
+    },
+    "IMERG_PRECTOT_target_h22": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 22
+    },
+    "IMERG_PRECTOT_target_h23": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 23
+    },
+    "IMERG_PRECTOT_target_h24": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 24
+    },
+    "IMERG_PRECTOT_target_h25": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 25
+    },
+    "IMERG_PRECTOT_target_h26": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 26
+    },
+    "IMERG_PRECTOT_target_h27": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 27
+    },
+    "IMERG_PRECTOT_target_h28": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 28
+    },
+    "IMERG_PRECTOT_target_h29": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 29
+    },
+    "IMERG_PRECTOT_target_h30": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "daily",
+      "days": 30
+    },
+    "IMERG_PRECTOT_target_sum_7d": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "sum",
+      "days": 7
+    },
+    "IMERG_PRECTOT_target_sum_30d": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "sum",
+      "days": 30
+    },
+    "IMERG_PRECTOT_target_sum_90d": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "sum",
+      "days": 90
+    },
+    "IMERG_PRECTOT_target_sum_season": {
+      "variable": "IMERG_PRECTOT",
+      "kind": "season",
+      "aggregation": "sum"
+    }
+  },
+  "static": [
+    "Soil_pH_0_5cm_mean",
+    "Soil_pH_5_15cm_mean",
+    "Soil_pH_15_30cm_mean",
+    "Soil_pH_30_60cm_mean",
+    "Soil_pH_60_100cm_mean",
+    "Total_Nitrogen_0_5cm_mean",
+    "Total_Nitrogen_5_15cm_mean",
+    "Total_Nitrogen_15_30cm_mean",
+    "Total_Nitrogen_30_60cm_mean",
+    "Total_Nitrogen_60_100cm_mean",
+    "Organic_Carbon_0_5cm_mean",
+    "Organic_Carbon_5_15cm_mean",
+    "Organic_Carbon_15_30cm_mean",
+    "Organic_Carbon_30_60cm_mean",
+    "Organic_Carbon_60_100cm_mean",
+    "Sand_0_5cm_mean",
+    "Sand_5_15cm_mean",
+    "Sand_15_30cm_mean",
+    "Sand_30_60cm_mean",
+    "Sand_60_100cm_mean",
+    "Silt_0_5cm_mean",
+    "Silt_5_15cm_mean",
+    "Silt_15_30cm_mean",
+    "Silt_30_60cm_mean",
+    "Silt_60_100cm_mean",
+    "Clay_0_5cm_mean",
+    "Clay_5_15cm_mean",
+    "Clay_15_30cm_mean",
+    "Clay_30_60cm_mean",
+    "Clay_60_100cm_mean",
+    "Bulk_Density_0_5cm_mean",
+    "Bulk_Density_5_15cm_mean",
+    "Bulk_Density_15_30cm_mean",
+    "Bulk_Density_30_60cm_mean",
+    "Bulk_Density_60_100cm_mean",
+    "CEC_0_5cm_mean",
+    "CEC_5_15cm_mean",
+    "CEC_15_30cm_mean",
+    "CEC_30_60cm_mean",
+    "CEC_60_100cm_mean",
+    "Coarse_Fragments_0_5cm_mean",
+    "Coarse_Fragments_5_15cm_mean",
+    "Coarse_Fragments_15_30cm_mean",
+    "Coarse_Fragments_30_60cm_mean",
+    "Coarse_Fragments_60_100cm_mean",
+    "Elevation",
+    "Slope",
+    "Aspect"
+  ],
+  "metadata": [
+    "GRID_ID",
+    "DATE",
+    "LATITUDE",
+    "LONGITUDE",
+    "SEASON_START",
+    "SEASON_END"
+  ],
+  "lags": [
+    0,
+    1,
+    2,
+    3,
+    7,
+    14,
+    29,
+    60,
+    90,
+    365
+  ],
+  "windows": [
+    3,
+    7,
+    14,
+    30,
+    60,
+    90
+  ],
+  "imputed_date": "2025-09-20",
+  "splits": [
+    {
+      "Split": "train",
+      "Rows": 914325,
+      "Start": "2021-01-01",
+      "End": "2023-12-31",
+      "MB": 1694.87
+    },
+    {
+      "Split": "validation",
+      "Rows": 354875,
+      "Start": "2024-01-01",
+      "End": "2025-02-28",
+      "MB": 753.6
+    },
+    {
+      "Split": "test",
+      "Rows": 458415,
+      "Start": "2025-03-01",
+      "End": "2026-08-31",
+      "MB": 951.23
+    }
+  ],
+  "climatology": "prior complete calendar years; origin-year cutoff; +/-7 days",
+  "origin_assumption": "day t measurements available",
+  "season_definition": "next full meteorological season; grouped evaluation by season start",
+  "sfmc_season_policy": "mean of observed days only; allow exactly the known missing date in an otherwise complete season"
+}

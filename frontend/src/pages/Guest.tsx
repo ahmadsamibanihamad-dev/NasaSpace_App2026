@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { StepLocate, type LocatedPoint } from './setup/StepLocate'
 import { StatusPill } from './analysis/results'
-import { Button, Card, Chip, Skeleton } from '../components/ui/primitives'
+import { Button, Card, Chip, Skeleton, Tabs } from '../components/ui/primitives'
+import { OutlookView } from '../features/outlook/OutlookView'
 import { ErrorState, StateBlock } from '../components/ui/states'
 import { Drops } from '../components/ui/viz'
 import { Icon } from '../components/ui/Icon'
@@ -20,6 +21,7 @@ export default function Guest() {
   const { t, i18n } = useTranslation()
   const [point, setPoint] = useState<LocatedPoint | null>(null)
   const [water, setWater] = useState<(typeof WATER)[number]>('none')
+  const [view, setView] = useState<'climate' | 'outlook'>('climate')
 
   const q = useQuery({
     queryKey: ['guest', point?.lat.toFixed(4), point?.lon.toFixed(4), water],
@@ -104,7 +106,21 @@ export default function Guest() {
             </aside>
 
             <main className="xl:col-span-8 flex flex-col gap-6 order-2 xl:order-none">
-              <h1 className="text-h1 font-semibold">{t('guest.resultsTitle')}</h1>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h1 className="text-h1 font-semibold">{t('guest.resultsTitle')}</h1>
+                <Tabs
+                  value={view}
+                  onChange={setView}
+                  options={[
+                    { value: 'climate', label: t('outlook.tabClimate') },
+                    { value: 'outlook', label: t('outlook.tab') },
+                  ]}
+                />
+              </div>
+              {view === 'outlook' ? (
+                <OutlookView lat={point.lat} lon={point.lon} irrigation={water !== 'none'} />
+              ) : (
+                <>
               {q.isLoading ? (
                 <div aria-busy="true" role="status">
                   <p className="text-body font-semibold flex items-center gap-3">
@@ -178,6 +194,8 @@ export default function Guest() {
                     <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {t('results.disclaimer')}
                   </p>
                 </div>
+              )}
+                </>
               )}
             </main>
           </div>

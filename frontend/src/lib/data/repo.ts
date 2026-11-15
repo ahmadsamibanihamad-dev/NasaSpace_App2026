@@ -132,3 +132,52 @@ export interface GuestRecommendation extends DataMeta {
 
 export const guestRecommend = (input: { lat: number; lon: number; irrigation_available: boolean; irrigation_method?: string | null }) =>
   api<GuestRecommendation>('/guest/recommendations', { body: input })
+
+// ---------------- Forecast outlook (AI team's models and rules; nothing stored) ----------------
+
+type Text2 = { ar: string; en: string }
+
+export interface OutlookForecast {
+  key: 'temperature_c' | 'humidity_pct' | 'soil_moisture_m3_m3' | 'rainfall_mm'
+  variable: string
+  value: number
+  unit: string
+  method: 'baseline' | 'direct_xgb' | 'residual_xgb'
+  baseline: string | null
+  validation_mae: number | null
+}
+
+export interface OutlookCrop {
+  crop_id: string
+  name: Text2
+  score: number
+  status: 'suitable_candidate' | 'conditional' | 'not_recommended'
+  days_to_harvest: [number, number]
+  note: Text2
+  reasons: Text2[]
+  risks: Text2[]
+  factor_scores: Record<string, number>
+}
+
+export interface OutlookPeriod {
+  horizon_days: 30 | 90
+  period_start: string
+  period_end: string
+  forecast: OutlookForecast[]
+  best_candidate: string | null
+  recommendations: OutlookCrop[]
+}
+
+export interface Outlook {
+  data_mode: string
+  forecast_origin: string
+  grid: { id: string; lat: number; lon: number; distance_km: number }
+  irrigation_available: boolean | null
+  soil_ph: { value: number; source: 'user' | 'soilgrids' } | null
+  rule_version: string
+  periods: OutlookPeriod[]
+  warnings: Text2[]
+}
+
+export const getOutlook = (input: { lat: number; lon: number; irrigation_available: boolean | null; soil_ph?: number | null }) =>
+  api<Outlook>('/outlook', { body: input })

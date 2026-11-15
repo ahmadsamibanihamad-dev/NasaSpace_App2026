@@ -11,6 +11,9 @@ argon2-cffi>=23.1
 email-validator>=2.1
 pytest>=8.2
 
-# Install only when the trained models are delivered (AI_MODE=production), matching the
-# versions the AI team trained with:
-#   xgboost, lightgbm, scikit-learn, joblib
+# Forecast package from the AI team (backend/nasa_final). The models were trained with
+# xgboost 3.4.1, which needs Python 3.12; 3.2 is the newest release for Python 3.11 and loads them.
+pandas>=2.2
+pyarrow>=15
+xgboost>=3.2
+scikit-learn>=1.4

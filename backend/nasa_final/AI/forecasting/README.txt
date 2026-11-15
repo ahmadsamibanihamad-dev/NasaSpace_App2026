@@ -1,0 +1,1 @@
+Agriculture MVP. Load Model_Registry.json and call mvp_inference.predict_entry(feature_dataframe, target, entry, Path(bundle_directory)). Input must contain engineered columns in required_columns, not raw GPS. Baseline entries are formulas, not trained artifacts. Historical demo only if current observations are unavailable. Validation-selected; consult test report if present.

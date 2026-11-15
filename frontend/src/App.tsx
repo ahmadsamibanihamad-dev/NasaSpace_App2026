@@ -18,6 +18,7 @@ const AnalysisView = lazy(() => import('./pages/analysis/AnalysisView'))
 const Rotation = lazy(() => import('./pages/Rotation'))
 const Analytics = lazy(() => import('./pages/Analytics'))
 const Risks = lazy(() => import('./pages/Risks'))
+const Outlook = lazy(() => import('./pages/Outlook'))
 const Reports = lazy(() => import('./pages/Reports'))
 const Settings = lazy(() => import('./pages/Settings'))
 
@@ -94,6 +95,7 @@ export default function App() {
           <Route path="analysis/:id" element={<Suspense fallback={<PageFallback />}><AnalysisView /></Suspense>} />
           <Route path="rotation" element={<Suspense fallback={<PageFallback />}><Rotation /></Suspense>} />
           <Route path="analytics" element={<Suspense fallback={<PageFallback />}><Analytics /></Suspense>} />
+          <Route path="outlook" element={<Suspense fallback={<PageFallback />}><Outlook /></Suspense>} />
           <Route path="risks" element={<Suspense fallback={<PageFallback />}><Risks /></Suspense>} />
           <Route path="reports" element={<Suspense fallback={<PageFallback />}><Reports /></Suspense>} />
           <Route path="settings" element={<Suspense fallback={<PageFallback />}><Settings /></Suspense>} />

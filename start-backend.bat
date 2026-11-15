@@ -14,13 +14,16 @@ if not exist .venv (
     exit /b 1
   )
   call .venv\Scripts\python.exe -m pip install --upgrade pip
-  call .venv\Scripts\python.exe -m pip install -r requirements.txt
-  if errorlevel 1 (
-    echo.
-    echo Installation failed. Check your internet connection and run this file again.
-    pause
-    exit /b 1
-  )
+)
+
+rem Installs anything new in requirements.txt; takes a few seconds when nothing changed.
+echo Checking Python libraries...
+call .venv\Scripts\python.exe -m pip install -q -r requirements.txt
+if errorlevel 1 (
+  echo.
+  echo Installing the Python libraries failed. Check your internet connection and run this file again.
+  pause
+  exit /b 1
 )
 
 echo.

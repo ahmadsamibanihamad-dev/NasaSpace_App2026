@@ -13,11 +13,29 @@ DATA_DIR = APP_DIR / "data"
 APP_NAME = {"en": "Ardna", "ar": "أرضنا"}
 
 
+def _local_secret() -> str:
+    """Random signing secret stored next to the database. Never logged, never committed."""
+    f = BACKEND_DIR / ".jwt_secret"
+    try:
+        v = f.read_text(encoding="utf-8").strip()
+        if len(v) >= 32:
+            return v
+    except OSError:
+        pass
+    v = secrets.token_urlsafe(48)
+    try:
+        f.write_text(v, encoding="utf-8")
+    except OSError:
+        pass  # read-only folder: fall back to a per-process secret
+    return v
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Security. If JWT_SECRET is unset a random secret is generated per process (tokens reset on restart).
-    jwt_secret: str = Field(default_factory=lambda: secrets.token_urlsafe(48))
+    # Security. If JWT_SECRET is unset, a random secret is generated once and kept in a local,
+    # git-ignored file so that sessions survive a restart of the server.
+    jwt_secret: str = Field(default_factory=lambda: _local_secret())
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
 
@@ -46,7 +64,7 @@ class Settings(BaseSettings):
     @field_validator("jwt_secret")
     @classmethod
     def _non_empty_secret(cls, v: str) -> str:
-        return v or secrets.token_urlsafe(48)
+        return v or _local_secret()
 
 
 @lru_cache
