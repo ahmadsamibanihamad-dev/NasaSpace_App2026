@@ -42,6 +42,42 @@ function browserPosition(options: PositionOptions): Promise<GeolocationPosition>
   return new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject, options))
 }
 
+/** A fix at least this accurate (metres) is treated as the exact position of the land. */
+export const PRECISE_M = 30
+
+/**
+ * Watches the device position with high accuracy and keeps the most accurate fix.
+ * Resolves as soon as a fix is within `goodEnough` metres, otherwise with the best fix seen when
+ * `maxMs` runs out. Rejects with the browser's error if no fix arrived (immediately when denied).
+ */
+function refinedPosition(maxMs: number, goodEnough: number, onFirstFix?: () => void): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    let best: GeolocationPosition | null = null
+    let lastError: unknown = { code: 3 }
+    let done = false
+    const finish = (fn: () => void) => {
+      if (done) return
+      done = true
+      navigator.geolocation.clearWatch(watch)
+      clearTimeout(timer)
+      fn()
+    }
+    const watch = navigator.geolocation.watchPosition(
+      (p) => {
+        if (!best) onFirstFix?.()
+        if (!best || p.coords.accuracy < best.coords.accuracy) best = p
+        if (best.coords.accuracy <= goodEnough) finish(() => resolve(best!))
+      },
+      (err) => {
+        lastError = err
+        if (err.code === 1) finish(() => reject(err))
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: maxMs },
+    )
+    const timer = setTimeout(() => finish(() => (best ? resolve(best) : reject(lastError))), maxMs)
+  })
+}
+
 async function networkEstimate(): Promise<{ lat: number; lon: number } | null> {
   for (const url of IP_SERVICES) {
     try {
@@ -79,26 +115,17 @@ export async function detectLocation(onStage?: (stage: 'asking' | 'detecting') =
       onStage?.('asking')
     }
     try {
-      // Wi-Fi / network positioning: quick, and the only thing most computers have
-      const p = await browserPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 })
-      onStage?.('detecting')
-      let best = p
-      if (p.coords.accuracy > 1500) {
-        // coarse fix: give GPS a short chance to do better (phones); keep the coarse one if it cannot
-        try {
-          best = await browserPosition({ enableHighAccuracy: true, timeout: 8000, maximumAge: 0 })
-        } catch {
-          best = p
-        }
-      }
-      return { lat: best.coords.latitude, lon: best.coords.longitude, accuracy: best.coords.accuracy, source: 'device' }
+      // Fresh high-accuracy fixes (GPS on phones), refined until good enough or time runs out
+      const p = await refinedPosition(15000, PRECISE_M, () => onStage?.('detecting'))
+      return { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, source: 'device' }
     } catch (e) {
       const code = (e as GeolocationPositionError).code
       if (code === 1) failure = 'denied'
       else {
         onStage?.('detecting')
         try {
-          const p = await browserPosition({ enableHighAccuracy: true, timeout: 12000, maximumAge: 0 })
+          // Wi-Fi / network positioning: the only thing most computers have
+          const p = await browserPosition({ enableHighAccuracy: false, timeout: 10000, maximumAge: 60 * 1000 })
           return { lat: p.coords.latitude, lon: p.coords.longitude, accuracy: p.coords.accuracy, source: 'device' }
         } catch (e2) {
           failure = (e2 as GeolocationPositionError).code === 1 ? 'denied' : 'unavailable'

@@ -69,7 +69,7 @@ export default function Guest() {
                   <div className="bg-surface-muted rounded-tile p-4">
                     <p className="text-caption text-text-secondary">{t('setup.locate.coordinates')}</p>
                     <p className="text-label font-semibold mt-1 tabular-nums" dir="ltr" style={{ textAlign: 'start' }}>
-                      {num(point.lat, 4)}, {num(point.lon, 4)}
+                      {num(point.lat, 5)}, {num(point.lon, 5)}
                     </p>
                   </div>
                 </div>

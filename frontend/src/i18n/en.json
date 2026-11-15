@@ -140,7 +140,7 @@
    "allow": "Allow location access",
    "asking": "Waiting for browser permission…",
    "detecting": "Detecting your location",
-   "detected": "We found your location",
+   "detected": "We found your exact location",
    "denied": "We couldn't detect your location automatically",
    "deniedBody": "Search for your governorate or area, type your land's coordinates, or click the map.",
    "outside": "This location is outside Jordan",
@@ -163,7 +163,11 @@
     "insecure": "Reason: browsers only allow location on a secure connection (https) or on localhost.",
     "unsupported": "Reason: this browser doesn't support location detection.",
     "unavailable": "Reason: the device returned no position. Check that Location services are on in the system settings (Windows: Settings → Privacy & security → Location)."
-   }
+   },
+   "accuracy": "(± {{m}} m)",
+   "approxDevice": "Approximate location: may be up to {{m}} m from where you are",
+   "approxDeviceBody": "This device did not give a precise position (no GPS, or you are indoors). The circle on the map shows where you may be. Drag the pin onto your land, or open the site on your phone while standing in the farm to get its exact position.",
+   "retryPrecise": "Detect location again"
   },
   "details": {
    "title": "Tell us about each plot",

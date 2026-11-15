@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Marker, useMapEvents } from 'react-leaflet'
+import { Circle, Marker, useMapEvents } from 'react-leaflet'
 import type { LatLngExpression } from 'leaflet'
 import { FlyTo, JordanMap, pinIcon } from '../../components/map/JordanMap'
 import { PlaceSearch } from '../../components/map/PlaceSearch'
@@ -10,7 +10,7 @@ import { Icon } from '../../components/ui/Icon'
 import { useLocate } from '../../hooks/queries'
 import type { Governorate } from '../../lib/types'
 import { num } from '../../lib/format'
-import { detectLocation, LocateError, type LocateFailure } from '../../lib/locate'
+import { detectLocation, LocateError, PRECISE_M, type LocateFailure } from '../../lib/locate'
 
 type State = 'idle' | 'asking' | 'detecting' | 'detected' | 'denied' | 'outside' | 'manual'
 
@@ -19,6 +19,9 @@ export interface LocatedPoint {
   lon: number
   governorate: Governorate | null
 }
+
+/** Accuracy radius for display: whole metres, rounded to tens above 100 m. */
+const accMetres = (m: number) => num(m > 100 ? Math.round(m / 10) * 10 : Math.max(1, Math.round(m)), 0)
 
 function ClickToSet({ enabled, onPick }: { enabled: boolean; onPick: (lat: number, lon: number) => void }) {
   useMapEvents({
@@ -38,11 +41,14 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
   // why the device position failed (shown to the user), and whether the pin is only a network estimate
   const [failure, setFailure] = useState<LocateFailure | null>(null)
   const [approximate, setApproximate] = useState(false)
+  // accuracy radius (metres) of the device fix behind the pin; null once the user places the pin
+  const [accuracy, setAccuracy] = useState<number | null>(null)
   const locate = useLocate()
 
-  const resolve = async (lat: number, lon: number, zoom = 15, fromGps = false) => {
+  const resolve = async (lat: number, lon: number, zoom = 15, fromGps = false, approx = false, radius: number | null = null) => {
     setError(null)
-    if (zoom !== 11) setApproximate(false)
+    setApproximate(approx)
+    setAccuracy(radius)
     try {
       const r = await locate.mutateAsync({ lat, lon })
       setPoint({ lat, lon, governorate: r.governorate })
@@ -62,16 +68,21 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
     try {
       const found = await detectLocation((stage) => setState(stage))
       setState('detecting')
-      if (found.source === 'device') {
+      const acc = found.accuracy
+      if (found.source === 'device' && acc != null && acc <= PRECISE_M) {
         setPoint({ lat: found.lat, lon: found.lon, governorate: null })
-        setFly({ c: [found.lat, found.lon], z: 16 })
+        setFly({ c: [found.lat, found.lon], z: 18 })
         // brief pause so the pulsing "detecting" marker is visible while we resolve the governorate
-        setTimeout(() => resolve(found.lat, found.lon, 16, true), 600)
+        setTimeout(() => resolve(found.lat, found.lon, 18, true, false, acc), 600)
+      } else if (found.source === 'device') {
+        // the device has no precise fix (no GPS, or indoors): never present it as the land itself.
+        // Show how far off it may be and let the user put the pin on the land.
+        const r = acc ?? 5000
+        await resolve(found.lat, found.lon, r <= 150 ? 17 : r <= 600 ? 15 : r <= 2500 ? 13 : 11, false, true, r)
       } else {
         // only a city-level estimate from the internet connection: show it, and ask the user to refine
         setFailure(found.deviceFailure ?? null)
-        setApproximate(true)
-        await resolve(found.lat, found.lon, 11)
+        await resolve(found.lat, found.lon, 11, false, true)
       }
     } catch (e) {
       setFailure(e instanceof LocateError ? e.reason : 'unavailable')
@@ -109,8 +120,8 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
 
           {approximate && state === 'manual' && (
             <Banner icon="info" tone="warning">
-              <b className="font-semibold block">{t('setup.locate.approx')}</b>
-              {t('setup.locate.approxBody')}
+              <b className="font-semibold block">{accuracy != null ? t('setup.locate.approxDevice', { m: accMetres(accuracy) }) : t('setup.locate.approx')}</b>
+              {accuracy != null ? t('setup.locate.approxDeviceBody') : t('setup.locate.approxBody')}
               {failure && <span className="block text-caption text-text-secondary mt-1">{t(`setup.locate.reasons.${failure}`)}</span>}
             </Banner>
           )}
@@ -119,6 +130,7 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
               {state === 'detected' && (
                 <p className="flex items-center gap-2 text-body font-semibold text-green-700">
                   <Icon name="check" size={18} /> {t('setup.locate.detected')}
+                  {accuracy != null && <span className="text-caption font-normal text-text-secondary">{t('setup.locate.accuracy', { m: accMetres(accuracy) })}</span>}
                 </p>
               )}
               <div className="grid grid-cols-2 gap-3">
@@ -128,8 +140,8 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
                 </div>
                 <div className="bg-surface-muted rounded-tile p-4">
                   <p className="text-caption text-text-secondary">{t('setup.locate.coordinates')}</p>
-                  <p className="text-label font-semibold mt-1 tabular-nums" dir="ltr">
-                    {num(point.lat, 4)}, {num(point.lon, 4)}
+                  <p className="text-caption font-semibold mt-1.5 tabular-nums whitespace-nowrap" dir="ltr">
+                    {num(point.lat, 5)}, {num(point.lon, 5)}
                   </p>
                 </div>
               </div>
@@ -139,6 +151,11 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
               {state === 'detected' && (
                 <Button variant="secondary" onClick={() => setState('manual')}>
                   {t('setup.locate.notMine')}
+                </Button>
+              )}
+              {approximate && state === 'manual' && (
+                <Button variant="secondary" icon="locate" onClick={ask}>
+                  {t('setup.locate.retryPrecise')}
                 </Button>
               )}
               {state === 'manual' && <p className="text-caption text-text-secondary">{t('setup.locate.moveHint')}</p>}
@@ -183,6 +200,9 @@ export function StepLocate({ initial, onConfirm }: { initial: LocatedPoint | nul
         <JordanMap showCoords>
           <ClickToSet enabled={canClickMap} onPick={(lat, lon) => resolve(lat, lon, undefined)} />
           {fly && <FlyTo center={fly.c} zoom={fly.z} />}
+          {point && accuracy != null && state !== 'detecting' && (
+            <Circle center={[point.lat, point.lon]} radius={accuracy} interactive={false} pathOptions={{ color: '#2F8F4E', weight: 1.5, fillColor: '#2F8F4E', fillOpacity: 0.12 }} />
+          )}
           {point && state !== 'detecting' && (
             <Marker
               position={[point.lat, point.lon]}
