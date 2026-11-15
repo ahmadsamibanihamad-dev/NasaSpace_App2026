@@ -10,7 +10,7 @@ Nothing is re-derived here: the same lags, rolling windows, changes, calendar te
 team's own `Historical_Demo_Features.parquet`.
 
 Source data: `nasa_final/data/processed/master_2019_2026/Jordan_Master_Dataset_2019_2026_Cleaned.parquet`
-(daily, 835 grid points, 2019-12-01 to 2026-08-31). The file is large and is not in git; without it
+(daily, 835 grid points, 2019-12-01 to 2026-08-31). The file is large (47 MB); without it
 only the demo origin date is available.
 """
 

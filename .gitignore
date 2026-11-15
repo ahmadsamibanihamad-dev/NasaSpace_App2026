@@ -27,5 +27,5 @@ frontend/.env
 .DS_Store
 .claude/settings.local.json
 
-# AI team master dataset (47 MB). Copy it from NASA_FINAL.zip; without it only the default forecast date works.
-backend/nasa_final/data/processed/master_2019_2026/
+# Illustrated site guide: screenshots of a real farm, kept on the author's machine only.
+docs/AgriVision-site-guide.*
