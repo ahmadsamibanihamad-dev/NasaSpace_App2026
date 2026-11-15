@@ -69,3 +69,9 @@ export function scoreFill(score: number | null | undefined): string {
   if (score >= 40) return '#D7ECDC'
   return '#EEF7F0'
 }
+
+/** List separator for the current language (Arabic comma in Arabic). */
+export const listSep = () => (i18n.language === 'ar' ? '، ' : ', ')
+
+/** Joins short labels (parcel numbers, crop names) for display. */
+export const joinList = (items: readonly string[] | null | undefined) => (items ?? []).join(listSep())

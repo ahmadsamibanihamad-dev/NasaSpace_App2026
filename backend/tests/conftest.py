@@ -11,6 +11,7 @@ os.environ["AI_MODE"] = "off"
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
+from sqlalchemy import event
 from sqlmodel import SQLModel, create_engine
 
 from app.core import db, ratelimit
@@ -29,6 +30,12 @@ def climate():
 @pytest.fixture()
 def client(climate, monkeypatch):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+
+    # same as production: SQLite only enforces foreign keys when asked to
+    @event.listens_for(engine, "connect")
+    def _fk_on(dbapi_conn, _):
+        dbapi_conn.execute("PRAGMA foreign_keys=ON")
+
     db.set_engine(engine)
     from app import models  # noqa: F401
 

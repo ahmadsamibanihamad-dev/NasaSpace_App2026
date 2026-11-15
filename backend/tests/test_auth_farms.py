@@ -144,3 +144,19 @@ def test_rate_limit():
     c = TestClient(app)
     assert [c.get("/x").status_code for _ in range(4)] == [200, 200, 200, 429]
     assert c.get("/x").json()["error"]["code"] == "RATE_LIMITED"
+
+
+def test_deleting_a_farm_removes_its_parcels_history_and_analyses(client):
+    """A farm that has been used (parcels, crop history, analyses) must still be deletable."""
+    h = auth_headers(client)
+    farm = client.post(f"{API}/farms/demo", headers=h).json()
+    plots = client.get(f"{API}/farms/{farm['id']}/plots", headers=h).json()
+    assert len(plots) == 6
+    a = client.post(f"{API}/analyses", json={"analysis_type": "risk", "farm_id": farm["id"], "plot_ids": None}, headers=h).json()
+    assert client.get(f"{API}/analyses/{a['analysis_id']}", headers=h).json()["status"] == "completed"
+    # one parcel with history first, then the whole farm
+    assert client.delete(f"{API}/plots/{plots[0]['id']}", headers=h).status_code == 204
+    assert client.delete(f"{API}/farms/{farm['id']}", headers=h).status_code == 204
+    assert client.get(f"{API}/farms", headers=h).json() == []
+    assert client.get(f"{API}/analyses/{a['analysis_id']}", headers=h).status_code == 404
+    assert client.get(f"{API}/plots/{plots[1]['id']}", headers=h).status_code == 404

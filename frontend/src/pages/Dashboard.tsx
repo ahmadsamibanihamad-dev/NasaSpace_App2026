@@ -9,7 +9,7 @@ import { TickStrip } from '../components/ui/viz'
 import { Icon, type IconName } from '../components/ui/Icon'
 import { CropIcon } from '../components/crops/CropIcon'
 import { FarmMiniMap } from '../components/map/FarmMiniMap'
-import { area as fmtArea, cropName, date, num, scoreTone } from '../lib/format'
+import { area as fmtArea, cropName, date, num, scoreTone, listSep } from '../lib/format'
 import { loc } from '../i18n'
 import type { MetricSummary, Plot } from '../lib/types'
 
@@ -276,7 +276,7 @@ export default function Dashboard() {
                   <span className="min-w-0 flex-1">
                     <span className="block text-label font-semibold truncate">{t(`analysis.objectives.${a.analysis_type}`)}</span>
                     <span className="block text-caption text-text-secondary truncate">
-                      {date(a.created_at, { day: 'numeric', month: 'short' })} · {a.summary?.plots.join('، ')}
+                      {date(a.created_at, { day: 'numeric', month: 'short' })} · {a.summary?.plots.join(listSep())}
                     </span>
                   </span>
                   {a.status === 'completed' ? a.summary?.headline_score != null ? <ScoreBadge score={a.summary.headline_score} /> : <Icon name="check" size={18} className="text-green-600" /> : <Pill tone={a.status === 'failed' ? 'critical' : 'neutral'} icon={a.status === 'failed' ? 'alert' : 'rotate'}>{t(`reports.statuses.${a.status}`)}</Pill>}

@@ -7,7 +7,7 @@ import { Button, Card, CardTitle, IconButton, Pill, Skeleton } from '../componen
 import { EmptyState, ErrorState } from '../components/ui/states'
 import { ConfirmDialog } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
-import { cropName, date, dayMonth } from '../lib/format'
+import { cropName, date, dayMonth, listSep } from '../lib/format'
 import type { Analysis } from '../lib/types'
 import { ScoreBadge } from './Dashboard'
 
@@ -19,7 +19,7 @@ function useSummaryRows() {
     const rows: [string, string][] = [
       [t('reports.type'), t(`analysis.objectives.${a.analysis_type}`)],
       [t('reports.date'), date(a.created_at)],
-      [t('reports.plots'), a.summary?.plots.join('، ') ?? '—'],
+      [t('reports.plots'), a.summary?.plots.join(listSep()) ?? '—'],
     ]
     if (!r) return rows
     for (const p of r.plots ?? []) {
@@ -28,9 +28,9 @@ function useSummaryRows() {
         rows.push([`${p.plot_label} · ${t('results.window')}`, p.recommended_planting_window ? `${dayMonth(p.recommended_planting_window.start)} – ${dayMonth(p.recommended_planting_window.end)}` : '—'])
         for (const [k, v] of Object.entries(p.environmental_scores)) rows.push([`${p.plot_label} · ${t(`results.factor.${k}`)}`, String(v)])
       }
-      rows.push([`${p.plot_label} · ${t('results.risks')}`, p.risks.map((x) => `${t(`risks.types.${x.type}`)} (${t(`results.severity.${x.severity}`)})`).join('، ') || '—'])
+      rows.push([`${p.plot_label} · ${t('results.risks')}`, p.risks.map((x) => `${t(`risks.types.${x.type}`)} (${t(`results.severity.${x.severity}`)})`).join(listSep()) || '—'])
     }
-    for (const rec of r.recommendations ?? []) rows.push([`${rec.plot_label} · ${t('results.recommendedCrops')}`, rec.ranked.slice(0, 3).map((c) => `${cropName(c.crop)} ${c.suitability_score}`).join('، ')])
+    for (const rec of r.recommendations ?? []) rows.push([`${rec.plot_label} · ${t('results.recommendedCrops')}`, rec.ranked.slice(0, 3).map((c) => `${cropName(c.crop)} ${c.suitability_score}`).join(listSep())])
     for (const c of r.calendar?.rows ?? []) rows.push([`${c.plot_label} · ${cropName(c.crop)}`, c.best_window ? `${dayMonth(c.best_window.start)} – ${dayMonth(c.best_window.end)}` : '—'])
     for (const ro of r.rotation ?? [])
       for (const s of ro.strategies) rows.push([`${ro.plot_label} · ${t(`rotation.keys.${s.key}`)}`, `${s.sequence.map((q) => cropName(q.crop)).join(' / ')} · ${s.scores.water_use}/${s.scores.soil_health}/${s.scores.income_potential}`])
@@ -102,7 +102,7 @@ export default function Reports() {
                     <p className="text-label font-semibold">{t(`analysis.objectives.${a.analysis_type}`)}</p>
                     <p className="text-caption text-text-secondary">{date(a.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                     <p className="text-caption text-text-secondary break-words">
-                      {t('reports.plots')}: {a.summary?.plots.join('، ')}
+                      {t('reports.plots')}: {a.summary?.plots.join(listSep())}
                       {a.summary?.crop && ` · ${cropName(a.summary.crop)}`}
                     </p>
                   </div>
@@ -145,7 +145,7 @@ export default function Reports() {
                     </td>
                     <td className="py-3 font-semibold">{t(`analysis.objectives.${a.analysis_type}`)}</td>
                     <td className="py-3 whitespace-nowrap">{date(a.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
-                    <td className="py-3">{a.summary?.plots.join('، ')}</td>
+                    <td className="py-3">{a.summary?.plots.join(listSep())}</td>
                     <td className="py-3">{a.summary?.crop ? cropName(a.summary.crop) : '—'}</td>
                     <td className="py-3">
                       {a.status === 'completed' && a.summary?.headline_score != null ? (

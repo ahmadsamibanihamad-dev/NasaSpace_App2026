@@ -2,6 +2,18 @@
 
 Last updated 2026-11-15.
 
+## Full test pass (2026-11-15)
+
+Run with a fresh account against the live backend and real NASA POWER data.
+- Automated: backend 66 tests, frontend 8, type-check and production build clean.
+- 67 API-level checks through the site's own data layer (auth, farms, parcels, history, 20 time-series combinations, 11 analysis runs, forecast, soil, guest, error cases): all behave as intended.
+- 20 pages opened in Arabic, 19 in English, 15 at phone width: no missing strings, no console errors, no horizontal overflow.
+- 26 UI interactions driven by script (wizard, coordinates entry, reports compare, rotation, settings, sign-in/out, validation, delete farm).
+- Bugs found and fixed: deleting a farm that had parcels or analyses failed with a 500 (rows were deleted in the wrong order; tests missed it because the test database did not enforce foreign keys, now it does); parcel numbers were joined with an Arabic comma in the English UI.
+- Not testable here (browser pane was hidden, so no real mouse input or screenshots): drawing a parcel by dragging on the map, the reshape/rotate handles, print-to-PDF output, real device geolocation, `start.bat` by double-click, visual appearance.
+- Findings left for the user: forgot-password page says an email will be sent but none is; in dry cells every rainfed annual crop scores below 40, so rotation options A and B are all fallow; landing page still names SMAP as a source.
+- Test accounts left in the local database: e2e-1115@example.com and two full-<timestamp>@example.com.
+
 ## Planting date, soil from the API, parcel form (2026-11-15, user request)
 
 - Forecast page has a planting start date. Default 2026-05-02 uses the team's demo snapshot. Other dates (2021-01-02 to 2026-09-01) build features from the team's master dataset with their own notebook code, copied into `backend/app/services/outlook_features.py`; a test proves the output equals their demo snapshot (516 columns, zero difference).

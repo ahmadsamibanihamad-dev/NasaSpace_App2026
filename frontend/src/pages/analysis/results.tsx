@@ -10,7 +10,7 @@ import { Modal } from '../../components/ui/Modal'
 import { CropIcon } from '../../components/crops/CropIcon'
 import { FarmMiniMap } from '../../components/map/FarmMiniMap'
 import { loc } from '../../i18n'
-import { cropName, dayMonth, monthName, num, scoreFill, scoreTone } from '../../lib/format'
+import { cropName, dayMonth, monthName, num, scoreFill, scoreTone, listSep } from '../../lib/format'
 import type { AnalysisResult, Bi, Evidence, Farm, Plot, PlotSuitability, RankedCrop, RequirementMatch, Risk, RotationStrategy } from '../../lib/types'
 
 const RISK_ICON: Record<string, IconName> = { frost: 'snow', heat_stress: 'thermo', drought: 'sun', dry_spell: 'sun', excessive_rainfall: 'cloudRain', low_soil_moisture: 'drop' }
@@ -91,7 +91,7 @@ export function RiskChips({ risks }: { risks: Risk[] }) {
               {t(`risks.types.${r.type}`)} · {t(`results.severity.${r.severity}`)}
             </Pill>
             {r.period && <span className="text-caption text-text-secondary">{loc(r.period)}</span>}
-            {r.affected_plots && <span className="text-caption text-text-secondary">· {t('risks.affected')}: {r.affected_plots.join('، ')}</span>}
+            {r.affected_plots && <span className="text-caption text-text-secondary">· {t('risks.affected')}: {r.affected_plots.join(listSep())}</span>}
           </div>
           <p className="text-label">{loc(r.explanation)}</p>
           <p className="text-label text-text-secondary mt-2 flex items-start gap-2">
@@ -389,7 +389,7 @@ export function CalendarView({ result }: { result: AnalysisResult }) {
                 }
                 sub={
                   <>
-                    {manyPlots && `${r.plot_label} · `}
+                    {manyPlots && `${r.plot_label.replaceAll('، ', listSep())} · `}
                     {r.best_window ? `${dayMonth(r.best_window.start)} – ${dayMonth(r.best_window.end)}` : t(r.perennial ? 'results.yearRound' : 'results.noWindow')}
                   </>
                 }

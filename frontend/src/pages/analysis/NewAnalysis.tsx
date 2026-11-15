@@ -9,7 +9,7 @@ import { Icon, type IconName } from '../../components/ui/Icon'
 import { CropIcon } from '../../components/crops/CropIcon'
 import { FarmMiniMap } from '../../components/map/FarmMiniMap'
 import { CROP_IDS } from '../../lib/places'
-import { area as fmtArea, cropName, date } from '../../lib/format'
+import { area as fmtArea, cropName, date, listSep } from '../../lib/format'
 import type { AnalysisType } from '../../lib/types'
 import { ApiError } from '../../lib/api'
 
@@ -278,7 +278,7 @@ function Summary({ farmName, plots, whole, type, crop, date: d, priority, large 
   const { t } = useTranslation()
   const rows: [string, string][] = [
     [t('common.farm'), farmName],
-    [t('analysis.scope'), whole ? `${t('analysis.wholeFarm')} (${plots.length})` : plots.length ? plots.join('، ') : '—'],
+    [t('analysis.scope'), whole ? `${t('analysis.wholeFarm')} (${plots.length})` : plots.length ? plots.join(listSep()) : '—'],
     [t('analysis.objective'), type ? t(`analysis.objectives.${type}`) : '—'],
   ]
   if (crop !== undefined) rows.push([t('analysis.crop'), crop ? cropName(crop) : type === 'crop_suitability' ? '—' : t(type === 'planting_window' ? 'analysis.allCrops' : 'analysis.currentCrops')])

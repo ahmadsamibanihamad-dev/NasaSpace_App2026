@@ -165,12 +165,18 @@ def update_farm(farm_id: str, body: FarmUpdateIn, user: User = Depends(current_u
 @router.delete("/farms/{farm_id}", status_code=204)
 def delete_farm(farm_id: str, user: User = Depends(current_user), session: Session = Depends(get_session)):
     f = owned_farm(session, user, farm_id)
+    # Children first, flushed in order: the models declare no ORM relationships, so the session
+    # would otherwise be free to delete the farm row before the rows that point at it.
+    plots = session.exec(select(Plot).where(Plot.farm_id == f.id)).all()
     for a in session.exec(select(Analysis).where(Analysis.farm_id == f.id)).all():
         session.delete(a)
-    for p in session.exec(select(Plot).where(Plot.farm_id == f.id)).all():
+    for p in plots:
         for h in session.exec(select(CropHistory).where(CropHistory.plot_id == p.id)).all():
             session.delete(h)
+    session.flush()
+    for p in plots:
         session.delete(p)
+    session.flush()
     session.delete(f)
     session.commit()
     return Response(status_code=204)
@@ -255,6 +261,7 @@ def delete_plot(plot_id: str, user: User = Depends(current_user), session: Sessi
     farm = session.get(Farm, p.farm_id)
     for h in session.exec(select(CropHistory).where(CropHistory.plot_id == p.id)).all():
         session.delete(h)
+    session.flush()  # history rows before the parcel they point at
     session.delete(p)
     session.flush()
     recenter_farm(session, farm)
