@@ -92,6 +92,21 @@ These numbers are design heuristics. No nutrient depletion is estimated.
 
 In the 90-day planner the first crop becomes the most recent crop for the second one. To avoid counting rotation twice, a sequence is scored from each crop's environment score (all factors except rotation) plus the engine's rotation scores.
 
+## Cultivation type
+
+`open_field` (default) uses the outdoor forecast as described above.
+
+`greenhouse`: the forecast describes outdoor air, and nothing is known about the greenhouse's heating or cooling. So:
+
+- temperature, humidity and rainfall are **unknown** factors (left out, their weight spread over the known ones, `coverage_pct` drops);
+- surface soil moisture is not used; water is satisfied by irrigation (100 when available, unknown when not stated);
+- **no irrigation is a critical failure**, because rain does not reach the crop;
+- the outdoor temperature and frost rules are not applied;
+- a crop is at most `conditional`, never `suitable_candidate`, and the answer carries a warning;
+- soil, fertility, terrain and rotation are scored as usual.
+
+No greenhouse-specific crop requirement is assumed; none is in the references. At a location with no soil data the score rests on few factors, which `coverage_pct` shows.
+
 ## References and their applicability to Jordan
 
 | Key | Reference |
@@ -143,7 +158,7 @@ Nothing here was validated on Jordanian field data. Soil pH in the dataset is 7.
 
 Only `lat` and `lon` are required. The answer carries: `forecast_origin` and `data_mode`, the matched `grid`, the four forecasts with method and validation error, `soil` and `terrain`, `previous_crops` with families, and for each period three ranked crops with `score`, `component_scores`, `group_scores`, `rotation`, `explanations` (each with the factor it belongs to and its effect), `critical_failures`, `days_to_harvest`, `missing_factors`, `coverage_pct`; plus `weights`, `weight_policy` and `rule_version`.
 
-`cultivation_type` is recorded and not scored. `POST /api/v1/crop-rotation/plan` takes the same history fields with `latitude`, `longitude` and `planning_horizon_days`.
+`cultivation_type` is `open_field` (default) or `greenhouse`; see "Cultivation type" below. `POST /api/v1/crop-rotation/plan` takes the same history fields with `latitude`, `longitude` and `planning_horizon_days`.
 
 Data mode is `historical_demo` (default date) or `historical_data` (another date inside the dataset). A date outside the dataset is refused with `DATE_OUT_OF_RANGE`; historical data is never served as a live forecast.
 

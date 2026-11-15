@@ -194,3 +194,26 @@ def test_planting_date_moves_the_forecast_period_and_the_historical_window(clien
     # asking for the default date explicitly gives exactly the default answer
     same = client.post(f"{API}/outlook", json={**WEST_IRBID, "planting_date": "2026-05-02"}).json()
     assert same["periods"] == spring["periods"] and same["is_default_date"] is True
+
+
+def test_cultivation_type_and_laboratory_soil_change_the_answer(client):
+    base = {**WEST_IRBID, "irrigation_available": True, "horizon_days": 90}
+    field = client.post(f"{API}/outlook", json=base).json()
+    house = client.post(f"{API}/outlook", json={**base, "cultivation_type": "greenhouse"}).json()
+    assert field["cultivation_type"] == "open_field" and house["cultivation_type"] == "greenhouse"
+    f, g = field["periods"][0]["recommendations"], house["periods"][0]["recommendations"]
+    assert all(x["component_scores"]["temperature"] is not None for x in f) and all(x["component_scores"]["temperature"] is None for x in g)
+    assert all(x["status"] != "suitable_candidate" for x in g)
+    assert {x["crop_id"]: x["score"] for x in f} != {x["crop_id"]: x["score"] for x in g}
+    assert any("greenhouse" in w["en"] for w in house["warnings"])
+    # laboratory results replace the estimate, keep their source, and move the scores
+    lab = client.post(f"{API}/outlook", json={**base, "soil_lab": {"ph": 6.8, "sand": 70, "silt": 20, "clay": 10}}).json()
+    props = {p["key"]: p for p in lab["soil"]["properties"]}
+    assert props["ph"]["value"] == 6.8 and "laboratory" in props["ph"]["source"] and lab["soil"]["has_laboratory_values"] is True
+    assert lab["soil"]["texture_class"]["0-30"] == "sandy loam"
+    assert {x["crop_id"]: x["score"] for x in lab["periods"][0]["recommendations"]} != {x["crop_id"]: x["score"] for x in f}
+    plan = client.post(f"{API}/crop-rotation/plan", json={"latitude": WEST_IRBID["lat"], "longitude": WEST_IRBID["lon"], "irrigation_available": True, "cultivation_type": "greenhouse"}).json()
+    assert plan["cultivation_type"] == "greenhouse" and any("greenhouse" in w["en"].lower() for w in plan["warnings"])
+    if plan["best_rotation"]:
+        assert plan["best_rotation"]["status"] == "conditionally_suitable"
+        assert all(s["component_scores"]["temperature"] is None for s in plan["best_rotation"]["sequence"])

@@ -37,6 +37,7 @@ class ForecastRequest(BaseModel):
     irrigation_available: Optional[bool]=None
     soil_ph: Optional[float]=Field(default=None,ge=0,le=14)
     previous_crop: Optional[str]=None
+    cultivation_type: Optional[Literal['open_field','greenhouse']]=None
 
 class DemoRequest(BaseModel):
     latitude: float=Field(ge=-90,le=90)
@@ -115,9 +116,9 @@ def demo(req: DemoRequest):
                 target=f'{v}_target_{agg}_{days}d'; entry=registry[target]
                 values[key]=float(predict_entry(row,target,entry,F)[0]); methods[key]=entry['method']
             site=env.site_context(grid_id,start,days,lab)
-            result=recommend(days,**values,irrigation_available=req.irrigation_available,site=site,crop_history=history)
+            result=recommend(days,**values,irrigation_available=req.irrigation_available,site=site,crop_history=history,cultivation_type=req.cultivation_type)
             output[str(days)]={'forecast':values,'methods':methods,'period_start':str(start),'period_end':str(origin+timedelta(days=days)),'site':site,**result}
-        return {'data_mode':'historical_demo','forecast_origin':str(origin),'grid_id':grid_id,'matched_latitude':float(row.LATITUDE.iloc[0]),'matched_longitude':float(row.LONGITUDE.iloc[0]),'distance_km':round(dist,2),'cultivation_type':req.cultivation_type,'periods':output,'warning':'Historical snapshot; not a live forecast. Nearest-grid distance check is not a national boundary check.'}
+        return {'data_mode':'historical_demo','forecast_origin':str(origin),'grid_id':grid_id,'matched_latitude':float(row.LATITUDE.iloc[0]),'matched_longitude':float(row.LONGITUDE.iloc[0]),'distance_km':round(dist,2),'cultivation_type':req.cultivation_type or 'open_field','periods':output,'warning':'Historical snapshot; not a live forecast. Nearest-grid distance check is not a national boundary check.'}
     except HTTPException: raise
     except (FileNotFoundError,ImportError,KeyError,ValueError) as e: raise HTTPException(503,'Forecast package unavailable or incompatible') from e
 

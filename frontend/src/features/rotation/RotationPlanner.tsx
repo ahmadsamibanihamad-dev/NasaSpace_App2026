@@ -4,7 +4,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query'
-import { Button, Card, Field, Input, Pill, Select, Skeleton, Tabs, Tile } from '../../components/ui/primitives'
+import { Button, Card, Field, Input, Pill, Skeleton, Tabs, Tile } from '../../components/ui/primitives'
 import { Banner, ErrorState, StateBlock } from '../../components/ui/states'
 import { FactorBar } from '../../components/ui/viz'
 import { Icon, type IconName } from '../../components/ui/Icon'
@@ -337,18 +337,16 @@ export function RotationPlanner({
   const [horizon, setHorizon] = useState<'90' | '30'>('90')
   const [planting, setPlanting] = useState('') // '' = default date from the backend
   const [history, setHistory] = useState<FarmHistoryValue>(() => emptyHistory(defaultIrrigation, defaultPrevious))
-  const [cultivation, setCultivation] = useState<'open_field' | 'greenhouse'>('open_field')
 
   const input = {
     latitude: lat,
     longitude: lon,
     planning_horizon_days: Number(horizon) as 30 | 90,
     planting_date: planting || null,
-    cultivation_type: cultivation,
     ...historyPayload(history),
   }
   const q = useQuery({
-    queryKey: ['rotation-plan', lat.toFixed(4), lon.toFixed(4), horizon, planting, historyKey(history), cultivation],
+    queryKey: ['rotation-plan', lat.toFixed(4), lon.toFixed(4), horizon, planting, historyKey(history)],
     queryFn: () => getRotationPlan(input),
     staleTime: 10 * 60 * 1000,
     retry: 0,
@@ -397,12 +395,6 @@ export function RotationPlanner({
             aria-invalid={dateError}
             onChange={(e) => e.target.value && setPlanting(e.target.value)}
           />
-        </Field>
-        <Field label={t('planner.cultivation')} htmlFor="plan-cult">
-          <Select id="plan-cult" value={cultivation} onChange={(e) => setCultivation(e.target.value as 'open_field' | 'greenhouse')}>
-            <option value="open_field">{t('planner.openField')}</option>
-            <option value="greenhouse">{t('planner.greenhouse')}</option>
-          </Select>
         </Field>
       </div>
       <div>

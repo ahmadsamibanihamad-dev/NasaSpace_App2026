@@ -902,7 +902,23 @@
   "earlier": "Earlier crops (optional)",
   "addEarlier": "Add an earlier crop",
   "crop": "Crop",
-  "pick": "Choose a crop"
+  "pick": "Choose a crop",
+  "greenhouseNote": "In a greenhouse the forecast temperature, humidity and rainfall are left out of the score because they are outdoor values, irrigation becomes a requirement, and recommendations stay conditional.",
+  "lab": {
+   "title": "Laboratory soil test results",
+   "optional": "optional",
+   "add": "Enter results",
+   "hide": "Hide",
+   "applied": "Applied: {{n}} values",
+   "body": "If you have a laboratory test of your soil, enter what you know from it. A value you enter replaces the automatic estimate in the calculation; anything left empty stays on the estimate.",
+   "apply": "Apply results",
+   "clear": "Clear and use the estimate",
+   "error": {
+    "range": "A value is out of range: pH from 0 to 14, percentages from 0 to 100, other values not negative.",
+    "texture": "Enter sand, silt and clay together, or leave all three empty.",
+    "empty": "Enter at least one value."
+   }
+  }
  },
  "score": {
   "overall": "Overall suitability",

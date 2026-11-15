@@ -55,6 +55,7 @@ EN = {
     "متوسط الفترة لا يكشف الصقيع أو موجات الحر؛ تحقق من الطقس الفعلي": "A period mean does not reveal frost or heat waves; check the actual weather",
     "قواعد تجريبية غير معايرة محليًا؛ رطوبة السطح ليست رطوبة منطقة الجذور": "Experimental rules, not calibrated locally; surface moisture is not root-zone moisture",
     "نيتروجين التربة هنا نيتروجين كلي من SoilGrids وليس المتاح للنبات؛ لا تُحدَّد منه كميات السماد": "Soil nitrogen here is total nitrogen from SoilGrids, not plant-available nitrogen; fertilizer amounts are not derived from it",
+    "التوقعات تصف الجو الخارجي لا داخل البيت المحمي؛ عوامل الطقس لم تدخل في الدرجة والتوصيات مشروطة": "Forecasts describe outdoor air, not the inside of the greenhouse; the weather factors were left out of the score and the recommendations are conditional",
     "صنف سريع النضج": "Fast-maturing variety",
     "حصاد أوراق صغيرة؛ قد يتجاوز الشهر": "Baby-leaf harvest; may take more than a month",
     "حصاد مبكر للأوراق؛ قد يتجاوز الشهر": "Early leaf harvest; may take more than a month",
@@ -334,7 +335,7 @@ def outlook(body: OutlookIn):
         periods, warnings, previous = [], [], []
         for days in (body.horizon_days,) if body.horizon_days else (30, 90):
             site = ctx["sites"][days]
-            result = api.recommend(days, **ctx["values"][days], irrigation_available=body.irrigation_available, site=site, crop_history=history)
+            result = api.recommend(days, **ctx["values"][days], irrigation_available=body.irrigation_available, site=site, crop_history=history, cultivation_type=body.cultivation_type)
             previous = result["previous_crops"]
             periods.append(
                 {
@@ -370,7 +371,7 @@ def outlook(body: OutlookIn):
         "location": ctx["location"],
         "grid": ctx["grid"],
         "irrigation_available": body.irrigation_available,
-        "cultivation_type": body.cultivation_type,
+        "cultivation_type": body.cultivation_type or "open_field",
         "previous_crops": [{**p, "name": {"ar": names[p["crop_id"]]["name_ar"], "en": names[p["crop_id"]]["name_en"]}} for p in previous],
         "soil": ctx["soil"],
         "terrain": ctx["terrain"],

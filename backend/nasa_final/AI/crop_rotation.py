@@ -104,7 +104,7 @@ def duration_fit(crop: dict, phase_days: int) -> dict:
     return {"fits": True, "conditional": True, "score": round(100.0 * (phase_days - lo) / (hi - lo), 1)}
 
 
-def evaluate_phase(crop_group_days: int, phase_days: int, conditions: dict, irrigation_available, soil_ph=None, *, site=None, history=None) -> dict:
+def evaluate_phase(crop_group_days: int, phase_days: int, conditions: dict, irrigation_available, soil_ph=None, *, site=None, history=None, cultivation_type=None) -> dict:
     """Score one crop group with the recommendation engine under a phase's conditions.
 
     The engine turns total rainfall into a daily rate using the group's own horizon, so the phase
@@ -121,6 +121,7 @@ def evaluate_phase(crop_group_days: int, phase_days: int, conditions: dict, irri
         soil_ph=soil_ph,
         site=site,
         crop_history=history,
+        cultivation_type=cultivation_type,
     )
     return {r["crop_id"]: r for r in result["recommendations"]}
 
@@ -178,6 +179,7 @@ def plan(
     soil_ph: float | None = None,
     site_phase_1: dict | None = None,
     site_phase_2: dict | None = None,
+    cultivation_type: str | None = None,
     translate=_same,
 ) -> dict:
     """Rank crop sequences for the planning window.
@@ -214,7 +216,9 @@ def plan(
     len_1 = PHASE_1[1] - PHASE_1[0] + 1
     len_2 = PHASE_2[1] - PHASE_2[0] + 1
 
-    recs_1 = evaluate_phase(30, len_1, forecast_30, irrigation_available, soil_ph, site=site_phase_1, history=history)
+    if cultivation_type == "greenhouse":
+        warnings.append(T("زراعة محمية: التوقعات تصف الجو الخارجي لا داخل البيت المحمي، فلم تدخل عوامل الطقس في الدرجات، والخطة مشروطة.", "Greenhouse: forecasts describe outdoor air, not the inside of the greenhouse, so the weather factors were left out of the scores and the plan is conditional."))
+    recs_1 = evaluate_phase(30, len_1, forecast_30, irrigation_available, soil_ph, site=site_phase_1, history=history, cultivation_type=cultivation_type)
     fits_1 = {cid: duration_fit(CROPS[cid], len_1) for cid in SHORT_TERM}
     valid_1 = [cid for cid in SHORT_TERM if recs_1[cid]["status"] != "not_recommended" and fits_1[cid]["fits"]]
 
@@ -238,7 +242,7 @@ def plan(
     def second_crops(first: str) -> dict:
         """Longer-term crops evaluated after `first`: it becomes the most recent crop of the history."""
         shifted = [{"crop_id": first, "years_ago": 1}] + [{"crop_id": h["crop_id"], "years_ago": h["years_ago"] + 1} for h in history]
-        return evaluate_phase(90, len_2, derived, irrigation_available, soil_ph, site=site_phase_2 or site_phase_1, history=shifted)
+        return evaluate_phase(90, len_2, derived, irrigation_available, soil_ph, site=site_phase_2 or site_phase_1, history=shifted, cultivation_type=cultivation_type)
 
     def single(cid: str) -> dict:
         r = recs_1[cid]
@@ -329,6 +333,7 @@ def plan(
         "previous_crop": history[0]["crop_id"] if history and history[0]["years_ago"] == 1 else None,
         "crop_history": [{**h, "family": (PREVIOUS.get(h["crop_id"]) or {}).get("family")} for h in history],
         "forecasts": forecasts,
+        "cultivation_type": cultivation_type or "open_field",
         "best_rotation": best,
         "alternative_rotations": ranked[1:3],
         "rejected": rejected,

@@ -249,3 +249,39 @@ def test_depth_weighting_and_laboratory_override():
     assert lab["soil"]["by_depth"]["0-30"]["ph"] == {"value": 6.9, "unit": "pH", "source": "laboratory result (user)"}
     assert lab["soil"]["by_depth"]["0-30"]["clay"] == est["soil"]["by_depth"]["0-30"]["clay"]  # other values keep their source
     assert est["terrain"]["slope_pct"] is not None and est["soil"]["texture_class"]["0-30"] in rs.TEXTURE_GROUP
+
+
+# cultivation type ----------------------------------------------------
+
+
+def test_greenhouse_leaves_the_outdoor_weather_out_and_is_conditional():
+    hot = dict(temperature_c=38.0, humidity_pct=20.0, soil_moisture_m3_m3=0.05, rainfall_mm=0.0)
+    field = by_id(rs.recommend(30, **hot, irrigation_available=True, site=SANDY))
+    house = rs.recommend(30, **hot, irrigation_available=True, site=SANDY, cultivation_type="greenhouse")
+    assert house["cultivation_type"] == "greenhouse" and any("البيت المحمي" in w for w in house["warnings"])
+    for cid, g in by_id(house).items():
+        # outdoors the heat rules the crop out; inside a greenhouse the outdoor forecast says nothing
+        assert field[cid]["status"] == "not_recommended" and field[cid]["component_scores"]["temperature"] is not None
+        assert g["component_scores"]["temperature"] is None and g["component_scores"]["humidity"] is None and g["component_scores"]["rainfall"] is None
+        assert {"temperature", "humidity", "rainfall"} <= set(g["missing_factors"]) and g["coverage_pct"] < field[cid]["coverage_pct"]
+        assert g["component_scores"]["water"] == 100.0  # irrigation is the water source
+        assert g["status"] == "conditional"  # never a plain "suitable": the inside climate is unknown
+        assert any(n["component"] == "temperature" and n["effect"] == "unknown" for n in g["explanations"])
+
+
+def test_greenhouse_needs_irrigation_and_default_is_open_field():
+    dry = by_id(rs.recommend(30, **MILD, irrigation_available=False, site=SANDY, cultivation_type="greenhouse"))
+    assert all(r["status"] == "not_recommended" and any(c["component"] == "water" for c in r["critical_failures"]) for r in dry.values())
+    unknown = by_id(rs.recommend(30, **MILD, irrigation_available=None, site=SANDY, cultivation_type="greenhouse"))
+    assert all(r["component_scores"]["water"] is None and r["status"] == "conditional" for r in unknown.values())
+    # soil still decides the ranking inside a greenhouse
+    a = rs.recommend(90, **WARM, irrigation_available=True, site=SANDY, cultivation_type="greenhouse")
+    b = rs.recommend(90, **WARM, irrigation_available=True, site=CLAY, cultivation_type="greenhouse")
+    assert by_id(a)["carrot"]["score"] > by_id(b)["carrot"]["score"]
+    # no soil data and unknown irrigation: nothing can be evaluated, so nothing is recommended
+    none = rs.recommend(30, **MILD, cultivation_type="greenhouse")
+    assert none["status"] == "no_suitable_recommendation" and none["best_candidate"] is None
+    default = rs.recommend(30, **MILD, irrigation_available=True, site=SANDY)
+    assert default["cultivation_type"] == "open_field" and default == rs.recommend(30, **MILD, irrigation_available=True, site=SANDY, cultivation_type="open_field")
+    with pytest.raises(ValueError):
+        rs.recommend(30, **MILD, cultivation_type="hydroponic")

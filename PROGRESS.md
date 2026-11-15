@@ -2,6 +2,15 @@
 
 Last updated 2026-11-15.
 
+## Cultivation type in the rules, and laboratory soil input on the site (2026-11-15)
+
+The two items left open after mvp-2. Rule version stays mvp-2, six crops.
+
+- Engine (`recommendation_system.py`): `cultivation_type` parameter. In a greenhouse the outdoor temperature, humidity and rainfall factors are unknown, water comes from irrigation, no irrigation is a critical failure, and a crop is at most conditional. Passed through `crop_rotation.plan`, `/outlook`, `/crop-rotation/plan` and the package's own router.
+- Site: `FarmHistory` (shared by the forecast page, the guest tab and the rotation planner) now holds the cultivation type (chips) and a collapsible "laboratory soil test results" form with eight values, applied with a button. Sand, silt and clay must be entered together. The planner's own cultivation select was replaced by the shared chips.
+- Tests: backend 98 (3 new), frontend 8. Checked in the browser on the guest page.
+- The team's "Season-Aware Crop Recommendation" prompt (12 crops, season filter, regions) was started and then cancelled by the user the same day; nothing of it is in the repo. A copy of the unfinished work is not kept in the project.
+
 ## Multi-factor recommendation engine, mvp-2 (2026-11-15, team prompt "message (5).txt")
 
 The team's prompt asked to replace the temperature-dominated rules with a real multi-factor, crop-specific system using the soil, terrain and history already in the dataset, plus crop-history rotation.

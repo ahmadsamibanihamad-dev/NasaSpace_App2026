@@ -23,6 +23,12 @@ factor is never treated as suitable.
 Critical rules are applied apart from the weighted score: a crop that fails one is not recommended,
 whatever its rotation compatibility.
 
+Cultivation type. "open_field" (default) uses the outdoor forecast as before. In a "greenhouse" the
+outdoor forecast does not describe the air inside and nothing is known about its climate control, so
+temperature, humidity, rainfall and surface soil moisture are UNKNOWN factors there (left out, like any
+factor with no data), the outdoor temperature and frost rules are not applied, irrigation becomes a
+critical requirement because rain does not reach the crop, and a crop is at most "conditional".
+
 Scores are rule-based suitability indices, not probabilities of success. SoilGrids nitrogen is total
 nitrogen, not plant-available nitrogen: no fertilizer amount is derived from it. Rainfall forecasts
 are weak: rainfall never decides irrigation.
@@ -157,17 +163,21 @@ def _terrain_score(slope_pct):
     return 0.0
 
 
-def evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture_m3_m3, rainfall_mm, irrigation_available, soil_ph, site, history):
+def evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture_m3_m3, rainfall_mm, irrigation_available, soil_ph, site, history, cultivation_type="open_field"):
     notes, critical = [], []
     comp = {}
     soil = _soil_view(crop, site)
     hist = (site or {}).get("history")
+    greenhouse = cultivation_type == "greenhouse"
 
     # --- temperature (forecast) ---
     lo, hi = crop["temp"]
     temp = band(temperature_c, crop["temp"], S["temperature_margin_c"])
     comp["temperature"] = round(100 * temp, 1)
-    if temp == 1:
+    if greenhouse:
+        comp["temperature"] = None
+        notes.append(_note("temperature", "unknown", "زراعة محمية: الحرارة المتوقعة خارجية ولا تمثل الجو داخل البيت المحمي، فلم تدخل في الدرجة.", "Greenhouse: the forecast temperature is the outdoor one and does not describe the air inside the greenhouse, so it was left out of the score."))
+    elif temp == 1:
         notes.append(_note("temperature", "positive", "متوسط الحرارة ضمن النطاق المقترح للمحصول", "Mean temperature is within the range suggested for the crop"))
     else:
         side_ar, side_en = ("أعلى", "above") if temperature_c > hi else ("أدنى", "below")
@@ -191,9 +201,19 @@ def evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture
     else:
         water = water_soil
     comp["water"] = round(100 * water, 1)
-    if surface < 0.8:
+    if greenhouse:
+        # Rain does not reach the crop and the outdoor surface moisture is not the soil inside: irrigation decides.
+        comp["water"] = 100.0 if irrigation_available is True else None
+        notes[:] = [n for n in notes if n["component"] != "water"]
+        if irrigation_available is True:
+            notes.append(_note("water", "positive", "زراعة محمية والري متوفر؛ الماء يأتي من الري لا من المطر.", "Greenhouse with irrigation available; water comes from irrigation, not rain."))
+        elif irrigation_available is None:
+            notes.append(_note("water", "unknown", "زراعة محمية تعتمد على الري، وتوفر الري غير معروف.", "A greenhouse depends on irrigation, and irrigation availability is unknown."))
+    elif surface < 0.8:
         notes.append(_note("water", "negative", "مؤشر رطوبة سطح التربة بعيد عن نطاق الفحص الأولي", "Surface soil moisture is far from the screening range"))
-    if irrigation_available is True:
+    if greenhouse:
+        pass
+    elif irrigation_available is True:
         notes.append(_note("water", "positive", "الري متوفر، فيعوّض نقص رطوبة التربة جزئياً.", "Irrigation is available and partly offsets low soil moisture."))
     elif irrigation_available is None:
         notes.append(_note("water", "unknown", "توفر الري غير معروف", "Irrigation availability is unknown"))
@@ -203,16 +223,18 @@ def evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture
     # --- rainfall (forecast total; weak accuracy) ---
     rain_rate = rainfall_mm / horizon_days
     rain = 1.0 if irrigation_available is True else min(1.0, rain_rate / S["rain_rate_full_mm_per_day"])
-    comp["rainfall"] = round(100 * rain, 1)
-    if rain < 0.5:
+    comp["rainfall"] = None if greenhouse else round(100 * rain, 1)
+    if rain < 0.5 and not greenhouse:
         notes.append(_note("rainfall", "negative", "الأمطار المتوقعة قليلة نسبيًا؛ تحقق من توفر الماء", "Expected rainfall is relatively low; check that water is available"))
 
     # --- humidity (forecast) ---
     humidity = band(humidity_pct, S["humidity_band_pct"], S["humidity_margin"])
-    comp["humidity"] = round(100 * humidity, 1)
-    if humidity < 0.8:
+    comp["humidity"] = None if greenhouse else round(100 * humidity, 1)
+    if greenhouse:
+        notes.append(_note("humidity", "unknown", "الرطوبة الجوية والأمطار المتوقعة خارجية، فلم تدخل في الدرجة.", "The forecast air humidity and rainfall are outdoor values, so they were left out of the score."))
+    elif humidity < 0.8:
         notes.append(_note("humidity", "negative", "الرطوبة الجوية خارج نطاق الفحص الأولي", "Air humidity is outside the screening range"))
-    if crop["humidity_sensitivity"].get("note") and humidity_pct >= S["humidity_band_pct"][1]:
+    if not greenhouse and crop["humidity_sensitivity"].get("note") and humidity_pct >= S["humidity_band_pct"][1]:
         notes.append(_note("humidity", "caution", "رطوبة جوية عالية: يزداد خطر أمراض الأوراق عند بقاء المجموع الخضري مبتلاً.", "High air humidity: leaf disease risk rises when foliage stays wet."))
 
     # --- soil pH over the rooting depth (static, or laboratory value) ---
@@ -297,7 +319,9 @@ def evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture
     # --- contextual indicators from historical observations (no score) ---
     frost_freq = (hist or {}).get("frost_frequency")
     frost_risk = False
-    if hist:
+    if greenhouse:
+        notes.append(_note("history", "unknown", "لا تتوفر معلومات عن التحكم بحرارة البيت المحمي (تدفئة أو تبريد)، فالتوصية مشروطة.", "Nothing is known about the greenhouse's climate control (heating or cooling), so the recommendation is conditional."))
+    elif hist:
         if crop["frost"]["sensitivity"] == "sensitive" and frost_freq:
             frost_risk = True
             notes.append(_note("history", "negative", f"محصول حساس للصقيع، وحدث صقيع في هذه الفترة في {round(100 * frost_freq)}٪ من السنوات السابقة.", f"Frost-sensitive crop, and frost occurred in this window in {round(100 * frost_freq)} % of earlier years."))
@@ -307,25 +331,31 @@ def evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture
             notes.append(_note("history", "caution", f"متوسط الحرارة العظمى المرصودة تاريخياً ({tmax:.1f}°م) يتجاوز الحد الذي ينمو عنده المحصول جيداً ({limit}°م).", f"Historically observed mean daily maximum ({tmax:.1f} C) exceeds the limit at which the crop grows best ({limit} C)."))
     if crop["days"][1] > horizon_days:
         notes.append(_note("duration", "caution", "قد يتأخر الحصاد عن الفترة المحددة حسب الصنف والظروف", "Harvest may come later than the period, depending on variety and conditions"))
-    if crop["frost"]["sensitivity"] == "sensitive" and not hist:
+    if crop["frost"]["sensitivity"] == "sensitive" and not hist and not greenhouse:
         notes.append(_note("history", "caution", "تحقق من خطر الصقيع قبل الزراعة", "Check the frost risk before planting"))
 
     # --- weighted score over the known factors ---
     known = {k: v for k, v in comp.items() if v is not None}
     total_w = sum(WEIGHTS[k] for k in known)
-    score = sum(WEIGHTS[k] * v for k, v in known.items()) / total_w
     env_known = {k: v for k, v in known.items() if k != "rotation"}
     env_w = sum(WEIGHTS[k] for k in env_known)
-    environment = sum(WEIGHTS[k] * v for k, v in env_known.items()) / env_w
+    # In a greenhouse at a location with no soil data and unknown irrigation nothing about the site can be evaluated.
+    nothing_known = env_w == 0
+    score = sum(WEIGHTS[k] * v for k, v in known.items()) / total_w if total_w else 0.0
+    environment = sum(WEIGHTS[k] * v for k, v in env_known.items()) / env_w if env_w else 0.0
     groups = {}
     for g, members in GROUPS.items():
         m = [k for k in members if comp.get(k) is not None]
         groups[g] = round(sum(WEIGHTS[k] * comp[k] for k in m) / sum(WEIGHTS[k] for k in m), 1) if m else None
 
     # --- critical rules, independent of the weighted score ---
-    if temp < 0.4:
+    if nothing_known:
+        critical.append(_note("history", "negative", "لا تتوفر أي معلومة يمكن تقييم المحصول بها في هذا الموقع داخل بيت محمي.", "No information is available to evaluate the crop at this location inside a greenhouse."))
+    if greenhouse and irrigation_available is False:
+        critical.append(_note("water", "negative", "الزراعة المحمية لا تصلها الأمطار وتحتاج رياً، والري غير متوفر.", "A greenhouse receives no rain and needs irrigation, and irrigation is not available."))
+    if temp < 0.4 and not greenhouse:
         critical.append(_note("temperature", "negative", "الحرارة المتوقعة بعيدة جداً عن نطاق المحصول.", "The forecast temperature is far outside the crop's range."))
-    if irrigation_available is False and surface < 0.3 and rain < 0.5:
+    if not greenhouse and irrigation_available is False and surface < 0.3 and rain < 0.5:
         critical.append(_note("water", "negative", "لا ري، والتربة جافة، والأمطار المتوقعة قليلة.", "No irrigation, dry soil and little expected rain."))
     if frost_risk and frost_freq >= S["frost"]["critical_frequency"]:
         critical.append(_note("history", "negative", "محصول حساس للصقيع والصقيع متكرر في هذه الفترة.", "Frost-sensitive crop and frost is frequent in this window."))
@@ -336,7 +366,8 @@ def evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture
     if blocked or score < st["not_recommended_below"]:
         status = "not_recommended"
     elif (
-        score < st["conditional_below"]
+        greenhouse
+        or score < st["conditional_below"]
         or temp < 1
         or irrigation_available is not True
         or surface < 0.8
@@ -387,6 +418,7 @@ def recommend(
     site=None,
     previous_crop=None,
     crop_history=None,
+    cultivation_type=None,
 ):
     """Rank the crops of the horizon.
 
@@ -408,9 +440,12 @@ def recommend(
         if cid is not None and cid not in PREVIOUS:
             raise ValueError(f"unknown previous crop: {cid}")
     history = normalise_history(previous_crop, crop_history)
+    cultivation_type = cultivation_type or "open_field"
+    if cultivation_type not in ("open_field", "greenhouse"):
+        raise ValueError("cultivation_type must be open_field or greenhouse")
 
     results = [
-        evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture_m3_m3, rainfall_mm, irrigation_available, soil_ph, site, history)
+        evaluate_crop(crop, horizon_days, temperature_c, humidity_pct, soil_moisture_m3_m3, rainfall_mm, irrigation_available, soil_ph, site, history, cultivation_type)
         for crop in CATALOG["crops"]
         if crop["horizon"] == horizon_days
     ]
@@ -422,11 +457,13 @@ def recommend(
         "rule_version": CATALOG["version"],
         "status": "ok" if best else "no_suitable_recommendation",
         "best_candidate": best,
+        "cultivation_type": cultivation_type,
         "recommendations": results,
         "previous_crops": previous,
         "weights": WEIGHTS,
         "weight_policy": "A factor with no data is unknown: it is left out and its weight is spread proportionally over the known factors. coverage_pct is the share of the total weight that was evaluated.",
-        "warnings": [
+        "warnings": (["التوقعات تصف الجو الخارجي لا داخل البيت المحمي؛ عوامل الطقس لم تدخل في الدرجة والتوصيات مشروطة"] if cultivation_type == "greenhouse" else [])
+        + [
             "درجة الملاءمة مؤشر قواعد وليست احتمال نجاح أو ضمان حصاد",
             "توقع الأمطار ضعيف الدقة؛ لا تستخدمه لتحديد كمية الري",
             "متوسط الفترة لا يكشف الصقيع أو موجات الحر؛ تحقق من الطقس الفعلي",

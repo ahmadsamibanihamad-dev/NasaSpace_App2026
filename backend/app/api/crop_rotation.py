@@ -33,7 +33,8 @@ _s = get_settings()
 class PlanIn(FarmHistoryIn):
     """Location and planning window, plus the land's history (previous crops, irrigation, optional lab soil results).
 
-    `cultivation_type` is recorded with the plan; it is not an input of the forecasting models or of the rules.
+    `cultivation_type` (open_field by default, or greenhouse) is not an input of the forecasting models. In a
+    greenhouse the rules leave the outdoor weather factors out and require irrigation.
     The previous crop may be any crop of the previous-crop list, not only the six candidates.
     """
 
@@ -78,6 +79,7 @@ def build_plan(body: PlanIn) -> dict:
             irrigation_available=body.irrigation_available,
             site_phase_1=ctx["sites"][30],
             site_phase_2=site_2,
+            cultivation_type=body.cultivation_type,
             translate=_both,
         )
     except ValueError as e:
@@ -98,14 +100,6 @@ def build_plan(body: PlanIn) -> dict:
             "en": f"Historical data mode: forecasts are computed from readings available up to {ctx['origin']}; they are not a live forecast of current weather.",
         },
     )
-    if body.cultivation_type == "greenhouse":
-        warnings.append(
-            {
-                "ar": "التوقعات تمثل الظروف الخارجية المكشوفة، ولا تمثل الظروف داخل البيوت المحمية.",
-                "en": "Forecasts describe outdoor conditions; they do not describe conditions inside a greenhouse.",
-            }
-        )
-
     return {
         "status": out["status"],  # success | partial_plan | no_plan_available
         "data_mode": ctx["mode"],  # historical_demo | historical_data
@@ -125,7 +119,7 @@ def build_plan(body: PlanIn) -> dict:
         "previous_crop": out["previous_crop"],
         "crop_history": out["crop_history"],
         "irrigation_available": body.irrigation_available,
-        "cultivation_type": body.cultivation_type,
+        "cultivation_type": out["cultivation_type"],
         "soil": ctx["soil"],
         "terrain": ctx["terrain"],
         "historical_indicators": {"phase_1": ctx["sites"][30]["history"], "phase_2": site_2["history"] if site_2 else None},

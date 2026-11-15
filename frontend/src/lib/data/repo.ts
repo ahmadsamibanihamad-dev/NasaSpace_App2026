@@ -242,6 +242,9 @@ export interface FarmHistoryInput {
   previous_crop: string | null
   previous_crop_year: number | null
   crop_history: { year: number; crop_id: string }[]
+  cultivation_type?: 'open_field' | 'greenhouse' | null
+  /** Optional laboratory results; a given value replaces the estimated one for the request. */
+  soil_lab?: Partial<Record<'ph' | 'sand' | 'silt' | 'clay' | 'organic_carbon' | 'nitrogen' | 'cec' | 'coarse_fragments', number>> | null
 }
 
 export const getOutlook = (input: { lat: number; lon: number; planting_date?: string | null } & FarmHistoryInput) => api<Outlook>('/outlook', { body: input })
