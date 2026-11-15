@@ -4,7 +4,6 @@ import { Icon, type IconName } from './Icon'
 import { Button, Card, Pill, Skeleton, cx } from './primitives'
 import { ApiError } from '../../lib/api'
 import type { DataMeta } from '../../lib/types'
-import { date } from '../../lib/format'
 import { useOnline } from '../../hooks/useOnline'
 
 export function StateBlock({ icon, title, body, action, tone = 'neutral', className }: { icon: IconName; title: string; body?: ReactNode; action?: ReactNode; tone?: 'neutral' | 'warning' | 'critical'; className?: string }) {
@@ -89,33 +88,13 @@ export function DemoBadge() {
   )
 }
 
-/** Data provenance: which sources were used and how recent the data is. */
-export function DataFooter({ meta, compact }: { meta: Partial<DataMeta>; compact?: boolean }) {
+/** Short note that results come from the historical climate record, not a forecast. */
+export function DataFooter({ meta }: { meta: Partial<DataMeta> }) {
   const { t } = useTranslation()
-  if (!meta) return null
+  if (!meta || meta.analysis_basis !== 'historical_climatology') return null
   return (
-    <div className={cx('flex flex-col gap-2', compact ? 'text-caption' : 'text-label')}>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-text-secondary">
-        <span className="flex flex-wrap items-center gap-2">
-          {t('results.sources')}:
-          {(meta.data_sources || []).map((s) => (
-            <Pill key={s} tone="green" icon="satellite">
-              {s}
-            </Pill>
-          ))}
-        </span>
-        {meta.data_timestamp && (
-          <span>
-            {t('results.timestamp')}: <b className="font-semibold text-text-primary">{date(meta.data_timestamp)}</b>
-          </span>
-        )}
-        {meta.is_demo && <DemoBadge />}
-      </div>
-      {meta.analysis_basis === 'historical_climatology' && (
-        <p className="text-caption text-text-tertiary flex items-center gap-1">
-          <Icon name="info" size={14} /> {t('results.climatology')}
-        </p>
-      )}
-    </div>
+    <p className="text-caption text-text-secondary flex items-start gap-1">
+      <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {t('results.climatology')}
+    </p>
   )
 }

@@ -35,8 +35,6 @@ function useSummaryRows() {
     for (const ro of r.rotation ?? [])
       for (const s of ro.strategies) rows.push([`${ro.plot_label} · ${t(`rotation.keys.${s.key}`)}`, `${s.sequence.map((q) => cropName(q.crop)).join(' / ')} · ${s.scores.water_use}/${s.scores.soil_health}/${s.scores.income_potential}`])
     for (const w of r.water ?? []) rows.push([`${w.plot_label} · ${cropName(w.crop)}`, `ETc ${w.season_total.etc_mm} mm · ${t('results.irrigation')} ${w.season_total.irrigation_mm} mm (${w.season_total.irrigation_m3} m³)`])
-    rows.push([t('results.sources'), r.data_sources.join(', ')])
-    rows.push([t('results.timestamp'), date(r.data_timestamp)])
     return rows
   }
 }

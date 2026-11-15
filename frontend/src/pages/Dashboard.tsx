@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { useFarmCtx } from '../layout/FarmContext'
 import { useAnalyses, useEnvSummary, usePlots } from '../hooks/queries'
 import { Button, Card, CardTitle, Pill, Skeleton } from '../components/ui/primitives'
-import { Banner, DataFooter, DemoBadge, EmptyState, ErrorState } from '../components/ui/states'
+import { Banner, DemoBadge, EmptyState, ErrorState } from '../components/ui/states'
 import { TickStrip } from '../components/ui/viz'
 import { Icon, type IconName } from '../components/ui/Icon'
 import { CropIcon } from '../components/crops/CropIcon'
@@ -48,9 +48,6 @@ function MetricCard({ icon, label, m, digits = 1 }: { icon: IconName; label: str
             <Icon name={icon} size={18} />
           </span>
           {label}
-        </span>
-        <span className="text-caption text-text-tertiary" dir="ltr">
-          {m.source}
         </span>
       </div>
       <div className="flex items-end justify-between gap-4">
@@ -172,12 +169,6 @@ export default function Dashboard() {
           ) : null}
         </div>
       </div>
-
-      {env.data && (
-        <div className="px-2">
-          <DataFooter meta={env.data} compact />
-        </div>
-      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* Plots table */}
