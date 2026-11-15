@@ -43,7 +43,7 @@ export default function Outlook() {
           ) : undefined
         }
       />
-      <OutlookView lat={point.lat} lon={point.lon} irrigation={plot ? plot.irrigation_available : null} soilPh={plot?.soil_ph ?? null} />
+      <OutlookView lat={point.lat} lon={point.lon} irrigation={plot ? plot.irrigation_available : null} />
     </>
   )
 }

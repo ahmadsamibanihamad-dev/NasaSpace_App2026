@@ -1,17 +1,18 @@
-// Forecast outlook: the AI team's 30- and 90-day forecasts with three ranked crops per period.
-// Everything shown comes from the backend; this file only lays it out.
+// Forecast outlook: the AI team's 30- and 90-day forecasts from a planting start date, with three
+// ranked crops per period. Everything shown comes from the backend; this file only lays it out.
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
-import { Card, Pill, Skeleton, Tabs, Tile } from '../../components/ui/primitives'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { Button, Card, Field, Input, Pill, Skeleton, Tabs, Tile } from '../../components/ui/primitives'
 import { Banner, ErrorState, StateBlock } from '../../components/ui/states'
 import { FactorBar } from '../../components/ui/viz'
 import { Icon, type IconName } from '../../components/ui/Icon'
 import { CropIcon } from '../../components/crops/CropIcon'
 import { ApiError } from '../../lib/api'
 import { getOutlook, type OutlookCrop, type OutlookForecast } from '../../lib/data/repo'
-import { date, dayMonth, num } from '../../lib/format'
+import { date, num } from '../../lib/format'
 import { loc } from '../../i18n'
+import { SoilTiles } from './SoilInfo'
 
 const VAR_ICON: Record<OutlookForecast['key'], IconName> = {
   temperature_c: 'thermo',
@@ -88,14 +89,17 @@ function CropCard({ c, rank }: { c: OutlookCrop; rank: number }) {
   )
 }
 
-export function OutlookView({ lat, lon, irrigation, soilPh }: { lat: number; lon: number; irrigation: boolean | null; soilPh?: number | null }) {
+export function OutlookView({ lat, lon, irrigation }: { lat: number; lon: number; irrigation: boolean | null }) {
   const { t } = useTranslation()
   const [horizon, setHorizon] = useState<'30' | '90'>('30')
+  // '' = the default planting date chosen by the backend
+  const [planting, setPlanting] = useState('')
   const q = useQuery({
-    queryKey: ['outlook', lat.toFixed(4), lon.toFixed(4), irrigation, soilPh ?? null],
-    queryFn: () => getOutlook({ lat, lon, irrigation_available: irrigation, soil_ph: soilPh ?? null }),
+    queryKey: ['outlook', lat.toFixed(4), lon.toFixed(4), irrigation, planting],
+    queryFn: () => getOutlook({ lat, lon, irrigation_available: irrigation, planting_date: planting || null }),
     staleTime: 10 * 60 * 1000,
     retry: 0,
+    placeholderData: keepPreviousData,
   })
 
   if (q.isLoading)
@@ -109,7 +113,8 @@ export function OutlookView({ lat, lon, irrigation, soilPh }: { lat: number; lon
         </div>
       </div>
     )
-  if (q.error) {
+  const o = q.data
+  if (q.error && !o) {
     const e = q.error instanceof ApiError ? q.error : null
     if (e?.code === 'MODEL_UNAVAILABLE')
       return (
@@ -123,26 +128,42 @@ export function OutlookView({ lat, lon, irrigation, soilPh }: { lat: number; lon
       </Card>
     )
   }
-  const o = q.data
   if (!o) return null
   const p = o.periods.find((x) => String(x.horizon_days) === horizon) ?? o.periods[0]
+  const dateError = q.error instanceof ApiError && q.error.code === 'DATE_OUT_OF_RANGE'
+  const canPickDate = o.planting_date_min !== o.planting_date_max
 
   return (
     <div className="flex flex-col gap-6">
-      {o.data_mode === 'historical_demo' && (
-        <Banner icon="info" tone="warning">
-          <b className="font-semibold block">{t('outlook.demoTitle')}</b>
-          {t('outlook.demoBody', { date: date(o.forecast_origin) })}
-        </Banner>
-      )}
+      <Banner icon="info" tone="warning">
+        <b className="font-semibold block">{t('outlook.demoTitle')}</b>
+        {t(o.is_default_date ? 'outlook.demoBody' : 'outlook.historyBody', { date: date(o.forecast_origin) })}
+      </Banner>
 
       <Card className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-h2 font-semibold">{t('outlook.forecastTitle')}</h2>
-            <p className="text-label text-text-secondary mt-1">
-              {dayMonth(p.period_start)} – {date(p.period_end)}
-            </p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="w-48">
+              <Field label={t('outlook.plantingDate')} htmlFor="outlook-date">
+                <Input
+                  id="outlook-date"
+                  type="date"
+                  dir="ltr"
+                  value={planting || o.planting_date}
+                  min={o.planting_date_min}
+                  max={o.planting_date_max}
+                  disabled={!canPickDate}
+                  aria-invalid={dateError}
+                  onChange={(e) => e.target.value && setPlanting(e.target.value)}
+                />
+              </Field>
+            </div>
+            {planting && !o.is_default_date && (
+              <Button variant="secondary" icon="rotate" onClick={() => setPlanting('')}>
+                {t('outlook.defaultDate')}
+              </Button>
+            )}
+            {q.isFetching && <span className="pulse-marker mb-3" role="status" aria-label={t('common.loading')} />}
           </div>
           <Tabs
             value={horizon}
@@ -152,6 +173,20 @@ export function OutlookView({ lat, lon, irrigation, soilPh }: { lat: number; lon
               { value: '90', label: t('outlook.h90') },
             ]}
           />
+        </div>
+        <p className="text-caption text-text-secondary -mt-2">
+          {dateError
+            ? t('outlook.dateRange', { a: date(o.planting_date_min), b: date(o.planting_date_max) })
+            : canPickDate
+              ? `${t('outlook.dateHint')} ${t('outlook.dateRange', { a: date(o.planting_date_min), b: date(o.planting_date_max) })}`
+              : t('outlook.dateFixed')}
+        </p>
+
+        <div>
+          <h2 className="text-h2 font-semibold">{t('outlook.forecastTitle')}</h2>
+          <p className="text-label text-text-secondary mt-1">
+            {date(p.period_start)} – {date(p.period_end)}
+          </p>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {p.forecast.map((f) => (
@@ -174,7 +209,6 @@ export function OutlookView({ lat, lon, irrigation, soilPh }: { lat: number; lon
         <p className="text-caption text-text-secondary flex items-start gap-1">
           <Icon name="pin" size={14} className="mt-0.5 shrink-0" />
           {t('outlook.grid', { km: num(o.grid.distance_km, 1) })}
-          {o.soil_ph && ` · ${t(o.soil_ph.source === 'user' ? 'outlook.phUser' : 'outlook.phSoilgrids', { ph: num(o.soil_ph.value, 1) })}`}
         </p>
       </Card>
 
@@ -187,6 +221,11 @@ export function OutlookView({ lat, lon, irrigation, soilPh }: { lat: number; lon
           ))}
         </div>
       </div>
+
+      <Card className="flex flex-col gap-3">
+        <h2 className="text-h2 font-semibold">{t('soilInfo.title')}</h2>
+        <SoilTiles soil={o.soil} />
+      </Card>
 
       <div className="flex flex-col gap-1 px-2 text-caption text-text-secondary">
         {o.warnings.map((w, i) => (

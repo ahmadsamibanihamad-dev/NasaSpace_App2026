@@ -8,9 +8,9 @@ import { area as fmtArea, meters, num } from '../../lib/format'
 import { useSettings } from '../../lib/settings'
 import type { PlotDraft, PlotStatus } from '../../lib/types'
 import { PARCEL_COLORS } from './io'
+import { SoilInfo } from '../outlook/SoilInfo'
 
 const METHODS = ['drip', 'sprinkler', 'surface'] as const
-const SOILS = ['clay', 'loam', 'sandy', 'silty', 'calcareous', 'unknown'] as const
 export const STATUSES: PlotStatus[] = ['planted', 'fallow', 'preparing', 'unused']
 
 /** Computed area / perimeter / centre cards. Always shows the dunum conversion in use. */
@@ -71,6 +71,8 @@ export type FormErrors = Partial<Record<'name' | 'label', string>>
 
 export function ParcelForm({ value, onChange, errors, farmName }: { value: PlotDraft; onChange: (patch: Partial<PlotDraft>) => void; errors: FormErrors; farmName: string }) {
   const { t } = useTranslation()
+  // Soil is looked up for the parcel's centre; it is never typed by the user.
+  const soilAt = value.polygon ? centroidOf(value.polygon) : null
   const cropOpts = (
     <>
       <option value="">{t('crops.fallow')}</option>
@@ -100,11 +102,6 @@ export function ParcelForm({ value, onChange, errors, farmName }: { value: PlotD
         <Input id="p-region" value={value.region} onChange={(e) => onChange({ region: e.target.value })} maxLength={80} />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label={t('parcels.cropType')} htmlFor="p-crop">
-          <Select id="p-crop" value={value.current_crop_id ?? ''} onChange={(e) => onChange({ current_crop_id: e.target.value || null, status: e.target.value ? 'planted' : value.status === 'planted' ? 'fallow' : value.status })}>
-            {cropOpts}
-          </Select>
-        </Field>
         <Field label={t('parcels.status')} htmlFor="p-status">
           <Select id="p-status" value={value.status} onChange={(e) => onChange({ status: e.target.value as PlotStatus })}>
             {STATUSES.map((s) => (
@@ -133,29 +130,8 @@ export function ParcelForm({ value, onChange, errors, farmName }: { value: PlotD
             ))}
           </Select>
         </Field>
-        <Field label={`${t('setup.details.soilType')} (${t('common.optional')})`} htmlFor="p-soil">
-          <Select id="p-soil" value={value.soil_type ?? ''} onChange={(e) => onChange({ soil_type: e.target.value || null })}>
-            <option value="">—</option>
-            {SOILS.map((s) => (
-              <option key={s} value={s}>
-                {t(`soil.${s}`)}
-              </option>
-            ))}
-          </Select>
-        </Field>
-        <Field label={`${t('setup.details.ph')} (${t('common.optional')})`} htmlFor="p-ph">
-          <Input
-            id="p-ph"
-            type="number"
-            dir="ltr"
-            step="0.1"
-            min={3}
-            max={10.5}
-            value={value.soil_ph ?? ''}
-            onChange={(e) => onChange({ soil_ph: e.target.value === '' ? null : Math.min(10.5, Math.max(3, parseFloat(e.target.value))) })}
-          />
-        </Field>
       </div>
+      {soilAt && <SoilInfo lat={soilAt.lat} lon={soilAt.lon} />}
       <Field label={t('parcels.color')}>
         <ColorPicker value={value.color} onChange={(color) => onChange({ color })} />
       </Field>

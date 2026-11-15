@@ -441,7 +441,6 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
       [t('parcels.name'), draft.name],
       [t('parcels.number'), draft.label],
       [t('parcels.region'), draft.region || '—'],
-      [t('parcels.cropType'), cropName(draft.current_crop_id)],
       [t('parcels.status'), t(`parcels.statuses.${draft.status}`)],
       [t('setup.details.method'), t(`irrigation.${draft.irrigation_available ? draft.irrigation_method ?? 'drip' : 'none'}`)],
       [t('parcels.ownerName'), draft.owner_name || '—'],

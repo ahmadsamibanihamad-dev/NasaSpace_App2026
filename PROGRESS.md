@@ -2,6 +2,14 @@
 
 Last updated 2026-11-15.
 
+## Planting date, soil from the API, parcel form (2026-11-15, user request)
+
+- Forecast page has a planting start date. Default 2026-05-02 uses the team's demo snapshot. Other dates (2021-01-02 to 2026-09-01) build features from the team's master dataset with their own notebook code, copied into `backend/app/services/outlook_features.py`; a test proves the output equals their demo snapshot (516 columns, zero difference).
+- The master dataset (47 MB) is git-ignored: `backend/nasa_final/data/processed/master_2019_2026/`. Without it only the default date works.
+- Soil is never typed by the user. `GET /api/v1/outlook/soil` reads the team's SoilGrids table; pH from it feeds the team's rules. Five grid points (central Irbid and Amman among them) have no soil values and stay empty.
+- Parcel form: removed crop type, soil type and soil pH fields; added a read-only soil block. `current_crop_id`, `soil_type`, `soil_ph` columns still exist on Plot.
+- The user's rule for this area: do not go beyond the team's recommendation system or add logic of our own to it.
+
 ## AI team package integrated (2026-11-15)
 
 The team delivered `NASA_FINAL.zip` (forecast models, baselines, rule-based ranking, FastAPI router).

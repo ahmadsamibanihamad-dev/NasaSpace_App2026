@@ -2,27 +2,33 @@
 
 The forecasting models, the baseline formulas, the crop table and the scoring rules all live in
 `backend/nasa_final/` exactly as the AI team delivered them. This module only adapts them to the
-rest of the API: Jordan boundary check, rate limit, the common error format, soil pH from the
+rest of the API: Jordan boundary check, rate limit, the common error format, soil values from the
 team's static soil table, and English text next to the Arabic text the rules produce.
 
-MVP data mode is `historical_demo`: forecasts are computed from a prepared snapshot of features
-whose origin date is fixed (see `forecast_origin` in the response). It is not a live forecast.
-Nothing is stored.
+The forecast is made for a planting start date. The default date is the team's prepared demo
+snapshot (`historical_demo`). Any other date inside the team's dataset is served by building the
+model inputs with the team's own feature code (`app/services/outlook_features.py`), mode
+`historical_data`. Neither is a live forecast: the dataset ends on a fixed day. Nothing is stored.
+
+Soil information is never typed by the user: it is read from the team's static soil table
+(ISRIC SoilGrids values per grid point) and left out where the table has no value.
 """
 
 import csv
 import json
 import logging
+from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.ratelimit import limit
+from app.services import outlook_features
 from app.services.geo import governorate_for, require_in_jordan
 
 log = logging.getLogger("ardna.outlook")
@@ -31,7 +37,8 @@ _s = get_settings()
 
 PACKAGE = Path(__file__).resolve().parents[2] / "nasa_final"
 SOIL_CSV = PACKAGE / "data" / "processed" / "Jordan_Soil_Properties_Mean.csv"
-REGISTRY = PACKAGE / "AI" / "forecasting" / "Model_Registry.json"
+FORECAST_DIR = PACKAGE / "AI" / "forecasting"
+REGISTRY = FORECAST_DIR / "Model_Registry.json"
 
 # forecast key in the AI package -> (variable, aggregate, unit)
 VARIABLES = {
@@ -66,6 +73,21 @@ EN = {
     "محصول دافئ حساس للصقيع": "Warm-season crop, sensitive to frost",
 }
 
+# Soil table columns: (prefix in the CSV, key in the API, unit). Units are those of the team's
+# SoilGrids notebook after applying the SoilGrids conversion factors.
+SOIL_PROPS = [
+    ("Soil_pH", "ph", "pH"),
+    ("Sand", "sand", "%"),
+    ("Silt", "silt", "%"),
+    ("Clay", "clay", "%"),
+    ("Organic_Carbon", "organic_carbon", "g/kg"),
+    ("Total_Nitrogen", "nitrogen", "g/kg"),
+    ("Bulk_Density", "bulk_density", "kg/dm3"),
+    ("CEC", "cec", "cmol/kg"),
+    ("Coarse_Fragments", "coarse_fragments", "%"),
+]
+TOPSOIL = [("0_5cm", 5), ("5_15cm", 10), ("15_30cm", 15)]  # layer, thickness in cm
+
 
 def _both(text: str) -> dict:
     return {"ar": text, "en": EN.get(text, text)}
@@ -75,8 +97,8 @@ class OutlookIn(BaseModel):
     lat: float = Field(ge=-90, le=90)
     lon: float = Field(ge=-180, le=180)
     irrigation_available: Optional[bool] = None
-    # Measured value for the parcel, if the user has one. Otherwise the static soil table is used.
-    soil_ph: Optional[float] = Field(default=None, ge=0, le=14)
+    # First day of the period to plan for. Omitted = the default (demo) date.
+    planting_date: Optional[date] = None
 
 
 def _package():
@@ -96,19 +118,55 @@ def _registry() -> dict:
 
 
 @lru_cache(maxsize=1)
-def _soil_ph_by_grid() -> dict:
-    """Topsoil pH (0-30 cm, depth-weighted) per grid, from the team's static soil table."""
+def _soil_table() -> dict:
+    """Topsoil (0-30 cm, thickness-weighted mean of the three layers) per grid point."""
     out = {}
     if not SOIL_CSV.exists():
         return out
     with SOIL_CSV.open(encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
-            try:
-                a, b, c = (float(row[k]) for k in ("Soil_pH_0_5cm_mean", "Soil_pH_5_15cm_mean", "Soil_pH_15_30cm_mean"))
-            except (KeyError, ValueError):
-                continue
-            out[row["GRID_ID"]] = round((a * 5 + b * 10 + c * 15) / 30, 2)
+            props = {}
+            for prefix, key, _unit in SOIL_PROPS:
+                try:
+                    props[key] = round(sum(float(row[f"{prefix}_{layer}_mean"]) * cm for layer, cm in TOPSOIL) / 30, 2)
+                except (KeyError, ValueError):
+                    continue  # no value in the table for this point: leave it out
+            out[row["GRID_ID"]] = props
     return out
+
+
+def _soil(grid_id: str) -> Optional[dict]:
+    props = _soil_table().get(grid_id)
+    if not props:
+        return None
+    return {
+        "source": "ISRIC SoilGrids",
+        "depth_cm": [0, 30],
+        "properties": [{"key": key, "value": props[key], "unit": unit} for _p, key, unit in SOIL_PROPS if key in props],
+    }
+
+
+def _nearest_grid(api, lat: float, lon: float):
+    """The grid point of the team's dataset nearest to a location (same rule as their demo: 15 km)."""
+    try:
+        d, _unused = api.load_demo()
+        row, dist = api.nearest(d, lat, lon)
+    except Exception as e:
+        log.warning("Forecast demo data unavailable: %s", e)
+        raise AppError(503, "MODEL_UNAVAILABLE", "The forecast data is missing or cannot be read.") from e
+    if dist > 15:
+        raise AppError(422, "UNSUPPORTED_LOCATION", "This location is too far from the grid points the data covers.", {"lat": lat, "lon": lon})
+    return row, dist
+
+
+def _dates(api) -> dict:
+    """Default planting date and the range of planting dates that can be served."""
+    d, _unused = api.load_demo()
+    demo_origin = d["DATE"].iloc[0].date()
+    default = demo_origin + timedelta(days=1)
+    cov = outlook_features.coverage()
+    lo, hi = (cov[0] + timedelta(days=1), cov[1] + timedelta(days=1)) if cov else (default, default)
+    return {"demo_origin": demo_origin, "default": default, "min": lo, "max": hi}
 
 
 @router.get("/status")
@@ -116,18 +174,19 @@ def outlook_status():
     """Whether the forecast package can be used, and what it covers."""
     try:
         api = _package()
-        d, _ = api.load_demo()
-        origin = str(d["DATE"].iloc[0].date())
+        dates = _dates(api)
         available = True
     except AppError:
-        api, origin, available = None, None, False
+        api, dates, available = None, None, False
     except Exception as e:
         log.warning("Forecast demo data unavailable: %s", e)
-        api, origin, available = None, None, False
+        api, dates, available = None, None, False
     return {
         "available": available,
-        "data_mode": "historical_demo",
-        "forecast_origin": origin,
+        "forecast_origin": str(dates["demo_origin"]) if dates else None,
+        "default_planting_date": str(dates["default"]) if dates else None,
+        "planting_date_min": str(dates["min"]) if dates else None,
+        "planting_date_max": str(dates["max"]) if dates else None,
         "horizons_days": [30, 90],
         "rule_version": api.CATALOG["version"] if api else None,
         "crops": [
@@ -137,83 +196,111 @@ def outlook_status():
     }
 
 
+@router.get("/soil")
+def soil(lat: float = Query(ge=-90, le=90), lon: float = Query(ge=-180, le=180)):
+    """Soil properties for a location in Jordan, from the team's static soil table. Never invented."""
+    require_in_jordan(lat, lon)
+    row, dist = _nearest_grid(_package(), lat, lon)
+    grid_id = str(row.GRID_ID.iloc[0])
+    return {
+        "grid": {"id": grid_id, "lat": float(row.LATITUDE.iloc[0]), "lon": float(row.LONGITUDE.iloc[0]), "distance_km": round(dist, 2)},
+        "soil": _soil(grid_id),
+    }
+
+
 @router.post("", dependencies=[Depends(limit("guest", _s.rate_limit_guest))])
 def outlook(body: OutlookIn):
-    """Forecast for the next 30 and 90 days at a location in Jordan, with three ranked crops per period."""
+    """Forecast for the 30 and 90 days from a planting date at a location in Jordan, with three ranked crops per period."""
     require_in_jordan(body.lat, body.lon)
     api = _package()
+    demo_row, dist = _nearest_grid(api, body.lat, body.lon)
+    grid_id = str(demo_row.GRID_ID.iloc[0])
+    dates = _dates(api)
+    planting = body.planting_date or dates["default"]
+    if not (dates["min"] <= planting <= dates["max"]):
+        raise AppError(
+            422,
+            "DATE_OUT_OF_RANGE",
+            "The planting date is outside the period the data covers.",
+            {"min": str(dates["min"]), "max": str(dates["max"]), "default": str(dates["default"])},
+        )
+    origin = planting - timedelta(days=1)  # the last day with observations; the period starts the next day
+
     try:
-        d, _ = api.load_demo()
-        row, _dist = api.nearest(d, body.lat, body.lon)
-        grid_id = str(row.GRID_ID.iloc[0])
-    except Exception as e:
-        log.warning("Forecast demo data unavailable: %s", e)
-        raise AppError(503, "MODEL_UNAVAILABLE", "The forecast data is missing or cannot be read.") from e
+        if origin == dates["demo_origin"]:
+            row, mode = demo_row, "historical_demo"
+        else:
+            row, mode = outlook_features.features_for(grid_id, origin), "historical_data"
+        from nasa_final.AI.forecasting.mvp_inference import predict_entry
 
-    ph, ph_source = body.soil_ph, "user" if body.soil_ph is not None else None
-    if ph is None and grid_id in _soil_ph_by_grid():
-        ph, ph_source = _soil_ph_by_grid()[grid_id], "soilgrids"
+        registry = _registry()
+        soil_info = _soil(grid_id)
+        ph = next((x["value"] for x in (soil_info or {}).get("properties", []) if x["key"] == "ph"), None)
 
-    try:
-        raw = api.demo(api.DemoRequest(latitude=body.lat, longitude=body.lon, irrigation_available=body.irrigation_available, soil_ph=ph))
-    except HTTPException as e:
-        if e.status_code == 422:
-            raise AppError(422, "UNSUPPORTED_LOCATION", "This location is too far from the grid points the forecast covers.", {"lat": body.lat, "lon": body.lon}) from e
-        raise AppError(503, "MODEL_UNAVAILABLE", "The forecast package is unavailable or incompatible.") from e
-
-    registry = _registry()
-    periods, warnings = [], []
-    for days in (30, 90):
-        p = raw["periods"][str(days)]
-        forecast = []
-        for key, (variable, agg, unit) in VARIABLES.items():
-            entry = registry[f"{variable}_target_{agg}_{days}d"]
-            forecast.append(
+        # Same steps as the team's demo endpoint: forecast the four variables, then rank the crops.
+        periods, warnings = [], []
+        for days in (30, 90):
+            values, forecast = {}, []
+            for key, (variable, agg, unit) in VARIABLES.items():
+                target = f"{variable}_target_{agg}_{days}d"
+                entry = registry[target]
+                values[key] = float(predict_entry(row, target, entry, FORECAST_DIR)[0])
+                forecast.append(
+                    {
+                        "key": key,
+                        "variable": variable,
+                        "value": values[key],
+                        "unit": unit,
+                        "method": entry["method"],  # baseline | direct_xgb | residual_xgb
+                        "baseline": entry.get("baseline"),
+                        "validation_mae": entry.get("validation_mae"),
+                    }
+                )
+            result = api.recommend(days, **values, irrigation_available=body.irrigation_available, soil_ph=ph)
+            periods.append(
                 {
-                    "key": key,
-                    "variable": variable,
-                    "value": p["forecast"][key],
-                    "unit": unit,
-                    "method": entry["method"],  # baseline | direct_xgb | residual_xgb
-                    "baseline": entry.get("baseline"),
-                    "validation_mae": entry.get("validation_mae"),
+                    "horizon_days": days,
+                    "period_start": str(planting),
+                    "period_end": str(origin + timedelta(days=days)),
+                    "forecast": forecast,
+                    "best_candidate": result["best_candidate"],
+                    "recommendations": [
+                        {
+                            "crop_id": r["crop_id"],
+                            "name": {"ar": r["name_ar"], "en": r["name_en"]},
+                            "score": r["score"],
+                            "status": r["status"],  # suitable_candidate | conditional | not_recommended
+                            "days_to_harvest": r["days_to_harvest"],
+                            "note": _both(r["note_ar"]),
+                            "reasons": [_both(x) for x in r["reasons"]],
+                            "risks": [_both(x) for x in r["risks"]],
+                            "factor_scores": r["factor_scores"],
+                        }
+                        for r in result["recommendations"]
+                    ],
                 }
             )
-        periods.append(
-            {
-                "horizon_days": days,
-                "period_start": p["period_start"],
-                "period_end": p["period_end"],
-                "forecast": forecast,
-                "best_candidate": p["best_candidate"],
-                "recommendations": [
-                    {
-                        "crop_id": r["crop_id"],
-                        "name": {"ar": r["name_ar"], "en": r["name_en"]},
-                        "score": r["score"],
-                        "status": r["status"],  # suitable_candidate | conditional | not_recommended
-                        "days_to_harvest": r["days_to_harvest"],
-                        "note": _both(r["note_ar"]),
-                        "reasons": [_both(x) for x in r["reasons"]],
-                        "risks": [_both(x) for x in r["risks"]],
-                        "factor_scores": r["factor_scores"],
-                    }
-                    for r in p["recommendations"]
-                ],
-            }
-        )
-        for w in p["warnings"]:
-            if w not in warnings:
-                warnings.append(w)
+            for w in result["warnings"]:
+                if w not in warnings:
+                    warnings.append(w)
+    except AppError:
+        raise
+    except (FileNotFoundError, ImportError, KeyError, ValueError) as e:
+        log.warning("Forecast failed: %r", e)
+        raise AppError(503, "MODEL_UNAVAILABLE", "The forecast package is unavailable or incompatible.") from e
 
     return {
-        "data_mode": raw["data_mode"],
-        "forecast_origin": raw["forecast_origin"],
+        "data_mode": mode,
+        "planting_date": str(planting),
+        "forecast_origin": str(origin),
+        "is_default_date": planting == dates["default"],
+        "planting_date_min": str(dates["min"]),
+        "planting_date_max": str(dates["max"]),
         "saved": False,
         "location": {"lat": body.lat, "lon": body.lon, "governorate": governorate_for(body.lat, body.lon)},
-        "grid": {"id": raw["grid_id"], "lat": raw["matched_latitude"], "lon": raw["matched_longitude"], "distance_km": raw["distance_km"]},
+        "grid": {"id": grid_id, "lat": float(demo_row.LATITUDE.iloc[0]), "lon": float(demo_row.LONGITUDE.iloc[0]), "distance_km": round(dist, 2)},
         "irrigation_available": body.irrigation_available,
-        "soil_ph": {"value": ph, "source": ph_source} if ph is not None else None,
+        "soil": soil_info,
         "rule_version": api.CATALOG["version"],
         "periods": periods,
         "warnings": [_both(w) for w in warnings],

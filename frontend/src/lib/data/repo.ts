@@ -168,16 +168,30 @@ export interface OutlookPeriod {
   recommendations: OutlookCrop[]
 }
 
+export interface SoilInfoData {
+  source: string
+  depth_cm: [number, number]
+  properties: { key: string; value: number; unit: string }[]
+}
+
 export interface Outlook {
-  data_mode: string
+  data_mode: 'historical_demo' | 'historical_data'
+  planting_date: string
   forecast_origin: string
+  is_default_date: boolean
+  planting_date_min: string
+  planting_date_max: string
   grid: { id: string; lat: number; lon: number; distance_km: number }
   irrigation_available: boolean | null
-  soil_ph: { value: number; source: 'user' | 'soilgrids' } | null
+  soil: SoilInfoData | null
   rule_version: string
   periods: OutlookPeriod[]
   warnings: Text2[]
 }
 
-export const getOutlook = (input: { lat: number; lon: number; irrigation_available: boolean | null; soil_ph?: number | null }) =>
+export const getOutlook = (input: { lat: number; lon: number; irrigation_available: boolean | null; planting_date?: string | null }) =>
   api<Outlook>('/outlook', { body: input })
+
+/** Soil properties for a location, from the AI team's static soil table. `soil` is null where the table has no value. */
+export const getSoil = (lat: number, lon: number) =>
+  api<{ grid: { id: string; lat: number; lon: number; distance_km: number }; soil: SoilInfoData | null }>(`/outlook/soil?${q({ lat, lon })}`)
