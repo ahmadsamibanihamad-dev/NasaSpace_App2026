@@ -6,8 +6,9 @@ __pycache__/
 backend/.env
 backend/*.db
 backend/data_store/
-backend/app/ml/models/*
-!backend/app/ml/models/.gitkeep
+backend/app/ml/artifacts/*
+!backend/app/ml/artifacts/.gitkeep
+!backend/app/ml/artifacts/manifests/
 
 # Node
 node_modules/

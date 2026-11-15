@@ -132,5 +132,55 @@ def require_polygon_in_jordan(g: BaseGeometry) -> None:
         raise AppError(422, "UNSUPPORTED_LOCATION", "Part of the polygon is outside Jordan.")
 
 
+HAVERSINE_RADIUS = 6371008.8  # metres, same constant as Turf.js length()
+
+
+def perimeter_m(g: BaseGeometry | dict) -> float:
+    """Geodesic length of the outer ring (haversine), identical to the frontend's perimeter."""
+    g = shape(g) if isinstance(g, dict) else g
+    coords = list(g.exterior.coords)
+    total = 0.0
+    for (lon1, lat1), (lon2, lat2) in zip(coords, coords[1:]):
+        p1, p2 = math.radians(lat1), math.radians(lat2)
+        dphi, dlmb = p2 - p1, math.radians(lon2 - lon1)
+        h = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlmb / 2) ** 2
+        total += 2 * HAVERSINE_RADIUS * math.atan2(math.sqrt(h), math.sqrt(1 - h))
+    return total
+
+
+MIN_PARCEL_M2 = 10.0
+
+
+def validate_parcel(gj: dict) -> BaseGeometry:
+    """Server-side parcel checks; the reasons mirror the frontend's messages."""
+    try:
+        ring = gj["coordinates"][0]
+        if gj.get("type") != "Polygon" or len(gj["coordinates"]) != 1:
+            raise ValueError
+        pts = [(float(x), float(y)) for x, y in ring]
+    except Exception as exc:  # noqa: BLE001
+        raise AppError(422, "INVALID_GEOMETRY", "Parcel must be a GeoJSON Polygon with one ring", ["invalid_number"]) from exc
+    if any(not (math.isfinite(x) and math.isfinite(y)) for x, y in pts):
+        raise AppError(422, "INVALID_GEOMETRY", "Coordinates must be numbers", ["invalid_number"])
+    if any(not (-180 <= x <= 180 and -90 <= y <= 90) for x, y in pts):
+        raise AppError(422, "INVALID_GEOMETRY", "Coordinates out of range", ["out_of_range"])
+    if len(pts) >= 2 and pts[0] == pts[-1]:
+        pts = pts[:-1]
+    distinct = {(round(x, 7), round(y, 7)) for x, y in pts}
+    if len(distinct) < 3:
+        raise AppError(422, "INVALID_GEOMETRY", "A parcel needs at least 3 different corners", ["too_few_points"])
+    if len(distinct) != len(pts):
+        raise AppError(422, "INVALID_GEOMETRY", "The boundary has a repeated point", ["duplicate_points"])
+    g = shape({"type": "Polygon", "coordinates": [pts + [pts[0]]]})
+    if not g.is_valid:
+        raise AppError(422, "INVALID_GEOMETRY", "The boundary crosses itself", ["self_intersecting"])
+    if geodesic_area_m2(g) < MIN_PARCEL_M2:
+        raise AppError(422, "INVALID_GEOMETRY", "The parcel is too small", ["too_small"])
+    for x, y in pts:
+        if not inside_jordan(y, x):
+            raise AppError(422, "UNSUPPORTED_LOCATION", "Part of the parcel is outside Jordan", ["outside_jordan"])
+    return g
+
+
 def to_geojson(g: BaseGeometry) -> dict:
     return json.loads(json.dumps(mapping(g)))

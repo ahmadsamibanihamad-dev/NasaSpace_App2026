@@ -2,6 +2,23 @@
 
 Last updated 2026-11-14.
 
+## Backend built (2026-11-15)
+The user asked for the full backend with FastAPI + SQLite, ready for an ML model that the team will deliver, plus a guest mode.
+
+- **Guest**: `POST /api/v1/guest/recommendations` takes a location (and optional irrigation) and returns ranked crops. Nothing is stored.
+- **Signed-in users**: farms, parcels, crop history, analyses and forecasts are saved and isolated per user.
+- **Engine**: `backend/app/engine/` is a Python port of the frontend engine. `tests/test_engine_parity.py` (34 tests) checks it against reference results exported by `frontend/src/lib/engine/export-fixtures.test.ts`. A live check on real POWER data gave the same ranking as the browser.
+- **ML layer**: `backend/app/ml/` has one interface with `off`, `mock` and `production` services chosen by `AI_MODE`; a model registry read from manifests; no silent fallback to mock. `app/engine/decision.py` holds the base rules that turn a forecast into a crop decision (one temperature rule so far).
+- **Tests**: 55 passing (`backend/.venv/Scripts/python.exe -m pytest -q`).
+- **Docs**: `backend/README.md` (run, API, model integration, what is needed from the AI team). Launcher: `start-backend.bat`.
+
+Not done yet:
+- The frontend still uses browser storage. Next step: re-implement `frontend/src/lib/data/repo.ts` against the API, add the guest page, then remove the in-browser engine.
+- The AI team's dataset (SMAP, IMERG, SoilGrids, Copernicus DEM, 835-grid mapping), schema and models have not been delivered. `build_features` and inference in `app/ml/production.py` are marked `TODO(model delivery)`.
+- The new spec lists radish, arugula and spinach; the crop base still has the original 13. Open decision.
+- Open decisions from the spec merge: keep or drop water needs, planting calendar and risk centre; how much data-freshness information the UI should show.
+- Web only: the Flutter app was dropped by the user.
+
 ## Direction change (user request, 2026-11-14)
 - Work is **frontend-only** for now. The backend in `backend/` (Phases 1–2: auth, farms, geo, tests) is kept but not used by the UI.
 - The plot mechanism changed: the old grid "plot division editor" was removed. Parcels are now drawn one by one on the map or entered as coordinates, managed from a side panel ("إدارة القطع الزراعية").

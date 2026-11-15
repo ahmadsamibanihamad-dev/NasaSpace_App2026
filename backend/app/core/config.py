@@ -16,28 +16,32 @@ APP_NAME = {"en": "Ardna", "ar": "أرضنا"}
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Security (JWT_SECRET must be set in .env for any real deployment)
-    # If unset, a random secret is generated per process (tokens reset on restart).
+    # Security. If JWT_SECRET is unset a random secret is generated per process (tokens reset on restart).
     jwt_secret: str = Field(default_factory=lambda: secrets.token_urlsafe(48))
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60 * 24 * 7
 
     database_url: str = f"sqlite:///{(BACKEND_DIR / 'ardna.db').as_posix()}"
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174"
 
-    # NASA POWER
+    # NASA POWER (no key needed)
     power_base_url: str = "https://power.larc.nasa.gov/api/temporal/daily/point"
-    power_history_years: int = 15
+    power_history_years: int = 12
     power_timeout_s: float = 90.0
-    # If true, never call external services (tests / offline demo); use cached or demo data.
+    power_cache_hours: int = 24
+    # true = never call external services; use cached data only (tests / offline demo)
     offline_mode: bool = False
 
-    # Local store for ingested SMAP / IMERG tables (written by backend/scripts/*)
-    data_store_dir: str = str(BACKEND_DIR / "data_store")
+    # Rate limits (requests per minute per client)
+    rate_limit_auth: int = 10
+    rate_limit_guest: int = 12
 
-    # Recommendation engine selection
-    engine: Literal["rules", "ml", "hybrid"] = "rules"
-    model_path: str = str(APP_DIR / "ml" / "models" / "model.joblib")
+    # AI forecasting models
+    #   off        - no forecasts; recommendations use the historical climate record only
+    #   mock       - clearly labelled demonstration forecasts, for building the UI
+    #   production - real model artifacts from MODEL_DIR; never falls back to mock
+    ai_mode: Literal["off", "mock", "production"] = "off"
+    model_dir: str = str(APP_DIR / "ml" / "artifacts")
 
     @field_validator("jwt_secret")
     @classmethod
