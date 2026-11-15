@@ -86,7 +86,7 @@ export async function getEnvSummary(lat: number, lon: number): Promise<EnvSummar
       soil_moisture: {
         value: sm === null ? null : sm * 100,
         unit: '%',
-        source: 'NASA POWER · GWETROOT',
+        source: 'NASA POWER',
         period: last30,
         trend: recent.map((r) => ({ label: label(r), value: r.gwr === null ? null : r.gwr * 100 })),
         historical_mean: smHist === null ? null : smHist * 100,
@@ -95,7 +95,7 @@ export async function getEnvSummary(lat: number, lon: number): Promise<EnvSummar
       temperature: {
         value: t30,
         unit: '°C',
-        source: 'NASA POWER · T2M',
+        source: 'NASA POWER',
         period: last30,
         trend: recent.map((r) => ({ label: label(r), value: r.t })),
         historical_mean: tHist,
@@ -104,7 +104,7 @@ export async function getEnvSummary(lat: number, lon: number): Promise<EnvSummar
       seasonal_rainfall: {
         value: seasonRain,
         unit: 'mm',
-        source: 'NASA POWER · PRECTOTCORR',
+        source: 'NASA POWER',
         period: { ar: `من 1 تشرين الأول ${seasonYear} حتى ${d.lastDate}`, en: `1 October ${seasonYear} to ${d.lastDate}` },
         trend: recent.map((r) => ({ label: label(r), value: r.rain })),
         historical_mean: histRain,

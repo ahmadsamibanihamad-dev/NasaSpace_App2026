@@ -89,42 +89,27 @@ export function DemoBadge() {
   )
 }
 
-/** Data provenance footer: sources actually used, quality, confidence, timestamp. */
-export function DataFooter({ meta, modelVersion, compact }: { meta: Partial<DataMeta>; modelVersion?: string; compact?: boolean }) {
+/** Data provenance: which sources were used and how recent the data is. */
+export function DataFooter({ meta, compact }: { meta: Partial<DataMeta>; compact?: boolean }) {
   const { t } = useTranslation()
   if (!meta) return null
   return (
-    <div className={cx('flex flex-col gap-3', compact ? 'text-caption' : 'text-label')}>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-text-secondary">{t('results.sources')}:</span>
-        {(meta.data_sources || []).map((s) => (
-          <Pill key={s} tone="green" icon="satellite">
-            {s}
-          </Pill>
-        ))}
-        {meta.is_demo && <DemoBadge />}
-      </div>
-      <div className="flex flex-wrap gap-x-6 gap-y-1 text-text-secondary">
-        {meta.data_quality && (
-          <span>
-            {t('results.quality')}: <b className="font-semibold text-text-primary">{t(`results.qualityLevels.${meta.data_quality}`)}</b>
-          </span>
-        )}
-        {meta.confidence && (
-          <span>
-            {t('results.confidence')}: <b className="font-semibold text-text-primary">{t(`results.confidenceLevels.${meta.confidence}`)}</b>
-          </span>
-        )}
+    <div className={cx('flex flex-col gap-2', compact ? 'text-caption' : 'text-label')}>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-text-secondary">
+        <span className="flex flex-wrap items-center gap-2">
+          {t('results.sources')}:
+          {(meta.data_sources || []).map((s) => (
+            <Pill key={s} tone="green" icon="satellite">
+              {s}
+            </Pill>
+          ))}
+        </span>
         {meta.data_timestamp && (
           <span>
             {t('results.timestamp')}: <b className="font-semibold text-text-primary">{date(meta.data_timestamp)}</b>
           </span>
         )}
-        {modelVersion && (
-          <span>
-            {t('results.model')}: <b className="font-semibold text-text-primary">{modelVersion}</b>
-          </span>
-        )}
+        {meta.is_demo && <DemoBadge />}
       </div>
       {meta.analysis_basis === 'historical_climatology' && (
         <p className="text-caption text-text-tertiary flex items-center gap-1">
@@ -132,15 +117,5 @@ export function DataFooter({ meta, modelVersion, compact }: { meta: Partial<Data
         </p>
       )}
     </div>
-  )
-}
-
-export function LowQualityBanner({ meta }: { meta?: Partial<DataMeta> | null }) {
-  const { t } = useTranslation()
-  if (!meta || (meta.data_quality !== 'limited' && meta.data_quality !== 'poor')) return null
-  return (
-    <Banner icon="alert" tone="warning">
-      {t('results.lowQuality')}
-    </Banner>
   )
 }

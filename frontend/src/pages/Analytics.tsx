@@ -4,7 +4,7 @@ import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, T
 import { useFarmCtx } from '../layout/FarmContext'
 import { useTimeSeries } from '../hooks/queries'
 import { Card, Chip, Skeleton, Tabs } from '../components/ui/primitives'
-import { DataFooter, EmptyState, ErrorState, LowQualityBanner } from '../components/ui/states'
+import { DataFooter, EmptyState, ErrorState } from '../components/ui/states'
 import { Icon, type IconName } from '../components/ui/Icon'
 import { date, monthName, num } from '../lib/format'
 
@@ -92,10 +92,9 @@ export default function Analytics() {
       </Card>
 
       {q.data && (
-        <Card className="flex flex-col gap-3">
-          <LowQualityBanner meta={q.data} />
+        <div className="px-2">
           <DataFooter meta={q.data} compact />
-        </Card>
+        </div>
       )}
     </div>
   )

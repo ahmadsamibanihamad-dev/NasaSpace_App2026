@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext'
 import { useFarmCtx } from '../layout/FarmContext'
 import { useAnalyses, useEnvSummary, usePlots } from '../hooks/queries'
 import { Button, Card, CardTitle, Pill, Skeleton } from '../components/ui/primitives'
-import { Banner, DataFooter, DemoBadge, EmptyState, ErrorState, LowQualityBanner } from '../components/ui/states'
+import { Banner, DataFooter, DemoBadge, EmptyState, ErrorState } from '../components/ui/states'
 import { TickStrip } from '../components/ui/viz'
 import { Icon, type IconName } from '../components/ui/Icon'
 import { CropIcon } from '../components/crops/CropIcon'
@@ -174,13 +174,9 @@ export default function Dashboard() {
       </div>
 
       {env.data && (
-        <Card className="flex flex-col gap-3">
-          <LowQualityBanner meta={env.data} />
+        <div className="px-2">
           <DataFooter meta={env.data} compact />
-          <p className="text-caption text-text-tertiary flex items-start gap-1">
-            <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {t('results.sharedCell')}
-          </p>
-        </Card>
+        </div>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">

@@ -126,14 +126,13 @@ export function buildRotation(input: RotationInput): { strategies: RotationStrat
   const seqText = (seq: (string | null)[], l: 'ar' | 'en') => seq.map((x) => name(x, l)).join(l === 'ar' ? ' ← ' : ' → ')
   const rainEv = best.get('wheat')!.stats
 
-  const gaps = (seq: (string | null)[]): Bi[] => {
+  const gaps = (): Bi[] => {
     const g: Bi[] = []
     if (plot.soil_ph === null || !plot.soil_type) g.push({ ar: 'لا يوجد فحص تربة للقطعة (pH، نوع التربة، الملوحة، المادة العضوية).', en: 'No soil test for this plot (pH, texture, salinity, organic matter).' })
     if (input.history.length < 2) g.push({ ar: 'سجل المحاصيل أقل من موسمين؛ أضف المواسم السابقة لتقييم أدق.', en: 'Crop history covers fewer than two seasons; add earlier seasons for a better assessment.' })
-    g.push({ ar: 'مؤشر الدخل نسبي (1–3) وغير مبني على أسعار السوق أو تكاليف الإنتاج.', en: 'The income indicator is relative (1–3) and not based on market prices or production costs.' })
-    g.push({ ar: 'رطوبة التربة والأمطار من NASA POWER؛ بيانات SMAP و GPM IMERG غير مستخدمة بعد.', en: 'Soil moisture and rainfall come from NASA POWER; SMAP and GPM IMERG data are not used yet.' })
+    g.push({ ar: 'إمكانية الدخل مؤشر نسبي لا يشمل أسعار السوق الحالية ولا تكاليف الإنتاج.', en: 'Income potential is a relative indicator that excludes current market prices and production costs.' })
+    g.push({ ar: 'رطوبة التربة والأمطار مقدَّرة من بيانات مناخية على مستوى المنطقة، وليست قياساً ميدانياً في القطعة نفسها.', en: 'Soil moisture and rainfall are estimated from area-level climate data, not measured in the plot itself.' })
     if (plot.irrigation_available) g.push({ ar: 'كمية مياه الري المتاحة فعلياً ونوعيتها (الملوحة) غير معروفة.', en: 'The actual quantity and quality (salinity) of irrigation water are unknown.' })
-    if (seq.includes('vetch')) g.push({ ar: 'معاملات البيقيا (Kc وعمق الجذور) غير واردة في FAO-56 وتحتاج مراجعة.', en: 'Vetch coefficients (Kc, rooting depth) are not in FAO-56 and need review.' })
     return g
   }
   const reviewRisks = (seq: (string | null)[]): Bi[] => {
@@ -197,7 +196,7 @@ export function buildRotation(input: RotationInput): { strategies: RotationStrat
       why,
       evidence,
       benefits,
-      information_gaps: gaps(seq),
+      information_gaps: gaps(),
       risks_for_review: reviewRisks(seq),
     }
   }

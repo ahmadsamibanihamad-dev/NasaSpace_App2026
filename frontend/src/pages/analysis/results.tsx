@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Button, Card, CardTitle, Chip, Pill, cx } from '../../components/ui/primitives'
-import { Banner, DataFooter, DemoBadge, EmptyState, LowQualityBanner } from '../../components/ui/states'
+import { Banner, DataFooter, DemoBadge, EmptyState } from '../../components/ui/states'
 import { Drops, FactorBar, Gauge, WindowBar } from '../../components/ui/viz'
 import { Icon, type IconName } from '../../components/ui/Icon'
 import { Modal } from '../../components/ui/Modal'
@@ -38,25 +38,19 @@ export function ResultFrame({ result, children, multiPlot }: { result: AnalysisR
             <DemoBadge />
           </div>
         )}
-        <LowQualityBanner meta={result} />
         {result.engine_fallback && <Banner icon="alert" tone="warning">{t('results.engineFallback')}</Banner>}
       </div>
       {children}
       <Card className="flex flex-col gap-3">
         <h2 className="text-h2 font-semibold">{t('results.dataFooter')}</h2>
-        <DataFooter meta={result} modelVersion={result.model_version} />
-        {(result.notes ?? []).map((n, i) => (
-          <p key={i} className="text-caption text-text-secondary flex items-start gap-1">
-            <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {loc(n)}
-          </p>
-        ))}
+        <DataFooter meta={result} />
         {multiPlot !== false && (
           <p className="text-caption text-text-secondary flex items-start gap-1">
             <Icon name="satellite" size={14} className="mt-0.5 shrink-0" /> {t('results.sharedCell')}
           </p>
         )}
         <p className="text-caption text-text-secondary flex items-start gap-1">
-          <Icon name="alert" size={14} className="mt-0.5 shrink-0 text-warning" /> {loc(result.disclaimer) || t('results.disclaimer')}
+          <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {t('results.disclaimer')}
         </p>
       </Card>
     </div>
@@ -158,7 +152,6 @@ export function RequirementsTable({ rows }: { rows: RequirementMatch[] }) {
               </td>
               <td className="py-2 text-caption text-text-secondary" dir="ltr" style={{ textAlign: 'start' }}>
                 {r.source}
-                {r.needs_review && <span className="block text-text-primary">⚠ {t('results.needsReview')}</span>}
               </td>
             </tr>
           ))}

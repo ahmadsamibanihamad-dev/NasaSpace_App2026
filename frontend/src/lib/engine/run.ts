@@ -37,8 +37,8 @@ const r1 = (x: number) => Math.round(x * 10) / 10
 const pause = (ms = 350) => new Promise((r) => setTimeout(r, ms))
 
 const DISCLAIMER = {
-  ar: 'تعكس الدرجة الملاءمة البيئية فقط، ولا تضمن الإنتاج. يُرجى التأكد مع مهندس زراعي محلي. الحسابات من محرك قواعد أولي داخل المتصفح (rules-web-v0) لم تُعايَر أوزانه محلياً بعد.',
-  en: 'The score reflects environmental suitability, not guaranteed yield. Confirm with a local agricultural engineer. Computed by a provisional in-browser rule engine (rules-web-v0) whose weights are not yet locally calibrated.',
+  ar: 'تعكس الدرجة الملاءمة البيئية فقط، ولا تضمن الإنتاج. يُرجى التأكد مع مهندس زراعي محلي.',
+  en: 'The score reflects environmental suitability, not guaranteed yield. Confirm with a local agricultural engineer.',
 }
 
 function soilAnomaly(c: Climate): number | null {

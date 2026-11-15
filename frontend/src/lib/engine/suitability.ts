@@ -255,8 +255,8 @@ export function buildRisks(c: Climate, e: Evaluation, plot: PlotCtx, soilAnomaly
       severity: soilAnomaly <= RISK.soilWetnessAnomaly.high ? 'high' : 'moderate',
       period: { ar: 'آخر 30 يوماً', en: 'Last 30 days' },
       explanation: {
-        ar: `رطوبة منطقة الجذور في آخر 30 يوماً أقل من معدلها لهذا الوقت من السنة بـ ${r0(Math.abs(soilAnomaly) * 100)} نقطة مئوية (مؤشر GWETROOT من NASA POWER).`,
-        en: `Root-zone wetness over the last 30 days is ${r0(Math.abs(soilAnomaly) * 100)} percentage points below normal for this time of year (NASA POWER GWETROOT index).`,
+        ar: `رطوبة منطقة الجذور في آخر 30 يوماً أقل من معدلها لهذا الوقت من السنة بـ ${r0(Math.abs(soilAnomaly) * 100)} نقطة مئوية حسب بيانات NASA POWER.`,
+        en: `Root-zone wetness over the last 30 days is ${r0(Math.abs(soilAnomaly) * 100)} percentage points below normal for this time of year, according to NASA POWER data.`,
       },
       action: {
         ar: 'افحص رطوبة التربة ميدانياً قبل الزراعة، وأجّل البذار حتى أول مطر فعّال أو اروِ رية إنبات.',
@@ -270,7 +270,7 @@ export function buildRisks(c: Climate, e: Evaluation, plot: PlotCtx, soilAnomaly
 
 export function buildEvidence(c: Climate, e: Evaluation): Evidence[] {
   const s = e.stats
-  const per = `${c.firstYear}–${c.lastYear} · ${seasonLabel(e.crop, e.dekad).en}`
+  const per = `${c.firstYear}–${c.lastYear}`
   const ev = (metric: string, ar: string, en: string, value: number | null, unit: string): Evidence => ({ metric, label: { ar, en }, value: value === null || !Number.isFinite(value) ? null : r1(value), unit, period: per, source: SRC })
   return [
     ev('seasonal_mean_temperature_c', 'متوسط حرارة الموسم', 'Seasonal mean temperature', s.tmean, '°C'),
@@ -412,7 +412,14 @@ export function buildRequirements(e: Evaluation, plot: PlotCtx): RequirementMatc
 
 export function recommendedActions(e: Evaluation, risks: Risk[], plot: PlotCtx, win: { start: string; end: string } | null): Bi[] {
   const out: Bi[] = []
-  if (win && !e.crop.perennial) out.push({ ar: `ازرع بين ${win.start} و ${win.end} حسب بيانات المناخ التاريخية.`, en: `Plant between ${win.start} and ${win.end} according to the historical climate record.` })
+  if (win && !e.crop.perennial) {
+    // "11 تشرين الأول" / "11 October" instead of raw ISO dates
+    const day = (iso: string, months: string[]) => `${+iso.slice(8, 10)} ${months[+iso.slice(5, 7) - 1]}`
+    out.push({
+      ar: `أفضل موعد للزراعة بين ${day(win.start, MONTHS_AR)} و${day(win.end, MONTHS_AR)}، حسب سجل المناخ في منطقتك.`,
+      en: `The best time to plant is between ${day(win.start, MONTHS_EN)} and ${day(win.end, MONTHS_EN)}, based on your area's climate record.`,
+    })
+  }
   if (plot.irrigation_available) out.push({ ar: `خطّط لنحو ${r0(e.stats.irrigation)} ملم من مياه الري خلال الموسم (ETc ${r0(e.stats.etc)} ملم ناقص المطر الفعّال ${r0(e.stats.effRain)} ملم).`, en: `Plan for about ${r0(e.stats.irrigation)} mm of irrigation over the season (ETc ${r0(e.stats.etc)} mm minus effective rain ${r0(e.stats.effRain)} mm).` })
   for (const r of risks.filter((x) => x.severity !== 'low').slice(0, 3)) out.push(r.action)
   if (plot.soil_ph === null) out.push({ ar: 'أجرِ فحص تربة (pH والملوحة) لتأكيد ملاءمة المحصول.', en: 'Run a soil test (pH and salinity) to confirm the crop fits.' })

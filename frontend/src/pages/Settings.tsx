@@ -5,7 +5,6 @@ import { useAuth } from '../auth/AuthContext'
 import { useFarmCtx } from '../layout/FarmContext'
 import { useDeleteFarm, useUpdateFarm } from '../hooks/queries'
 import { Button, Card, CardTitle, Field, Input, Pill, Select, Tabs, Toggle } from '../components/ui/primitives'
-import { Banner } from '../components/ui/states'
 import { ConfirmDialog } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
 import { Icon } from '../components/ui/Icon'
@@ -44,10 +43,6 @@ export default function Settings() {
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-      <div className="xl:col-span-2">
-        <Banner icon="info">{t('parcels.localNote')}</Banner>
-      </div>
-
       <Card>
         <CardTitle action={<Button size="sm" variant="secondary" icon="plus" onClick={() => nav('/setup?new=1')}>{t('farm.addFarm')}</Button>}>{t('settings.farms')}</CardTitle>
         <ul className="flex flex-col gap-2">
@@ -173,7 +168,6 @@ export default function Settings() {
               </Button>
             </>
           )}
-          <p className="text-caption text-text-tertiary">{t('settings.tileNote')}</p>
         </div>
       </Card>
 
@@ -188,7 +182,6 @@ export default function Settings() {
             <span className="text-label">{t('settings.notifAnalyses')}</span>
             <Toggle checked={s.notifyAnalyses} onChange={(v) => updateSettings({ notifyAnalyses: v })} label={t('settings.notifAnalyses')} />
           </div>
-          <p className="text-caption text-text-tertiary">{t('settings.notifUiOnly')}</p>
         </div>
       </Card>
 
