@@ -6,7 +6,7 @@
  * Signed-in users keep their farms, parcels and history there; guests store nothing.
  */
 import { api, getToken, setToken } from '../api'
-import type { AuthResponse, CropHistoryItem, EnvSummary, Farm, LocateResponse, Plot, PlotDraft, TimeSeries, User } from '../types'
+import type { Analysis, AnalysisType, AuthResponse, Bi, CropHistoryItem, DataMeta, EnvSummary, Farm, Governorate, LocateResponse, Plot, PlotDraft, RankedCrop, TimeSeries, User } from '../types'
 
 const q = (params: Record<string, string | number | undefined>) =>
   new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined) as [string, string][]).toString()
@@ -98,6 +98,40 @@ export const getEnvSummary = (lat: number, lon: number) => api<EnvSummary>(`/env
 
 export const getTimeSeries = (lat: number, lon: number, variable: string, resolution: string) =>
   api<TimeSeries>(`/environment/timeseries?${q({ lat, lon, variable, resolution })}`)
+
+// ---------------- Analyses (saved history of the signed-in user) ----------------
+
+export interface NewAnalysisInput {
+  analysis_type: AnalysisType
+  farm_id: string
+  plot_ids: string[] | null
+  crop_id?: string | null
+  planting_date?: string | null
+  priority?: string | null
+}
+
+export const createAnalysis = (input: NewAnalysisInput) => api<{ analysis_id: string; status: string }>('/analyses', { body: input })
+
+export const listAnalyses = (farmId: string, type?: AnalysisType) => api<Analysis[]>(`/analyses?${q({ farm_id: farmId, analysis_type: type })}`)
+
+export const getAnalysis = (id: string) => api<Analysis>(`/analyses/${id}`)
+
+export const deleteAnalysis = (id: string) => api<void>(`/analyses/${id}`, { method: 'DELETE' })
+
+// ---------------- Guests (nothing is saved) ----------------
+
+export interface GuestRecommendation extends DataMeta {
+  location: { lat: number; lon: number; governorate: Governorate | null }
+  irrigation_available: boolean
+  saved: false
+  model_version: string
+  disclaimer: Bi
+  recommended_crops: RankedCrop[]
+  all_crops: { crop: string; suitability_score: number; suitability_status: string }[]
+}
+
+export const guestRecommend = (input: { lat: number; lon: number; irrigation_available: boolean; irrigation_method?: string | null }) =>
+  api<GuestRecommendation>('/guest/recommendations', { body: input })
 
 // ---------------- Forecast outlook (AI team's models and rules; nothing stored) ----------------
 

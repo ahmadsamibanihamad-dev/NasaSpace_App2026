@@ -177,7 +177,7 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
     }
   }
   const startEditData = (p: Plot) => {
-    const { id: _i, farm_id: _f, area_m2: _a, perimeter_m: _p, created_at: _c, updated_at: _u, ...d } = p
+    const { id: _i, farm_id: _f, area_m2: _a, perimeter_m: _p, created_at: _c, updated_at: _u, latest_score: _s, latest_status: _st, latest_top_risk: _r, ...d } = p
     setDraft(d)
     setErrors({})
     setMode('editData')
@@ -528,8 +528,8 @@ export function ParcelManager({ farm, initialPlotId, startAdding }: { farm: Farm
               <Button size="sm" variant="secondary" icon="polygon" onClick={() => startReshape(selected)}>
                 {t('parcels.editBoundary')}
               </Button>
-              <Button size="sm" variant="secondary" icon="sprout" onClick={() => nav(`/app/rotation?plot=${selected.id}`)}>
-                {t('nav.rotation')}
+              <Button size="sm" variant="secondary" icon="sprout" onClick={() => nav(`/app/analysis/new?plot=${selected.id}`)}>
+                {t('farm.analyze')}
               </Button>
               <Button size="sm" variant="danger" icon="trash" onClick={() => setConfirmDelete(true)}>
                 {t('parcels.delete')}

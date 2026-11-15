@@ -3,10 +3,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Session
 
-from app.api import auth, crop_rotation, farms, geo, outlook, public
+from app.api import analyses, auth, crop_rotation, farms, forecasts, geo, outlook, public
 from app.core.config import APP_NAME, get_settings
-from app.core.db import init_db
+from app.core.db import get_engine, init_db
 from app.core.errors import install_error_handlers
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -16,6 +17,14 @@ log = logging.getLogger("ardna")
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
+    with Session(get_engine()) as session:
+        n = analyses.fail_interrupted(session)
+        if n:
+            log.info("Marked %s interrupted analyses as failed", n)
+    from app.ml.service import get_prediction_service
+
+    status = get_prediction_service().status()  # loads models once, at startup
+    log.info("AI mode: %s (ready=%s)", status["ai_mode"], status["ready"])
     yield
 
 
@@ -24,7 +33,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=f"{APP_NAME['en']} API",
         version="1.0.0",
-        description="Agricultural decision support for farms in Jordan, built on the AI team's forecasts and recommendation rules. Guests get forecasts and plans for a location; signed-in users keep farms, parcels and saved plans.",
+        description="Agricultural decision support for farms in Jordan. Guests get crop recommendations for a location; signed-in users keep farms, parcels and history.",
         lifespan=lifespan,
         openapi_url="/api/v1/openapi.json",
         docs_url="/api/v1/docs",
@@ -37,7 +46,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     install_error_handlers(app)
-    for r in (auth.router, geo.router, farms.router, outlook.router, crop_rotation.router, public.router):
+    for r in (auth.router, geo.router, farms.router, analyses.router, forecasts.router, outlook.router, crop_rotation.router, public.router):
         app.include_router(r, prefix="/api/v1")
     return app
 

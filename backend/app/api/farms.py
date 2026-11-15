@@ -8,7 +8,7 @@ from app.api.schemas import FarmIn, FarmOut, FarmUpdateIn, HistoryItem, HistoryR
 from app.core.db import get_session
 from app.core.errors import AppError
 from app.models import Analysis, CropHistory, Farm, Plot, User, utcnow, RotationPlan
-from app.services.crops import CROP_IDS
+from app.services.crops import CROP_IDS as ANALYSIS_CROP_IDS
 from app.services.geo import geodesic_area_m2, governorate_for, governorate_info, perimeter_m, require_in_jordan, to_geojson, validate_parcel
 
 router = APIRouter(tags=["farms"])
@@ -34,8 +34,50 @@ def farm_out(session: Session, f: Farm) -> FarmOut:
     )
 
 
-def plot_out(p: Plot) -> PlotOut:
-    return PlotOut(**p.model_dump(exclude={"area_m2", "perimeter_m"}), area_m2=round(p.area_m2, 1), perimeter_m=round(p.perimeter_m, 1))
+def latest_plot_scores(session: Session, farm_id: str) -> dict[str, dict]:
+    """Latest suitability score and top risk per parcel, from the user's completed analyses."""
+    rows = session.exec(
+        select(Analysis)
+        .where(Analysis.farm_id == farm_id, Analysis.status == "completed", col(Analysis.analysis_type).in_(["crop_suitability", "risk"]))
+        .order_by(col(Analysis.created_at).desc())
+        .limit(30)
+    ).all()
+    rank = {"high": 3, "moderate": 2, "low": 1}
+    out: dict[str, dict] = {}
+    for a in rows:
+        for p in (a.result or {}).get("plots") or []:
+            d = out.setdefault(p["plot_id"], {})
+            if "score" not in d and p.get("suitability_score") is not None:
+                d["score"] = p["suitability_score"]
+                d["status"] = p.get("suitability_status")
+            if "risk" not in d and p.get("risks"):
+                top = max(p["risks"], key=lambda r: rank.get(r.get("severity"), 0))
+                d["risk"] = {"type": top["type"], "severity": top["severity"]}
+    return out
+
+
+def plot_out(p: Plot, scores: dict | None = None) -> PlotOut:
+    s = (scores or {}).get(p.id, {})
+    return PlotOut(
+        **p.model_dump(exclude={"area_m2", "perimeter_m"}),
+        area_m2=round(p.area_m2, 1),
+        perimeter_m=round(p.perimeter_m, 1),
+        latest_score=s.get("score"),
+        latest_status=s.get("status"),
+        latest_top_risk=s.get("risk"),
+    )
+
+
+def _team_crop_ids() -> frozenset:
+    import json
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[2] / "nasa_final" / "AI" / "crop_requirements.json"
+    return frozenset(c["id"] for c in json.loads(path.read_text(encoding="utf-8"))["crops"])
+
+
+# A parcel may carry any crop the site knows: the 13 of the analyses or the six of the AI team's system.
+CROP_IDS = ANALYSIS_CROP_IDS | _team_crop_ids()
 
 
 def _check_crop(cid: str | None) -> None:
@@ -161,7 +203,8 @@ def delete_farm(farm_id: str, user: User = Depends(current_user), session: Sessi
 def list_plots(farm_id: str, user: User = Depends(current_user), session: Session = Depends(get_session)):
     f = owned_farm(session, user, farm_id)
     plots = session.exec(select(Plot).where(Plot.farm_id == f.id)).all()
-    return [plot_out(p) for p in sorted(plots, key=_sort_key)]
+    scores = latest_plot_scores(session, f.id)
+    return [plot_out(p, scores) for p in sorted(plots, key=_sort_key)]
 
 
 @router.get("/farms/{farm_id}/plots/next-label")
@@ -193,7 +236,7 @@ def create_plot(farm_id: str, body: PlotIn, user: User = Depends(current_user), 
 @router.get("/plots/{plot_id}", response_model=PlotOut)
 def get_plot(plot_id: str, user: User = Depends(current_user), session: Session = Depends(get_session)):
     p = owned_plot(session, user, plot_id)
-    return plot_out(p)
+    return plot_out(p, latest_plot_scores(session, p.farm_id))
 
 
 @router.patch("/plots/{plot_id}", response_model=PlotOut)
@@ -223,7 +266,7 @@ def update_plot(plot_id: str, body: PlotUpdateIn, user: User = Depends(current_u
         recenter_farm(session, session.get(Farm, p.farm_id))
     session.commit()
     session.refresh(p)
-    return plot_out(p)
+    return plot_out(p, latest_plot_scores(session, p.farm_id))
 
 
 @router.delete("/plots/{plot_id}", status_code=204)

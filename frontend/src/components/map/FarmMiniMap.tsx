@@ -2,12 +2,14 @@ import { useMemo } from 'react'
 import { FitBounds, JordanMap } from './JordanMap'
 import { ParcelsLayer } from '../../features/parcels/ParcelsLayer'
 import { boundsOf } from '../../lib/geometry'
+import { scoreFill } from '../../lib/format'
 import type { Farm, Plot } from '../../lib/types'
 
-/** Compact farm map in the parcels' own colours; `picked` highlights a selection. */
+/** Compact farm map. `mode="score"` tints parcels by their latest suitability score; `picked` highlights a selection. */
 export function FarmMiniMap({
   farm,
   plots,
+  mode = 'score',
   picked,
   onPick,
   interactive = false,
@@ -15,6 +17,7 @@ export function FarmMiniMap({
 }: {
   farm: Farm
   plots: Plot[]
+  mode?: 'score' | 'color'
   picked?: string[]
   onPick?: (id: string) => void
   interactive?: boolean
@@ -23,7 +26,7 @@ export function FarmMiniMap({
   const bounds = useMemo(() => boundsOf(plots.map((p) => p.polygon)), [plots])
   const colorOf = (p: Plot) => {
     if (picked) return picked.includes(p.id) ? '#24753F' : '#F6F6F4'
-    return p.color
+    return mode === 'score' ? scoreFill(p.latest_score) : p.color
   }
   return (
     <div className={`rounded-tile overflow-hidden relative ${className}`}>

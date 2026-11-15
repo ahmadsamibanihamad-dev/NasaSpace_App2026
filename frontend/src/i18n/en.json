@@ -75,7 +75,8 @@
   "farmSwitcher": "Select farm",
   "searchPlaceholder": "Search plots or crops…",
   "noNotifications": "No new notifications",
-  "outlook": "Forecast"
+  "outlook": "Forecast",
+  "plans": "Saved plans"
  },
  "landing": {
   "heroTitle": "Know what to grow, where, and when",
@@ -86,9 +87,9 @@
   "step1": "Locate your land",
   "step1Body": "We find you on a satellite map, or you search for your area or type its coordinates.",
   "step2": "Draw your parcels",
-  "step2Body": "Draw your parcels on the map; soil information is fetched automatically for the location.",
-  "step3": "Get the forecast and a rotation plan",
-  "step3Body": "Forecasts of temperature, humidity, soil moisture and rainfall for one and three months, with ranked crops and a crop rotation plan and its reasons.",
+  "step2Body": "Drag on the map to draw a rectangle over each parcel and adjust its corners, or enter coordinates. Area and perimeter are calculated automatically.",
+  "step3": "Get recommendations",
+  "step3Body": "We assess crop suitability, planting time, rotation, and risks.",
   "sourcesTitle": "NASA data we rely on",
   "power": "NASA POWER",
   "powerBody": "10+ years of daily temperature, rainfall, solar radiation, and humidity.",
@@ -97,7 +98,7 @@
   "gpm": "GPM IMERG",
   "gpmBody": "Rainfall estimates from the Global Precipitation Measurement mission at 0.1°.",
   "jordanTitle": "Built for farms in Jordan",
-  "jordanBody": "Six short- and medium-duration crops scored by the recommendation system for the conditions expected at your location.",
+  "jordanBody": "Covers all 12 governorates, focuses on 13 crops common in Jordan from wheat and barley to olives and date palms, and measures land in dunums.",
   "footer": "A NASA Space Apps \"Field Shift\" project. Recommendations are guidance and do not replace a local agricultural engineer.",
   "builtWith": "Built with NASA POWER, SMAP and GPM IMERG"
  },
@@ -212,7 +213,7 @@
  "dashboard": {
   "greetingMorning": "Good morning, {{name}}",
   "greetingEvening": "Good evening, {{name}}",
-  "subtitle": "A quick look at your farm and observed climate readings.",
+  "subtitle": "Here's a quick look at your farm today.",
   "farmCard": "Your farm",
   "soilMoisture": "Soil moisture",
   "temperature": "Temperature",
@@ -232,11 +233,7 @@
   "qaSuitability": "Assess a crop",
   "qaRecommend": "Suggest crops",
   "qaRotation": "Plan rotation",
-  "qaRisks": "Check risks",
-  "planFor": "Plan rotation",
-  "savedPlans": "Saved plans",
-  "noPlans": "You have not saved a rotation plan yet.",
-  "makePlan": "New plan"
+  "qaRisks": "Check risks"
  },
  "farm": {
   "title": "My Farm",
@@ -484,13 +481,13 @@
   "empty": "No risk assessment has been run for this farm yet."
  },
  "reports": {
-  "title": "Saved plans",
+  "title": "Reports",
   "type": "Type",
   "date": "Date",
   "plots": "Plots",
   "status": "Status",
-  "pick2": "Select two plans to compare.",
-  "empty": "No saved plans",
+  "pick2": "Select two analyses to compare.",
+  "empty": "No past analyses.",
   "statuses": {
    "queued": "Queued",
    "running": "Running",
@@ -498,19 +495,8 @@
    "failed": "Failed"
   },
   "comparison": "Comparison",
-  "deleteBody": "This plan will be permanently deleted.",
-  "deleted": "Plan deleted.",
-  "subtitle": "Crop rotation plans you saved for this farm.",
-  "saved": "Plans",
-  "sequence": "Crop sequence",
-  "emptyBody": "Create a plan in the Rotation Planner, then press \"Save plan\".",
-  "planOf": "Plan for planting on {{date}}",
-  "print": "Print / PDF",
-  "planStatus": {
-   "success": "Full plan",
-   "partial_plan": "Partial plan",
-   "no_plan_available": "No plan"
-  }
+  "deleteBody": "This analysis will be permanently deleted.",
+  "deleted": "Analysis deleted."
  },
  "settings": {
   "title": "Settings",
@@ -719,16 +705,16 @@
  },
  "guest": {
   "title": "What should I grow on my land?",
-  "body": "Set the location of your land to see the forecast, ranked crops and a crop rotation plan. No account needed.",
+  "body": "Set your land's location and we'll suggest the crops that suit it best. No account needed.",
   "try": "Try without an account",
   "water": "Is irrigation available on your land?",
   "rainfed": "No, rainfed",
-  "resultsTitle": "Forecast and suggested crops",
+  "resultsTitle": "Suggested crops for your location",
   "loading": "Analysing your area's climate…",
   "loadingBody": "This can take a few seconds the first time.",
   "changeLocation": "Change location",
   "notSaved": "This result won't be saved.",
-  "saveCta": "Create an account to keep your land, its parcels and your rotation plans.",
+  "saveCta": "Create an account to save your land, its parcels and your analysis history, and get an analysis for each parcel.",
   "register": "Create a free account",
   "noCrops": "No crop suits this location under the current conditions. Try with irrigation available.",
   "others": "Other crops"
@@ -859,5 +845,24 @@
    "Fabaceae": "Legume family"
   },
   "tab": "Rotation planner"
+ },
+ "plans": {
+  "title": "Saved plans",
+  "subtitle": "Crop rotation plans you saved for this farm.",
+  "saved": "Plans",
+  "sequence": "Crop sequence",
+  "pick2": "Select two plans to compare.",
+  "empty": "No saved plans",
+  "emptyBody": "Create a plan in the Rotation Planner, then press \"Save plan\".",
+  "deleteBody": "This plan will be permanently deleted.",
+  "deleted": "Plan deleted.",
+  "planOf": "Plan for planting on {{date}}",
+  "print": "Print / PDF",
+  "new": "New plan",
+  "planStatus": {
+   "success": "Full plan",
+   "partial_plan": "Partial plan",
+   "no_plan_available": "No plan"
+  }
  }
 }

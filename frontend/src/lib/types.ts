@@ -73,9 +73,12 @@ export interface Plot {
   created_at: string
   updated_at: string
   // filled from the latest analyses
+  latest_score: number | null
+  latest_status: string | null
+  latest_top_risk: { type: string; severity: string } | null
 }
 
-export type PlotDraft = Omit<Plot, 'id' | 'farm_id' | 'area_m2' | 'perimeter_m' | 'created_at' | 'updated_at'>
+export type PlotDraft = Omit<Plot, 'id' | 'farm_id' | 'area_m2' | 'perimeter_m' | 'created_at' | 'updated_at' | 'latest_score' | 'latest_status' | 'latest_top_risk'>
 
 export interface CropHistoryItem {
   id?: string
@@ -155,4 +158,142 @@ export interface TimeSeries extends DataMeta {
   unit: string
   resolution: string
   points: { t: string; value: number | null; historical_mean: number | null }[]
+}
+
+export type AnalysisType =
+  | 'crop_suitability'
+  | 'crop_recommendation'
+  | 'planting_window'
+  | 'rotation'
+  | 'water'
+  | 'risk'
+
+export type Severity = 'low' | 'moderate' | 'high'
+
+export interface Risk {
+  type: string
+  severity: Severity
+  period?: Bi | null
+  explanation: Bi
+  action: Bi
+  affected_plots?: string[]
+}
+
+export interface Evidence {
+  metric: string
+  label?: Bi
+  value: number | string | null
+  unit?: string
+  period: string
+  source: string
+}
+
+export interface RequirementMatch {
+  key: string
+  label: Bi
+  required: string
+  observed: string
+  status: 'match' | 'partial' | 'mismatch' | 'unknown'
+  source: string
+  needs_review: boolean
+}
+
+export interface PlotSuitability {
+  plot_id: string
+  plot_label: string
+  plot_name?: string
+  crop: string
+  suitability_score: number
+  suitability_status: string
+  recommended_planting_window: { start: string; end: string } | null
+  environmental_scores: Record<string, number>
+  risks: Risk[]
+  alternative_crops: { crop: string; suitability_score: number }[]
+  explanation: Bi
+  recommended_actions: Bi[]
+  evidence: Evidence[]
+  requirements: RequirementMatch[]
+  period_scores: { period: string; start: string; score: number }[]
+}
+
+export interface RankedCrop {
+  crop: string
+  suitability_score: number
+  suitability_status: string
+  planting_window: { start: string; end: string } | null
+  water_demand: 1 | 2 | 3
+  main_reason: Bi
+  environmental_scores?: Record<string, number>
+  requirements?: RequirementMatch[]
+  explanation?: Bi
+}
+
+export interface CalendarRow {
+  plot_id: string
+  plot_label: string
+  crop: string
+  perennial?: boolean
+  period_scores: { period: string; start: string; score: number }[]
+  best_window: { start: string; end: string } | null
+}
+
+export interface RotationStrategy {
+  key: 'current' | 'option_a' | 'option_b'
+  title: Bi
+  focus: string
+  sequence: { season: string; crop: string | null; suitability_score: number | null }[]
+  scores: { water_use: number; soil_health: number; income_potential: number }
+  why: Bi[]
+  evidence: Evidence[]
+  benefits: Bi[]
+  information_gaps: Bi[]
+  risks_for_review: Bi[]
+}
+
+export interface WaterPlot {
+  plot_id: string
+  plot_label: string
+  crop: string
+  irrigation_available: boolean
+  monthly: { month: number; et0_mm: number; etc_mm: number; effective_rain_mm: number; irrigation_mm: number }[]
+  season_total: { etc_mm: number; effective_rain_mm: number; irrigation_mm: number; irrigation_m3: number }
+  explanation: Bi
+}
+
+export interface AnalysisResult extends DataMeta {
+  analysis_type: AnalysisType
+  farm_id: string
+  model_version: string
+  engine_fallback: boolean
+  disclaimer: Bi
+  // per type
+  plots?: PlotSuitability[]
+  recommendations?: { plot_id: string; plot_label: string; ranked: RankedCrop[] }[]
+  calendar?: {
+    rows: CalendarRow[]
+    frost_periods: { period: string; probability: number }[]
+    heat_periods: { period: string; probability: number }[]
+    monthly_rainfall_mm: { month: number; value: number }[]
+    monthly_soil_moisture: { month: number; value: number | null }[]
+  }
+  rotation?: { plot_id: string; plot_label: string; priority: string; history: CropHistoryItem[]; strategies: RotationStrategy[] }[]
+  water?: WaterPlot[]
+  risks?: Risk[]
+  [k: string]: unknown
+}
+
+export interface Analysis {
+  id: string
+  farm_id: string
+  analysis_type: AnalysisType
+  scope: 'farm' | 'plots'
+  inputs: Record<string, unknown>
+  status: 'queued' | 'running' | 'completed' | 'failed'
+  stage: string | null
+  stages: { key: string; label: Bi; status: 'pending' | 'running' | 'done' }[]
+  result: AnalysisResult | null
+  error: { code: string; message: string } | null
+  created_at: string
+  completed_at: string | null
+  summary?: { headline_score: number | null; crop: string | null; plots: string[] }
 }

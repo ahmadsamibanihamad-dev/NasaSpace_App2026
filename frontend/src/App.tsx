@@ -13,10 +13,14 @@ const SetupWizard = lazy(() => import('./pages/setup/SetupWizard'))
 const Guest = lazy(() => import('./pages/Guest'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const MyFarm = lazy(() => import('./pages/MyFarm'))
+const NewAnalysis = lazy(() => import('./pages/analysis/NewAnalysis'))
+const AnalysisView = lazy(() => import('./pages/analysis/AnalysisView'))
 const Rotation = lazy(() => import('./pages/Rotation'))
 const Analytics = lazy(() => import('./pages/Analytics'))
+const Risks = lazy(() => import('./pages/Risks'))
 const Outlook = lazy(() => import('./pages/Outlook'))
 const Reports = lazy(() => import('./pages/Reports'))
+const SavedPlans = lazy(() => import('./pages/SavedPlans'))
 const Settings = lazy(() => import('./pages/Settings'))
 
 function PageFallback() {
@@ -88,9 +92,13 @@ export default function App() {
         >
           <Route index element={<Suspense fallback={<PageFallback />}><Dashboard /></Suspense>} />
           <Route path="farm" element={<Suspense fallback={<PageFallback />}><MyFarm /></Suspense>} />
+          <Route path="analysis/new" element={<Suspense fallback={<PageFallback />}><NewAnalysis /></Suspense>} />
+          <Route path="analysis/:id" element={<Suspense fallback={<PageFallback />}><AnalysisView /></Suspense>} />
           <Route path="rotation" element={<Suspense fallback={<PageFallback />}><Rotation /></Suspense>} />
           <Route path="analytics" element={<Suspense fallback={<PageFallback />}><Analytics /></Suspense>} />
           <Route path="outlook" element={<Suspense fallback={<PageFallback />}><Outlook /></Suspense>} />
+          <Route path="risks" element={<Suspense fallback={<PageFallback />}><Risks /></Suspense>} />
+          <Route path="plans" element={<Suspense fallback={<PageFallback />}><SavedPlans /></Suspense>} />
           <Route path="reports" element={<Suspense fallback={<PageFallback />}><Reports /></Suspense>} />
           <Route path="settings" element={<Suspense fallback={<PageFallback />}><Settings /></Suspense>} />
           <Route path="*" element={<NotFound />} />

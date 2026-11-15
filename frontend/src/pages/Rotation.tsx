@@ -62,7 +62,7 @@ export default function Rotation() {
         plotId={plot?.id ?? null}
         onSaved={() => {
           qc.invalidateQueries({ queryKey: ['rotation-plans'] })
-          nav('/app/reports')
+          nav('/app/plans')
         }}
       />
     </>

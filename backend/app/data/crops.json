@@ -1,0 +1,2066 @@
+{
+ "note": "Exported from frontend/src/lib/engine/crops.ts. Every value carries its source; needs_review marks values to confirm locally.",
+ "crops": [
+  {
+   "id": "wheat",
+   "name": {
+    "ar": "قمح",
+    "en": "Wheat"
+   },
+   "scientific_name": "Triticum aestivum",
+   "family": "Poaceae",
+   "category": "cereal",
+   "nitrogen_fixing": false,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 15,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 23,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 27,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 300,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 750,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 900,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 1600,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 5.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 7,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.5,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 90,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 250,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 200,
+    "source": "FAO-56 Table 11",
+    "note": "Barley/Oats/Wheat, November (region not printed); the Winter Wheat Mediterranean row is 30/140/40/30 = 240 d"
+   },
+   "stages": {
+    "value": [
+     40,
+     60,
+     60,
+     40
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Barley/Oats/Wheat, November (region not printed); the Winter Wheat Mediterranean row is 30/140/40/30 = 240 d"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.7,
+     "source": "FAO-56 Table 12",
+     "note": "Winter wheat, non-frozen soils; Kc end printed as 0.25–0.4"
+    },
+    "mid": {
+     "value": 1.15,
+     "source": "FAO-56 Table 12",
+     "note": "Winter wheat, non-frozen soils; Kc end printed as 0.25–0.4"
+    },
+    "end": {
+     "value": 0.3,
+     "source": "FAO-56 Table 12",
+     "note": "Winter wheat, non-frozen soils; Kc end printed as 0.25–0.4"
+    }
+   },
+   "root_depth": {
+    "value": [
+     1.5,
+     1.8
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 5,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 27,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     11,
+     12
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 1,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "barley",
+   "name": {
+    "ar": "شعير",
+    "en": "Barley"
+   },
+   "scientific_name": "Hordeum vulgare",
+   "family": "Poaceae",
+   "category": "cereal",
+   "nitrogen_fixing": false,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 2,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 15,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 20,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 40,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": -4,
+    "source": "FAO ECOCROP"
+   },
+   "rain": {
+    "abs_min": {
+     "value": 200,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 500,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 1000,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 2000,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 7.5,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 90,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 240,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 200,
+    "source": "FAO-56 Table 11",
+    "note": "Barley/Oats/Wheat, November (region not printed)"
+   },
+   "stages": {
+    "value": [
+     40,
+     60,
+     60,
+     40
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Barley/Oats/Wheat, November (region not printed)"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.3,
+     "source": "FAO-56 Table 12"
+    },
+    "mid": {
+     "value": 1.15,
+     "source": "FAO-56 Table 12"
+    },
+    "end": {
+     "value": 0.25,
+     "source": "FAO-56 Table 12"
+    }
+   },
+   "root_depth": {
+    "value": [
+     1,
+     1.5
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 2,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 40,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     11,
+     12
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "high",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "high",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 1,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "lentil",
+   "name": {
+    "ar": "عدس",
+    "en": "Lentil"
+   },
+   "scientific_name": "Lens culinaris",
+   "family": "Fabaceae",
+   "category": "legume",
+   "nitrogen_fixing": true,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 15,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 29,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 32,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 250,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 600,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 1000,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 2500,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 5.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 7.5,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.2,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 70,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 240,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 170,
+    "source": "FAO-56 Table 11",
+    "note": "Lentil, Oct/Nov, Arid Region"
+   },
+   "stages": {
+    "value": [
+     25,
+     35,
+     70,
+     40
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Lentil, Oct/Nov, Arid Region"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.4,
+     "source": "FAO-56 Table 12"
+    },
+    "mid": {
+     "value": 1.1,
+     "source": "FAO-56 Table 12"
+    },
+    "end": {
+     "value": 0.3,
+     "source": "FAO-56 Table 12"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.6,
+     0.8
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 5,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 32,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     11,
+     12,
+     1
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 2,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "chickpea",
+   "name": {
+    "ar": "حمص",
+    "en": "Chickpea"
+   },
+   "scientific_name": "Cicer arietinum",
+   "family": "Fabaceae",
+   "category": "legume",
+   "nitrogen_fixing": true,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 7,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 15,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 29,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 35,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": -9,
+    "source": "FAO ECOCROP"
+   },
+   "rain": {
+    "abs_min": {
+     "value": 300,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 600,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 1000,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 1800,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4.7,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 8.5,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 9.5,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 90,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 180,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 135,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "No FAO-56 Table 11 row; midpoint of the ECOCROP growing-cycle range"
+   },
+   "stages": {
+    "value": [
+     25,
+     35,
+     70,
+     40
+    ],
+    "source": "FAO-56 Table 11 (other crop)",
+    "needs_review": true,
+    "note": "No Table 11 row for this crop; proportions borrowed from a similar crop"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.4,
+     "source": "FAO-56 Table 12"
+    },
+    "mid": {
+     "value": 1,
+     "source": "FAO-56 Table 12"
+    },
+    "end": {
+     "value": 0.35,
+     "source": "FAO-56 Table 12"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.6,
+     1
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 7,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 35,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     12,
+     1,
+     2,
+     3
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "high",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 2,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "vetch",
+   "name": {
+    "ar": "بيقيا",
+    "en": "Vetch"
+   },
+   "scientific_name": "Vicia sativa",
+   "family": "Fabaceae",
+   "category": "legume",
+   "nitrogen_fixing": true,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 3,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 14,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 23,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 28,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 350,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 700,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 900,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 1600,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 7,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.2,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 80,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 170,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 125,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "No FAO-56 Table 11 row; midpoint of the ECOCROP growing-cycle range"
+   },
+   "stages": {
+    "value": [
+     25,
+     35,
+     70,
+     40
+    ],
+    "source": "FAO-56 Table 11 (other crop)",
+    "needs_review": true,
+    "note": "No Table 11 row for this crop; proportions borrowed from a similar crop"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.4,
+     "source": "FAO-56 Table 12 (Legumes group)",
+     "needs_review": true,
+     "note": "Vetch is not listed in FAO-56; the Table 12 \"Legumes\" group values are used as a placeholder"
+    },
+    "mid": {
+     "value": 1.15,
+     "source": "FAO-56 Table 12 (Legumes group)",
+     "needs_review": true,
+     "note": "Vetch is not listed in FAO-56; the Table 12 \"Legumes\" group values are used as a placeholder"
+    },
+    "end": {
+     "value": 0.55,
+     "source": "FAO-56 Table 12 (Legumes group)",
+     "needs_review": true,
+     "note": "Vetch is not listed in FAO-56; the Table 12 \"Legumes\" group values are used as a placeholder"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.6,
+     0.8
+    ],
+    "source": "FAO-56 Table 22 (lentil)",
+    "needs_review": true,
+    "note": "Vetch is not in Table 22; lentil values used as a placeholder"
+   },
+   "base_temp": {
+    "value": 3,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 28,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     11,
+     12
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 1,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "tomato",
+   "name": {
+    "ar": "بندورة",
+    "en": "Tomato"
+   },
+   "scientific_name": "Solanum lycopersicum",
+   "family": "Solanaceae",
+   "category": "vegetable",
+   "nitrogen_fixing": false,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 7,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 20,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 27,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 35,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 400,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 600,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 1300,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 1800,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 5.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 6.8,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 7.5,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 70,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 150,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 145,
+    "source": "FAO-56 Table 11",
+    "note": "Tomato, April/May, Mediterranean"
+   },
+   "stages": {
+    "value": [
+     30,
+     40,
+     45,
+     30
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Tomato, April/May, Mediterranean"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.6,
+     "source": "FAO-56 Table 12",
+     "note": "Kc end printed as 0.70–0.90"
+    },
+    "mid": {
+     "value": 1.15,
+     "source": "FAO-56 Table 12",
+     "note": "Kc end printed as 0.70–0.90"
+    },
+    "end": {
+     "value": 0.8,
+     "source": "FAO-56 Table 12",
+     "note": "Kc end printed as 0.70–0.90"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.7,
+     1.5
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 7,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 35,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     3,
+     4,
+     5
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 3,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "cucumber",
+   "name": {
+    "ar": "خيار",
+    "en": "Cucumber"
+   },
+   "scientific_name": "Cucumis sativus",
+   "family": "Cucurbitaceae",
+   "category": "vegetable",
+   "nitrogen_fixing": false,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 18,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 32,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 38,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 400,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 1000,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 1200,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 4300,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 7.5,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.7,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 40,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 180,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 105,
+    "source": "FAO-56 Table 11",
+    "note": "Cucumber, June/Aug, Arid Region"
+   },
+   "stages": {
+    "value": [
+     20,
+     30,
+     40,
+     15
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Cucumber, June/Aug, Arid Region"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.6,
+     "source": "FAO-56 Table 12",
+     "note": "Fresh market"
+    },
+    "mid": {
+     "value": 1,
+     "source": "FAO-56 Table 12",
+     "note": "Fresh market"
+    },
+    "end": {
+     "value": 0.75,
+     "source": "FAO-56 Table 12",
+     "note": "Fresh market"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.7,
+     1.2
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 6,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 38,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     3,
+     4,
+     8
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 3,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "potato",
+   "name": {
+    "ar": "بطاطا",
+    "en": "Potato"
+   },
+   "scientific_name": "Solanum tuberosum",
+   "family": "Solanaceae",
+   "category": "vegetable",
+   "nitrogen_fixing": false,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 7,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 15,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 25,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 30,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": -1,
+    "source": "FAO ECOCROP"
+   },
+   "rain": {
+    "abs_min": {
+     "value": 250,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 500,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 800,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 2000,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4.2,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 6.2,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.5,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 90,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 160,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 130,
+    "source": "FAO-56 Table 11",
+    "note": "Potato, Jan/Nov, (Semi) Arid Climate (mid stage printed 30/45)"
+   },
+   "stages": {
+    "value": [
+     25,
+     30,
+     45,
+     30
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Potato, Jan/Nov, (Semi) Arid Climate (mid stage printed 30/45)"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.5,
+     "source": "FAO-56 Table 12"
+    },
+    "mid": {
+     "value": 1.15,
+     "source": "FAO-56 Table 12"
+    },
+    "end": {
+     "value": 0.75,
+     "source": "FAO-56 Table 12"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.4,
+     0.6
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 7,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 30,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     1,
+     2,
+     8,
+     9
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 3,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "onion",
+   "name": {
+    "ar": "بصل",
+    "en": "Onion"
+   },
+   "scientific_name": "Allium cepa",
+   "family": "Amaryllidaceae",
+   "category": "vegetable",
+   "nitrogen_fixing": false,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 4,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 12,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 25,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 30,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 300,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 350,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 600,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 2800,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4.3,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 7,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.3,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 85,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 175,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 210,
+    "source": "FAO-56 Table 11",
+    "note": "Onion (dry), Oct/Jan, Arid Region"
+   },
+   "stages": {
+    "value": [
+     20,
+     35,
+     110,
+     45
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Onion (dry), Oct/Jan, Arid Region"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.7,
+     "source": "FAO-56 Table 12",
+     "note": "Onions – dry"
+    },
+    "mid": {
+     "value": 1.05,
+     "source": "FAO-56 Table 12",
+     "note": "Onions – dry"
+    },
+    "end": {
+     "value": 0.75,
+     "source": "FAO-56 Table 12",
+     "note": "Onions – dry"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.3,
+     0.6
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 4,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 30,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     10,
+     11,
+     12
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 3,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "eggplant",
+   "name": {
+    "ar": "باذنجان",
+    "en": "Eggplant"
+   },
+   "scientific_name": "Solanum melongena",
+   "family": "Solanaceae",
+   "category": "vegetable",
+   "nitrogen_fixing": false,
+   "perennial": false,
+   "temp": {
+    "abs_min": {
+     "value": 9,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 20,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 35,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 40,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 800,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 1200,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 1600,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 4000,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4.3,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 5.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 6.8,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.5,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 70,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 120,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 140,
+    "source": "FAO-56 Table 11",
+    "note": "Egg plant, May/June, Mediterranean"
+   },
+   "stages": {
+    "value": [
+     30,
+     45,
+     40,
+     25
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Egg plant, May/June, Mediterranean"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.6,
+     "source": "FAO-56 Table 12"
+    },
+    "mid": {
+     "value": 1.05,
+     "source": "FAO-56 Table 12"
+    },
+    "end": {
+     "value": 0.9,
+     "source": "FAO-56 Table 12"
+    }
+   },
+   "root_depth": {
+    "value": [
+     0.7,
+     1.2
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 9,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 40,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [
+     3,
+     4,
+     5
+    ],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Typical planting months in Jordan; confirm with the local extension service"
+   },
+   "frost_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 3,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "olive",
+   "name": {
+    "ar": "زيتون",
+    "en": "Olive"
+   },
+   "scientific_name": "Olea europaea",
+   "family": "Oleaceae",
+   "category": "tree",
+   "nitrogen_fixing": false,
+   "perennial": true,
+   "temp": {
+    "abs_min": {
+     "value": 5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 20,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 34,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 40,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 200,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 400,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 700,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 1200,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 5.3,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 7,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.5,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 210,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 300,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 365,
+    "source": "Perennial: evaluated over the full year"
+   },
+   "stages": {
+    "value": [
+     30,
+     90,
+     60,
+     90
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Olives, March, Mediterranean"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.65,
+     "source": "FAO-56 Table 12",
+     "note": "Olives, 40–60% ground coverage by canopy"
+    },
+    "mid": {
+     "value": 0.7,
+     "source": "FAO-56 Table 12",
+     "note": "Olives, 40–60% ground coverage by canopy"
+    },
+    "end": {
+     "value": 0.7,
+     "source": "FAO-56 Table 12",
+     "note": "Olives, 40–60% ground coverage by canopy"
+    }
+   },
+   "root_depth": {
+    "value": [
+     1.2,
+     1.7
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 5,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 40,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Perennial tree crop"
+   },
+   "frost_tolerance": {
+    "value": "moderate",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "high",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 2,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "date_palm",
+   "name": {
+    "ar": "نخيل التمر",
+    "en": "Date palm"
+   },
+   "scientific_name": "Phoenix dactylifera",
+   "family": "Arecaceae",
+   "category": "tree",
+   "nitrogen_fixing": false,
+   "perennial": true,
+   "temp": {
+    "abs_min": {
+     "value": 10,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 26,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 45,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 52,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": -4,
+    "source": "FAO ECOCROP"
+   },
+   "rain": {
+    "abs_min": {
+     "value": 100,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 200,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 300,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 400,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 6.5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 8,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.5,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 365,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 365,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 365,
+    "source": "Perennial: evaluated over the full year"
+   },
+   "stages": {
+    "value": [
+     60,
+     90,
+     120,
+     95
+    ],
+    "source": "FAO-56 Table 11 (other crop)",
+    "needs_review": true,
+    "note": "No Table 11 row for this crop; proportions borrowed from a similar crop"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.9,
+     "source": "FAO-56 Table 12"
+    },
+    "mid": {
+     "value": 0.95,
+     "source": "FAO-56 Table 12"
+    },
+    "end": {
+     "value": 0.95,
+     "source": "FAO-56 Table 12"
+    }
+   },
+   "root_depth": {
+    "value": [
+     1.5,
+     2.5
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 10,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 52,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Perennial tree crop"
+   },
+   "frost_tolerance": {
+    "value": "high",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "high",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 3,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  },
+  {
+   "id": "citrus",
+   "name": {
+    "ar": "حمضيات",
+    "en": "Citrus"
+   },
+   "scientific_name": "Citrus sinensis",
+   "family": "Rutaceae",
+   "category": "tree",
+   "nitrogen_fixing": false,
+   "perennial": true,
+   "temp": {
+    "abs_min": {
+     "value": 13,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 20,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 30,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 38,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "killing_temp": {
+    "value": 0,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP lists 0 °C, which may be a placeholder for \"no data\""
+   },
+   "rain": {
+    "abs_min": {
+     "value": 450,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 1200,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 2000,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 2700,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "ph": {
+    "abs_min": {
+     "value": 4,
+     "source": "FAO ECOCROP"
+    },
+    "opt_min": {
+     "value": 5,
+     "source": "FAO ECOCROP"
+    },
+    "opt_max": {
+     "value": 6,
+     "source": "FAO ECOCROP"
+    },
+    "abs_max": {
+     "value": 8.3,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "cycle_days": {
+    "min": {
+     "value": 180,
+     "source": "FAO ECOCROP"
+    },
+    "max": {
+     "value": 365,
+     "source": "FAO ECOCROP"
+    }
+   },
+   "season_length": {
+    "value": 365,
+    "source": "Perennial: evaluated over the full year"
+   },
+   "stages": {
+    "value": [
+     60,
+     90,
+     120,
+     95
+    ],
+    "source": "FAO-56 Table 11",
+    "note": "Citrus, January, Mediterranean"
+   },
+   "kc": {
+    "ini": {
+     "value": 0.7,
+     "source": "FAO-56 Table 12",
+     "note": "Citrus, no ground cover, 70% canopy"
+    },
+    "mid": {
+     "value": 0.65,
+     "source": "FAO-56 Table 12",
+     "note": "Citrus, no ground cover, 70% canopy"
+    },
+    "end": {
+     "value": 0.7,
+     "source": "FAO-56 Table 12",
+     "note": "Citrus, no ground cover, 70% canopy"
+    }
+   },
+   "root_depth": {
+    "value": [
+     1.2,
+     1.5
+    ],
+    "source": "FAO-56 Table 22"
+   },
+   "base_temp": {
+    "value": 13,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Proxy: ECOCROP absolute minimum temperature used as the growing-degree-day base"
+   },
+   "heat_threshold": {
+    "value": 38,
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "ECOCROP absolute maximum (mean temperature); a heat-stress day is a day whose mean temperature exceeds it"
+   },
+   "planting_months": {
+    "value": [],
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Perennial tree crop"
+   },
+   "frost_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP killing / minimum temperatures"
+   },
+   "drought_tolerance": {
+    "value": "low",
+    "source": "FAO ECOCROP",
+    "needs_review": true,
+    "note": "Derived from ECOCROP minimum rainfall"
+   },
+   "income": {
+    "value": 3,
+    "source": "Not verified",
+    "needs_review": true,
+    "note": "Relative indicator only (1 low – 3 high); no market data is used"
+   }
+  }
+ ]
+}

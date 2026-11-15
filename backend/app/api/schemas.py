@@ -9,6 +9,8 @@ IrrigationMethod = Literal["drip", "sprinkler", "surface", "none"]
 SoilType = Literal["clay", "loam", "sandy", "silty", "calcareous", "unknown"]
 PlotStatus = Literal["planted", "fallow", "preparing", "unused"]
 CultivationType = Literal["open_field", "greenhouse"]
+AnalysisType = Literal["crop_suitability", "crop_recommendation", "planting_window", "rotation", "water", "risk"]
+Priority = Literal["save_water", "improve_soil", "increase_income"]
 
 
 # ---------------- auth ----------------
@@ -160,6 +162,9 @@ class PlotOut(BaseModel):
     soil_ph: Optional[float]
     created_at: datetime
     updated_at: datetime
+    latest_score: Optional[float] = None
+    latest_status: Optional[str] = None
+    latest_top_risk: Optional[dict] = None
 
 
 class HistoryItem(BaseModel):
@@ -170,3 +175,61 @@ class HistoryItem(BaseModel):
 
 class HistoryReplaceIn(BaseModel):
     items: list[HistoryItem] = Field(max_length=10)
+
+
+# ---------------- analyses ----------------
+
+
+class AnalysisIn(BaseModel):
+    analysis_type: AnalysisType
+    farm_id: str
+    plot_ids: Optional[list[str]] = None  # None = whole farm
+    crop_id: Optional[str] = None
+    planting_date: Optional[str] = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    priority: Optional[Priority] = None
+
+
+class AnalysisCreated(BaseModel):
+    analysis_id: str
+    status: str
+
+
+class AnalysisOut(BaseModel):
+    id: str
+    farm_id: str
+    analysis_type: str
+    scope: str
+    inputs: dict
+    status: str
+    stage: Optional[str]
+    stages: list[dict]
+    result: Optional[dict[str, Any]]
+    error: Optional[dict]
+    created_at: datetime
+    completed_at: Optional[datetime]
+    summary: Optional[dict] = None
+
+
+# ---------------- guests ----------------
+
+
+class GuestRecommendIn(BaseModel):
+    """A guest only gives a location (and optionally whether water is available). Nothing is stored."""
+
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    irrigation_available: bool = False
+    irrigation_method: Optional[IrrigationMethod] = None
+
+
+# ---------------- forecasts (AI model) ----------------
+
+
+class ForecastIn(BaseModel):
+    lat: float = Field(ge=-90, le=90)
+    lon: float = Field(ge=-180, le=180)
+    farm_id: Optional[str] = None
+    forecast_type: Literal["rolling", "calendar_season"] = "rolling"
+    forecast_horizon_days: Optional[Literal[7, 30, 90]] = 7
+    season: Optional[Literal["winter", "spring", "summer", "autumn"]] = None
+    season_year: Optional[int] = Field(default=None, ge=2020, le=2100)

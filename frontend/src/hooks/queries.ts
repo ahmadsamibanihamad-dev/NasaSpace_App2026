@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as repo from '../lib/data/repo'
-import type { CropHistoryItem, Farm, PlotDraft } from '../lib/types'
+import type { AnalysisType, CropHistoryItem, Farm, PlotDraft } from '../lib/types'
+
+export type { NewAnalysisInput } from '../lib/data/repo'
 
 export const useFarms = (enabled = true) => useQuery({ queryKey: ['farms'], queryFn: repo.listFarms, enabled })
 export const usePlots = (farmId?: string) => useQuery({ queryKey: ['plots', farmId], queryFn: () => repo.listPlots(farmId!), enabled: !!farmId })
@@ -25,6 +27,30 @@ export const useTimeSeries = (farm: Farm | null | undefined, variable: string, r
     staleTime: 60 * 60 * 1000,
     retry: 0,
   })
+
+export const useAnalyses = (farmId?: string, type?: AnalysisType) =>
+  useQuery({ queryKey: ['analyses', farmId, type], queryFn: () => repo.listAnalyses(farmId!, type), enabled: !!farmId })
+
+export const useAnalysis = (id?: string | null, poll = false) =>
+  useQuery({
+    queryKey: ['analysis', id],
+    queryFn: () => repo.getAnalysis(id!),
+    enabled: !!id,
+    refetchInterval: (q) => {
+      const s = q.state.data?.status
+      return poll && (s === 'queued' || s === 'running' || !s) ? 800 : false
+    },
+  })
+
+export function useCreateAnalysis() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: repo.createAnalysis, onSuccess: () => qc.invalidateQueries({ queryKey: ['analyses'] }) })
+}
+
+export function useDeleteAnalysis() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: repo.deleteAnalysis, onSuccess: () => qc.invalidateQueries({ queryKey: ['analyses'] }) })
+}
 
 export const useSavedPlans = (farmId?: string) => useQuery({ queryKey: ['rotation-plans', farmId], queryFn: () => repo.listRotationPlans(farmId!), enabled: !!farmId })
 

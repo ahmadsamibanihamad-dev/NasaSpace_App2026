@@ -1,197 +1,206 @@
-// Saved crop rotation plans of the current farm: open, compare two, print, delete.
 import { useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import { useFarmCtx } from '../layout/FarmContext'
-import { useDeleteSavedPlan, useSavedPlans } from '../hooks/queries'
-import { Button, Card, CardTitle, IconButton, PageHeader, Skeleton } from '../components/ui/primitives'
+import { useAnalyses, useAnalysis, useDeleteAnalysis } from '../hooks/queries'
+import { Button, Card, CardTitle, IconButton, Pill, Skeleton } from '../components/ui/primitives'
 import { EmptyState, ErrorState } from '../components/ui/states'
-import { Modal } from '../components/ui/Modal'
+import { ConfirmDialog } from '../components/ui/Modal'
 import { useToast } from '../components/ui/Toast'
-import { CropIcon } from '../components/crops/CropIcon'
-import { PlanView } from '../features/rotation/RotationPlanner'
-import { getSavedPlan, type SavedPlan } from '../lib/data/repo'
-import { cropName, date, num } from '../lib/format'
+import { cropName, date, dayMonth, listSep } from '../lib/format'
+import type { Analysis } from '../lib/types'
+import { ScoreBadge } from './Dashboard'
 
-const seqText = (p: SavedPlan) => p.summary.crops.map((c) => cropName(c)).join(' ← ')
+/** Key facts of a completed analysis as label/value rows (used for side-by-side comparison). */
+function useSummaryRows() {
+  const { t } = useTranslation()
+  return (a: Analysis): [string, string][] => {
+    const r = a.result
+    const rows: [string, string][] = [
+      [t('reports.type'), t(`analysis.objectives.${a.analysis_type}`)],
+      [t('reports.date'), date(a.created_at)],
+      [t('reports.plots'), a.summary?.plots.join(listSep()) ?? '—'],
+    ]
+    if (!r) return rows
+    for (const p of r.plots ?? []) {
+      rows.push([`${p.plot_label} · ${cropName(p.crop)}`, `${p.suitability_score} · ${t(`results.status.${p.suitability_status}`)}`])
+      if (a.analysis_type === 'crop_suitability') {
+        rows.push([`${p.plot_label} · ${t('results.window')}`, p.recommended_planting_window ? `${dayMonth(p.recommended_planting_window.start)} – ${dayMonth(p.recommended_planting_window.end)}` : '—'])
+        for (const [k, v] of Object.entries(p.environmental_scores)) rows.push([`${p.plot_label} · ${t(`results.factor.${k}`)}`, String(v)])
+      }
+      rows.push([`${p.plot_label} · ${t('results.risks')}`, p.risks.map((x) => `${t(`risks.types.${x.type}`)} (${t(`results.severity.${x.severity}`)})`).join(listSep()) || '—'])
+    }
+    for (const rec of r.recommendations ?? []) rows.push([`${rec.plot_label} · ${t('results.recommendedCrops')}`, rec.ranked.slice(0, 3).map((c) => `${cropName(c.crop)} ${c.suitability_score}`).join(listSep())])
+    for (const c of r.calendar?.rows ?? []) rows.push([`${c.plot_label} · ${cropName(c.crop)}`, c.best_window ? `${dayMonth(c.best_window.start)} – ${dayMonth(c.best_window.end)}` : '—'])
+    for (const ro of r.rotation ?? [])
+      for (const s of ro.strategies) rows.push([`${ro.plot_label} · ${t(`rotation.keys.${s.key}`)}`, `${s.sequence.map((q) => cropName(q.crop)).join(' / ')} · ${s.scores.water_use}/${s.scores.soil_health}/${s.scores.income_potential}`])
+    for (const w of r.water ?? []) rows.push([`${w.plot_label} · ${cropName(w.crop)}`, `ETc ${w.season_total.etc_mm} mm · ${t('results.irrigation')} ${w.season_total.irrigation_mm} mm (${w.season_total.irrigation_m3} m³)`])
+    return rows
+  }
+}
+
+function Compare({ ids }: { ids: [string, string] }) {
+  const { t } = useTranslation()
+  const a = useAnalysis(ids[0])
+  const b = useAnalysis(ids[1])
+  const rowsOf = useSummaryRows()
+  if (a.isLoading || b.isLoading) return <Skeleton className="h-48" />
+  if (!a.data || !b.data) return <ErrorState error={a.error ?? b.error} />
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {[a.data, b.data].map((x) => (
+        <div key={x.id} className="rounded-tile border border-border">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+            <b className="text-label font-semibold">{t(`analysis.objectives.${x.analysis_type}`)}</b>
+            <Link to={`/app/analysis/${x.id}`} className="text-label text-green-600 hover:underline">
+              {t('common.view')}
+            </Link>
+          </div>
+          <dl className="divide-y divide-border">
+            {rowsOf(x).map(([k, v], i) => (
+              <div key={i} className="flex justify-between gap-4 px-4 py-2 text-label">
+                <dt className="text-text-secondary">{k}</dt>
+                <dd className="font-semibold text-end min-w-0 break-words">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function Reports() {
   const { t } = useTranslation()
   const nav = useNavigate()
   const toast = useToast()
   const { farm } = useFarmCtx()
-  const [params, setParams] = useSearchParams()
-  const list = useSavedPlans(farm?.id)
-  const del = useDeleteSavedPlan()
+  const q = useAnalyses(farm?.id)
+  const del = useDeleteAnalysis()
   const [picked, setPicked] = useState<string[]>([])
-  const [toDelete, setToDelete] = useState<SavedPlan | null>(null)
-  const openId = params.get('plan')
-  const open = useQuery({ queryKey: ['rotation-plan-saved', openId], queryFn: () => getSavedPlan(openId!), enabled: !!openId })
+  const [toDelete, setToDelete] = useState<Analysis | null>(null)
+  const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= 2 ? [p[1], id] : [...p, id]))
 
-  if (list.isLoading) return <Skeleton className="h-96 !rounded-card" />
-  if (list.error) return <ErrorState error={list.error} onRetry={() => list.refetch()} />
-  const plans = list.data ?? []
-  const toggle = (id: string) => setPicked((x) => (x.includes(id) ? x.filter((i) => i !== id) : [...x, id].slice(-2)))
-  const pair = picked.map((id) => plans.find((p) => p.id === id)).filter(Boolean) as SavedPlan[]
-  const rows: [string, (p: SavedPlan) => string][] = [
-    [t('reports.date'), (p) => date(p.created_at)],
-    [t('reports.plots'), (p) => p.plot_label || '—'],
-    [t('outlook.plantingDate'), (p) => date(p.summary.planting_date)],
-    [t('reports.sequence'), (p) => seqText(p) || '—'],
-    [t('planner.rotationScore'), (p) => (p.summary.rotation_score === null ? '—' : num(p.summary.rotation_score, 0))],
-    [t('reports.status'), (p) => t(`reports.planStatus.${p.summary.status}`)],
-  ]
+  if (q.isLoading) return <Skeleton className="h-96 !rounded-card" />
+  if (q.error) return <ErrorState error={q.error} onRetry={() => q.refetch()} />
+  const rows = q.data ?? []
 
   return (
-    <>
-      <PageHeader
-        title={t('reports.title')}
-        subtitle={t('reports.subtitle')}
-        actions={
-          <Button icon="rotate" onClick={() => nav('/app/rotation')}>
-            {t('dashboard.makePlan')}
-          </Button>
-        }
-      />
-
-      {plans.length === 0 ? (
-        <Card>
-          <EmptyState icon="file" title={t('reports.empty')} body={t('reports.emptyBody')} />
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-6">
-          <Card>
-            <CardTitle>{t('reports.saved')}</CardTitle>
-            <p className="text-label text-text-secondary -mt-2 mb-3">{t('reports.pick2')}</p>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-label">
-                <thead>
-                  <tr className="text-caption text-text-secondary">
-                    <th className="py-2 w-8" />
-                    <th className="text-start font-normal py-2">{t('reports.date')}</th>
-                    <th className="text-start font-normal py-2">{t('reports.plots')}</th>
-                    <th className="text-start font-normal py-2">{t('outlook.plantingDate')}</th>
-                    <th className="text-start font-normal py-2">{t('reports.sequence')}</th>
-                    <th className="text-start font-normal py-2">{t('planner.rotationScore')}</th>
-                    <th className="py-2" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {plans.map((p) => (
-                    <tr key={p.id} className={`border-t border-border ${openId === p.id ? 'bg-green-50' : ''}`}>
-                      <td className="py-3">
-                        <input type="checkbox" className="size-4 accent-green-600" checked={picked.includes(p.id)} onChange={() => toggle(p.id)} aria-label={`${t('common.compare')} ${seqText(p)}`} />
-                      </td>
-                      <td className="py-3 whitespace-nowrap">{date(p.created_at, { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                      <td className="py-3">{p.plot_label || '—'}</td>
-                      <td className="py-3 whitespace-nowrap">{date(p.summary.planting_date, { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                      <td className="py-3">
-                        <span className="flex items-center gap-2">
-                          {p.summary.crops.map((c) => (
-                            <CropIcon key={c} crop={c} size={28} />
-                          ))}
-                          <span className="truncate max-w-56">{seqText(p) || t(`reports.planStatus.${p.summary.status}`)}</span>
-                        </span>
-                      </td>
-                      <td className="py-3 font-semibold tabular-nums">{p.summary.rotation_score === null ? '—' : num(p.summary.rotation_score, 0)}</td>
-                      <td className="py-3">
-                        <span className="flex items-center justify-end gap-1">
-                          <Button size="sm" variant="secondary" onClick={() => setParams(openId === p.id ? {} : { plan: p.id })}>
-                            {openId === p.id ? t('common.close') : t('common.view')}
-                          </Button>
-                          <IconButton icon="trash" label={t('common.delete')} onClick={() => setToDelete(p)} />
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-
-          {pair.length === 2 && (
-            <Card>
-              <CardTitle>{t('reports.comparison')}</CardTitle>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[480px] text-label">
-                  <tbody>
-                    {rows.map(([label, get]) => (
-                      <tr key={label} className="border-t border-border first:border-0">
-                        <th className="text-start font-normal text-text-secondary py-3 w-1/4">{label}</th>
-                        {pair.map((p) => (
-                          <td key={p.id} className="py-3 font-semibold">
-                            {get(p)}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          )}
-
-          {openId &&
-            (open.isLoading ? (
-              <Skeleton className="h-96 !rounded-card" />
-            ) : open.error ? (
-              <Card>
-                <ErrorState error={open.error} onRetry={() => open.refetch()} />
-              </Card>
-            ) : open.data?.plan ? (
-              <PlanView
-                key={open.data.id}
-                plan={open.data.plan}
-                header={
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="text-h1 font-semibold">
-                      {t('reports.planOf', { date: date(open.data.plan.planting_date) })}
-                      {open.data.plot_label && ` · ${t('common.plot')} ${open.data.plot_label}`}
-                    </h2>
-                    <Button variant="secondary" icon="printer" onClick={() => window.print()} className="print:hidden">
-                      {t('reports.print')}
-                    </Button>
+    <div className="flex flex-col gap-6">
+      <Card>
+        <CardTitle action={<span className="text-caption text-text-secondary">{t('reports.pick2')}</span>}>{t('reports.title')}</CardTitle>
+        {rows.length === 0 ? (
+          <EmptyState icon="file" title={t('reports.empty')} action={<Button icon="plus" onClick={() => nav('/app/analysis/new')}>{t('nav.newAnalysis')}</Button>} />
+        ) : (
+          <>
+          <ul className="md:hidden flex flex-col gap-3">
+            {rows.map((a) => (
+              <li key={a.id} className={`rounded-tile border p-4 flex flex-col gap-3 ${picked.includes(a.id) ? 'border-green-600 bg-green-50' : 'border-border'}`}>
+                <div className="flex items-start gap-3">
+                  <input type="checkbox" className="size-5 mt-0.5 accent-[#24753F] shrink-0" aria-label={t('common.compare')} disabled={a.status !== 'completed'} checked={picked.includes(a.id)} onChange={() => toggle(a.id)} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-label font-semibold">{t(`analysis.objectives.${a.analysis_type}`)}</p>
+                    <p className="text-caption text-text-secondary">{date(a.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-caption text-text-secondary break-words">
+                      {t('reports.plots')}: {a.summary?.plots.join(listSep())}
+                      {a.summary?.crop && ` · ${cropName(a.summary.crop)}`}
+                    </p>
                   </div>
-                }
-              />
-            ) : null)}
-        </div>
+                  {a.status === 'completed' && a.summary?.headline_score != null ? (
+                    <ScoreBadge score={a.summary.headline_score} />
+                  ) : (
+                    <Pill tone={a.status === 'completed' ? 'green' : a.status === 'failed' ? 'critical' : 'neutral'} icon={a.status === 'completed' ? 'check' : a.status === 'failed' ? 'alert' : 'rotate'}>
+                      {t(`reports.statuses.${a.status}`)}
+                    </Pill>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="secondary" className="flex-1" onClick={() => nav(`/app/analysis/${a.id}`)}>
+                    {t('common.view')}
+                  </Button>
+                  <IconButton icon="download" size={32} label={t('results.exportPdf')} disabled={a.status !== 'completed'} onClick={() => nav(`/app/analysis/${a.id}?print=1`)} />
+                  <IconButton icon="trash" size={32} label={t('common.delete')} onClick={() => setToDelete(a)} />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full min-w-[720px] text-label">
+              <thead>
+                <tr className="text-caption text-text-secondary">
+                  <th className="w-10 py-2" />
+                  <th className="text-start font-normal py-2">{t('reports.type')}</th>
+                  <th className="text-start font-normal py-2">{t('reports.date')}</th>
+                  <th className="text-start font-normal py-2">{t('reports.plots')}</th>
+                  <th className="text-start font-normal py-2">{t('dashboard.crop')}</th>
+                  <th className="text-start font-normal py-2">{t('reports.status')}</th>
+                  <th className="py-2" />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((a) => (
+                  <tr key={a.id} className={`border-t border-border ${picked.includes(a.id) ? 'bg-green-50' : 'hover:bg-surface-muted'}`}>
+                    <td className="py-3 text-center">
+                      <input type="checkbox" className="size-4 accent-[#24753F]" aria-label={t('common.compare')} disabled={a.status !== 'completed'} checked={picked.includes(a.id)} onChange={() => toggle(a.id)} />
+                    </td>
+                    <td className="py-3 font-semibold">{t(`analysis.objectives.${a.analysis_type}`)}</td>
+                    <td className="py-3 whitespace-nowrap">{date(a.created_at, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                    <td className="py-3">{a.summary?.plots.join(listSep())}</td>
+                    <td className="py-3">{a.summary?.crop ? cropName(a.summary.crop) : '—'}</td>
+                    <td className="py-3">
+                      {a.status === 'completed' && a.summary?.headline_score != null ? (
+                        <ScoreBadge score={a.summary.headline_score} />
+                      ) : (
+                        <Pill tone={a.status === 'completed' ? 'green' : a.status === 'failed' ? 'critical' : 'neutral'} icon={a.status === 'completed' ? 'check' : a.status === 'failed' ? 'alert' : 'rotate'}>
+                          {t(`reports.statuses.${a.status}`)}
+                        </Pill>
+                      )}
+                    </td>
+                    <td className="py-3">
+                      <span className="flex justify-end gap-2">
+                        <Button size="sm" variant="secondary" onClick={() => nav(`/app/analysis/${a.id}`)}>
+                          {t('common.view')}
+                        </Button>
+                        <IconButton icon="download" size={32} label={t('results.exportPdf')} disabled={a.status !== 'completed'} onClick={() => nav(`/app/analysis/${a.id}?print=1`)} />
+                        <IconButton icon="trash" size={32} label={t('common.delete')} onClick={() => setToDelete(a)} />
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          </>
+        )}
+      </Card>
+
+      {picked.length === 2 && (
+        <Card>
+          <CardTitle action={<Button size="sm" variant="ghost" onClick={() => setPicked([])}>{t('common.clear')}</Button>}>{t('reports.comparison')}</CardTitle>
+          <Compare ids={picked as [string, string]} />
+        </Card>
       )}
 
       {toDelete && (
-      <Modal
-        onClose={() => setToDelete(null)}
-        title={t('common.delete')}
-        footer={
-          <>
-            <Button variant="secondary" onClick={() => setToDelete(null)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="danger"
-              loading={del.isPending}
-              onClick={async () => {
-                if (!toDelete) return
-                try {
-                  await del.mutateAsync(toDelete.id)
-                  setPicked((x) => x.filter((i) => i !== toDelete.id))
-                  if (openId === toDelete.id) setParams({})
-                  toast(t('reports.deleted'))
-                } catch {
-                  toast(t('states.errorBody'), 'error')
-                }
-                setToDelete(null)
-              }}
-            >
-              {t('common.delete')}
-            </Button>
-          </>
-        }
-      >
-        <p className="text-body">{t('reports.deleteBody')}</p>
-      </Modal>
+        <ConfirmDialog
+          title={t('common.delete')}
+          body={t('reports.deleteBody')}
+          confirmLabel={t('common.delete')}
+          danger
+          busy={del.isPending}
+          onClose={() => setToDelete(null)}
+          onConfirm={async () => {
+            try {
+              await del.mutateAsync(toDelete.id)
+              setPicked((p) => p.filter((x) => x !== toDelete.id))
+              toast(t('reports.deleted'))
+            } catch {
+              toast(t('parcels.saveFailed'), 'error')
+            }
+            setToDelete(null)
+          }}
+        />
       )}
-    </>
+    </div>
   )
 }

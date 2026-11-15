@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     rate_limit_auth: int = 10
     rate_limit_guest: int = 12
 
+    # AI forecasting models
+    #   off        - no forecasts; recommendations use the historical climate record only
+    #   mock       - clearly labelled demonstration forecasts, for building the UI
+    #   production - real model artifacts from MODEL_DIR; never falls back to mock
+    ai_mode: Literal["off", "mock", "production"] = "off"
+    model_dir: str = str(APP_DIR / "ml" / "artifacts")
 
     @field_validator("jwt_secret")
     @classmethod

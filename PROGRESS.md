@@ -2,6 +2,17 @@
 
 Last updated 2026-11-15.
 
+## Analyses restored (2026-11-15, user decision)
+
+Removing the six analyses in the rebuild was my inference, not the user's request, and the user asked for them back ("اه رجعها ليش حذفتها اصلا"). The removal commit (6e21b1f) was reverted, then the planner-era pieces were put back on top.
+
+- Back: the 13-crop rule engine (`backend/app/engine/`), its data, `/analyses`, `/crops`, `/guest/recommendations`, the New Analysis wizard, result pages, Risks, Reports, the old dashboard, and the parity tests. The unused `app/ml` layer and `/forecasts` came back with the revert too.
+- Kept from the rebuild: the Crop Rotation Planner at `/app/rotation`, the forecast page, the soil lookup. Saved plans moved to their own page `/app/plans` (nav "الخطط المحفوظة"). Guest page has three tabs: historical climate (13 crops), forecast, planner.
+- Parcels accept either crop list: the 13 analysis crops or the team's six.
+- The two crop sets do not overlap. The analyses cannot run on the team's six crops because the team's table has no water coefficients, growth stages or frost limits.
+- Lesson: before deleting a feature the user did not name, ask about it by name.
+- Tests: backend 80, frontend 8. Browser: all six analyses run and render, planner, saved plans, forecast, navigation.
+
 ## Whole site rebuilt on the AI team's material (2026-11-15, user decision)
 
 The user: the 13 crops are cancelled; everything must work from what the team sent; for crop rotation follow the team's prompt ("AI-Powered Crop Rotation Planner").

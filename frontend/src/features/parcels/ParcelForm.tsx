@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { Polygon } from 'geojson'
 import { Field, Input, Select, cx } from '../../components/ui/primitives'
 import { Icon } from '../../components/ui/Icon'
-import { CROP_IDS } from '../../lib/places'
+import { CROP_IDS, TEAM_CROP_IDS } from '../../lib/places'
 import { areaM2, centroidOf, perimeterM } from '../../lib/geometry'
 import { area as fmtArea, meters, num } from '../../lib/format'
 import { useSettings } from '../../lib/settings'
@@ -76,7 +76,7 @@ export function ParcelForm({ value, onChange, errors, farmName }: { value: PlotD
   const cropOpts = (
     <>
       <option value="">{t('crops.fallow')}</option>
-      {CROP_IDS.map((c) => (
+      {[...CROP_IDS, ...TEAM_CROP_IDS].map((c) => (
         <option key={c} value={c}>
           {t(`crops.${c}`)}
         </option>
